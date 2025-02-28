@@ -1,0 +1,41 @@
+# Ignore source code
+src/
+scripts/
+index.ts
+
+# Ignore package.json explicitly if needed (not typical)
+package.json
+
+# Ignore other development files and folders
+node_modules/
+test/
+tests/
+__tests__/
+__mocks__/
+coverage/
+examples/
+scripts/
+.eslintcache
+.nyc_output
+.vscode/
+.idea/
+*.log
+
+# Ignore configuration and cache files
+*.tsbuildinfo
+*.env
+*.env.*
+*.swp
+*.swo
+
+# Ignore any temporary or backup files
+*.tmp
+*.bak
+*.old
+
+# Include only necessary production files
+!/dist/**
+!/lib/**
+!README.md
+!LICENSE
+!CHANGELOG.md
