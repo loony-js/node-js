@@ -1,14 +1,10 @@
 {
-  "name": "backend",
+  "name": "loony-sdk",
   "version": "0.1.0",
   "main": "dist/index.js",
   "license": "MIT",
   "scripts": {
-    "build": "tsc",
-    "test": "node ./dist/index.js"
-  },
-  "dependencies": {
-    "loony-sdk": "0.1.0"
+    "build": "tsc"
   },
   "devDependencies": {
     "@types/node": "^22.5.5"
