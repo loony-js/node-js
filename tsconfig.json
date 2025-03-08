@@ -23,8 +23,6 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "paths": {
-      "cloak": ["packages/cloak/src"],
-      "cloak/*": ["packages/cloak/src/*"],
       "loony-sdk": ["packages/loony-sdk/src"],
       "loony-sdk/*": ["packages/loony-sdk/src/*"]
     },

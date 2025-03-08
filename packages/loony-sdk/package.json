@@ -4,7 +4,7 @@
   "main": "dist/index.js",
   "license": "MIT",
   "scripts": {
-    "build": "tsc"
+    "build": "./scripts/build.sh"
   },
   "devDependencies": {
     "@types/node": "^22.5.5"

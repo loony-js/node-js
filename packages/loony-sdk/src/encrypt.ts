@@ -8,7 +8,7 @@ import { Buffer } from "node:buffer"
 
 // Constants for encryption
 const algorithm = "aes-256-cbc" // AES encryption algorithm
-const _keyLength = 32 // 256 bits (32 bytes)
+// const _keyLength = 32 // 256 bits (32 bytes)
 const ivLength = 16 // Initialization vector (16 bytes)
 
 // Helper function to generate key and IV
@@ -45,5 +45,3 @@ export const decrypt = (encryptedText: string, password: string) => {
 
   return decrypted
 }
-
-encrypt("sankar", "sankar")
