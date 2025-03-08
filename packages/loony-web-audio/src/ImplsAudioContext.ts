@@ -1,72 +1,83 @@
-import { LoonyWebAudioApi } from './types'
-import { encodeWAV, convertFloat32ToInt16 } from './encoder'
+import { LoonyWebAudioApi } from "./types"
+import { encodeWAV, convertFloat32ToInt16 } from "./encoder"
 
 export class ImplsAudioContext implements LoonyWebAudioApi {
-    
-    private micStream: MediaStream;
-    private audioContext: AudioContext;
-    private mediaStreamAudioSourceNode: undefined | MediaStreamAudioSourceNode;
-    private audioWorkletNode: undefined | AudioWorkletNode;
-    private buffer: Float32Array[] = []
+  private micStream: MediaStream
+  private audioContext: AudioContext
+  private mediaStreamAudioSourceNode: undefined | MediaStreamAudioSourceNode
+  private audioWorkletNode: undefined | AudioWorkletNode
+  private buffer: number[] = []
 
-    constructor(micStream: MediaStream, audioContext: AudioContext) {
-        this.micStream = micStream
-        this.audioContext = audioContext;
-        this.mediaStreamAudioSourceNode = this.audioContext.createMediaStreamSource(this.micStream);
-        this.audioWorkletNode = new AudioWorkletNode(
-            this.audioContext,
-            'LoonyAudioWorkletProcessor');
+  constructor(micStream: MediaStream, audioContext: AudioContext) {
+    this.micStream = micStream
+    this.audioContext = audioContext
+    this.mediaStreamAudioSourceNode = this.audioContext.createMediaStreamSource(
+      this.micStream,
+    )
+    this.audioWorkletNode = new AudioWorkletNode(
+      this.audioContext,
+      "LoonyAudioWorkletProcessor",
+    )
+  }
+
+  static async create() {
+    const micStream = await navigator.mediaDevices.getUserMedia({
+      audio: { sampleRate: 16000, channelCount: 1 },
+      video: false,
+    })
+
+    const audioContext = new AudioContext()
+    const blob = new Blob([preProcessor], { type: "application/javascript" })
+    const moduleURL = URL.createObjectURL(blob)
+    await audioContext.audioWorklet.addModule(moduleURL)
+
+    return new ImplsAudioContext(micStream, audioContext)
+  }
+
+  connect() {
+    if (this.audioWorkletNode) {
+      this.audioWorkletNode.port.onmessage = (
+        event: MessageEvent<Float32Array>,
+      ) => {
+        this.buffer.push(...event.data)
+      }
+      this.mediaStreamAudioSourceNode
+        ?.connect(this.audioWorkletNode)
+        .connect(this.audioContext.destination)
+      this.audioWorkletNode.port.postMessage({ command: "start" })
     }
+  }
 
-    static async create() {
-        const micStream = await navigator.mediaDevices.getUserMedia({ audio: { sampleRate: 16000, channelCount: 1 }, video: false });
-
-        const audioContext = new AudioContext();
-        const blob = new Blob([preProcessor], { type: 'application/javascript' });
-        const moduleURL = URL.createObjectURL(blob);
-        await audioContext
-            .audioWorklet
-            .addModule(moduleURL);
-
-        return new ImplsAudioContext(micStream, audioContext);
+  socketConnect(socket: WebSocket) {
+    if (this.audioWorkletNode) {
+      this.audioWorkletNode.port.onmessage = (
+        event: MessageEvent<Float32Array>,
+      ) => {
+        const x = convertFloat32ToInt16(event.data)
+        socket.send(x)
+      }
+      this.mediaStreamAudioSourceNode
+        ?.connect(this.audioWorkletNode)
+        .connect(this.audioContext.destination)
+      this.audioWorkletNode.port.postMessage({ command: "start" })
     }
+  }
 
-    connect() {
-        if (this.audioWorkletNode) {
-            this.audioWorkletNode.port.onmessage = (event: MessageEvent<any>) => {
-                this.buffer.push(...event.data)
-            };
-            this.mediaStreamAudioSourceNode?.connect(this.audioWorkletNode).connect(this.audioContext.destination)
-            this.audioWorkletNode.port.postMessage({ command: 'start' });
-        }
+  disconnect() {
+    if (this.audioWorkletNode) {
+      this.mediaStreamAudioSourceNode?.disconnect()
+      this.audioContext.close()
+      this.audioWorkletNode.port.postMessage({ command: "stop" })
     }
+  }
 
-    socketConnect(socket: WebSocket) {
-        if (this.audioWorkletNode) {
-            this.audioWorkletNode.port.onmessage = (event: MessageEvent<any>) => {
-                const x = convertFloat32ToInt16(event.data)
-                socket.send(x);
-            };
-            this.mediaStreamAudioSourceNode?.connect(this.audioWorkletNode).connect(this.audioContext.destination)
-            this.audioWorkletNode.port.postMessage({ command: 'start' });
-        }
-    }
-
-    disconnect() {
-        if (this.audioWorkletNode) {
-            this.mediaStreamAudioSourceNode?.disconnect()
-            this.audioContext.close()
-            this.audioWorkletNode.port.postMessage({ command: 'stop' });
-        }
-    }
-
-    getAudioUrl() {
-        const audioBlob = new Blob([encodeWAV(this.buffer as Float32Array[], 44100)], {
-            type: 'audio/wav',
-        });
-        const audioUrl = URL.createObjectURL(audioBlob);
-        return audioUrl
-    }
+  getAudioUrl() {
+    const audioBlob = new Blob([encodeWAV(this.buffer, 44100)], {
+      type: "audio/wav",
+    })
+    const audioUrl = URL.createObjectURL(audioBlob)
+    return audioUrl
+  }
 }
 
 const preProcessor = `class LoonyAudioWorkletProcessor extends AudioWorkletProcessor {

@@ -1,0 +1,12 @@
+{
+  "name": "loony-media",
+  "version": "0.1.0",
+  "main": "dist/index.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "./scripts/build.sh"
+  },
+  "devDependencies": {
+    "@types/node": "^22.5.5"
+  }
+}
