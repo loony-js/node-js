@@ -1,14 +1,15 @@
 {
-  "name": "backend",
+  "name": "speechmatics",
   "version": "0.1.0",
   "main": "dist/index.js",
   "license": "MIT",
   "scripts": {
-    "build": "./scripts/build.sh",
-    "dev": "node ./dist/index.js"
+    "build": "./scripts/build.sh"
   },
   "dependencies": {
-    "speechmatics": "0.1.0"
+    "@speechmatics/auth": "^0.0.1",
+    "@speechmatics/real-time-client": "^5.0.10",
+    "dotenv": "^16.4.7"
   },
   "devDependencies": {
     "@types/node": "^22.5.5"

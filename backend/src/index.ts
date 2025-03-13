@@ -1,3 +1,3 @@
-import { testHuffman } from "loony-sdk"
+import { main } from "speechmatics"
 
-testHuffman()
+main()

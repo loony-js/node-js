@@ -24,7 +24,9 @@
     "noUnusedParameters": true,
     "paths": {
       "loony-sdk": ["packages/loony-sdk/src"],
-      "loony-sdk/*": ["packages/loony-sdk/src/*"]
+      "loony-sdk/*": ["packages/loony-sdk/src/*"],
+      "speechmatics": ["packages/speechmatics/src"],
+      "speechmatics/*": ["packages/speechmatics/src/*"]
     },
     "baseUrl": "src"
   },
