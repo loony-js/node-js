@@ -6,11 +6,5 @@
   "scripts": {
     "build": "./scripts/build.sh",
     "dev": "node ./dist/index.js"
-  },
-  "dependencies": {
-    "speechmatics": "0.1.0"
-  },
-  "devDependencies": {
-    "@types/node": "^22.5.5"
   }
 }
