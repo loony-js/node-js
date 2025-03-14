@@ -1,85 +1,111 @@
-/**
- * This file showcases the real-time-client package being used in NodeJS.
- *
- * It will connect to the real-time API and transcribe a file in real-time.
- * To run this example, you will need to have a Speechmatics API key,
- * which can be generated from the Speechmatics Portal: https://portal.speechmatics.com/api-keys
- *
- * NOTE: This script is run as an ES Module via tsx, letting us use top-level await.
- * The library also works with CommonJS, but the code would need to be wrapped in an async function.
- */
-import {
-  RealtimeClient,
-  RealtimeServerMessage,
-  RecognitionResult,
-} from "@speechmatics/real-time-client"
-import fs from "node:fs"
-import dotenv from "dotenv"
-import { createSpeechmaticsJWT } from "@speechmatics/auth"
+import express from "express"
+import http from "http"
+import crypto from "crypto"
 
-export async function main() {
-  dotenv.config()
+const PORT = process.env.PORT || 1234
+const app = express()
+const server = http.createServer(app)
 
-  const apiKey = process.env.API_KEY
-  if (!apiKey) {
-    throw new Error("Please set the API_KEY environment variable")
+// Handling WebSocket connections
+server.on("upgrade", (request, socket) => {
+  console.log("Upgrade", request.headers["upgrade"])
+  // WebSocket handshake
+  if (request.headers["upgrade"] !== "websocket") {
+    socket.destroy()
+    return
   }
 
-  const client = new RealtimeClient()
+  const key = request.headers["sec-websocket-key"]
+  if (!key) {
+    socket.write("HTTP/1.1 400 Bad Request\r\n\r\n")
+    socket.destroy()
+    return
+  }
 
-  let finalText = ""
-
-  client.addEventListener(
-    "receiveMessage",
-    ({ data }: { data: RealtimeServerMessage }) => {
-      if (data.message === "AddPartialTranscript") {
-        const partialText = data.results
-          .map((r) => r.alternatives?.[0].content)
-          .join(" ")
-        process.stdout.write(`\r${finalText} \x1b[3m${partialText}\x1b[0m`)
-      } else if (data.message === "AddTranscript") {
-        const text = data.results
-          .map((r: RecognitionResult) => r.alternatives?.[0].content)
-          .join(" ")
-        finalText += text
-        process.stdout.write(`\r${finalText}`)
-      } else if (data.message === "EndOfTranscript") {
-        process.stdout.write("\n")
-        process.exit(0)
-      }
-    },
+  const acceptKey = generateWebSocketAcceptKey(key)
+  socket.write(
+    "HTTP/1.1 101 Switching Protocols\r\n" +
+      "Upgrade: websocket\r\n" +
+      "Connection: Upgrade\r\n" +
+      `Sec-WebSocket-Accept: ${acceptKey}\r\n\r\n`,
   )
 
-  const jwt = await createSpeechmaticsJWT({
-    type: "rt",
-    apiKey,
-    ttl: 60, // 1 minute
+  // Handling WebSocket communication
+  socket.on("data", (data) => {
+    const res = decodeWebSocketMessage(data)
+    const res1 = encodeWebSocketMessage(res)
+    console.log("Received from client:", res)
+    socket.write(res1)
   })
 
-  const fileStream = fs.createReadStream("/home/sankar/example.wav", {
-    highWaterMark: 4096, // avoid sending too much data at once
+  socket.on("end", () => {
+    console.log("Client disconnected")
   })
 
-  await client.start(jwt, {
-    transcription_config: {
-      language: "en",
-      enable_partials: true,
-    },
+  socket.on("error", (err) => {
+    console.error("Socket error:", err)
   })
+})
 
-  //send it
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  fileStream.on("data", (sample: any) => {
-    client.sendAudio(sample)
-  })
+// Middleware
+app.use(express.json())
 
-  //end the session
-  fileStream.on("end", () => {
-    // Send a stop message to the server when we're done sending audio.
-    // We set `noTimeout` because we are streaming faster than real-time,
-    // so we should wait for all the data to be processed before closing the connection.
-    client.stopRecognition({ noTimeout: true })
-  })
+// Simple Route
+app.get("/", (req, res) => {
+  res.send("Hello, Express!")
+})
+
+// Start Server
+server.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`)
+})
+
+function generateWebSocketAcceptKey(key: string) {
+  return crypto
+    .createHash("sha1")
+    .update(key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11")
+    .digest("base64")
 }
 
-main()
+// Decode WebSocket frame
+function decodeWebSocketMessage(buffer: Buffer) {
+  const secondByte = buffer[1]
+  const length = secondByte & 127
+  const maskStart = 2
+  const dataStart = maskStart + 4
+  const mask = buffer.slice(maskStart, maskStart + 4)
+  const data = buffer.slice(dataStart, dataStart + length)
+  let result = ""
+
+  for (let i = 0; i < length; i++) {
+    result += String.fromCharCode(data[i] ^ mask[i % 4]) // Apply unmasking
+  }
+  return result
+}
+
+// Encode WebSocket frame
+function encodeWebSocketMessage(message: string) {
+  const messageBuffer = Buffer.from(message)
+  const length = messageBuffer.length
+  const frame = [0x81] // FIN + Text Frame (Opcode 0x1)
+
+  if (length < 126) {
+    frame.push(length)
+  } else if (length < 65536) {
+    frame.push(126, length >> 8, length & 255)
+  } else {
+    frame.push(
+      127,
+      0,
+      0,
+      0,
+      0,
+      (length >> 24) & 255,
+      (length >> 16) & 255,
+      (length >> 8) & 255,
+      length & 255,
+    )
+  }
+
+  return Buffer.concat([Buffer.from(frame), messageBuffer])
+}

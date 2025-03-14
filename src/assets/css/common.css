@@ -1,0 +1,21 @@
+.page-heading {
+  font-weight: bold;
+  font-size: 32px;
+  margin-top: 6px;
+  margin-bottom: 16px;
+}
+.dropdown-content,
+.profile-content {
+  display: none;
+  position: relative;
+}
+.dropdown-content-items,
+.profile-content-items {
+  position: absolute;
+  background-color: white;
+  right: 0px;
+  width: 250px;
+  top: 28px;
+  box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+  z-index: 10;
+}

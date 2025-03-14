@@ -4,14 +4,20 @@
   "main": "dist/index.js",
   "license": "MIT",
   "scripts": {
-    "build": "./scripts/build.sh"
+    "build": "./scripts/build.sh",
+    "dev": "node ./dist/index.js"
   },
   "dependencies": {
     "@speechmatics/auth": "^0.0.1",
     "@speechmatics/real-time-client": "^5.0.10",
-    "dotenv": "^16.4.7"
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^5.0.1",
+    "socket.io": "^4.8.1",
+    "ws": "^8.18.1"
   },
   "devDependencies": {
+    "@types/express": "^5.0.0",
     "@types/node": "^22.5.5"
   }
 }

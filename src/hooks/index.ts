@@ -9,12 +9,6 @@ export const useWebSocket = (): [
 
   useEffect(() => {
     if (socket) {
-      // Connection opened
-      socket.addEventListener("open", () => {
-        console.log("Connected to WebSocket server")
-        socket.send(JSON.stringify({ message: "Hello Server!" }))
-      })
-
       // Listen for messages
       socket.addEventListener("message", (event) => {
         console.log("Message from server:", event.data)
@@ -30,18 +24,25 @@ export const useWebSocket = (): [
         console.log("WebSocket connection closed")
       })
     }
-  }, [])
+  }, [socket])
 
   const connect = async () => {
-    setSocket(new WebSocket("ws://localhost:7000/ws"))
-    console.log("WebSocket connected.")
+    const ws = new WebSocket("ws://localhost:1234")
+
+    ws.onopen = () => {
+      setSocket(ws)
+      console.log("WebSocket connected.")
+    }
+
+    ws.onclose = () => {
+      setSocket(undefined)
+      console.log("WebSocket closed.")
+    }
   }
   const disConnect = async () => {
     if (socket) {
       socket.send("close")
       socket.close()
-      setSocket(undefined)
-      console.log("WebSocket dis_connected.")
     }
   }
 

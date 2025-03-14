@@ -1,6 +1,6 @@
 #!/bin/bash
 
-rm -rf build
+rm -rf dist
 echo "Removed previous build directory."
 echo "New build"
 tsc
