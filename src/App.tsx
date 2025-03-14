@@ -1,8 +1,8 @@
-import VoiceStreaming from "VoiceStreaming"
+import SelectionSort from "./algo/SelectionSort"
 import "./assets/css/hybrid.css"
 
 function App() {
-  return <VoiceStreaming />
+  return <SelectionSort />
 }
 
 export default App
