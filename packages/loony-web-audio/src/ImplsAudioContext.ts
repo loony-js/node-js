@@ -22,7 +22,7 @@ export class ImplsAudioContext implements LoonyWebAudioApi {
 
   static async create() {
     const micStream = await navigator.mediaDevices.getUserMedia({
-      audio: { sampleRate: 16000, channelCount: 1 },
+      audio: { sampleRate: 16000, channelCount: 2 },
       video: false,
     })
 
@@ -55,13 +55,17 @@ export class ImplsAudioContext implements LoonyWebAudioApi {
       this.audioWorkletNode.port.onmessage = (
         event: MessageEvent<Float32Array>,
       ) => {
-        if (payload.length >= 4096) {
-          socket.send(convertFloat32ToInt16(payload))
+        console.log(payload.length)
+        if (payload.length >= 8192) {
+          const __data = convertFloat32ToInt16(payload)
+          console.log(__data)
+          socket.send(__data)
           payload = []
           payload.push(...event.data)
         } else {
           payload.push(...event.data)
         }
+        // socket.send(convertFloat32ToInt16(event.data))
         this.buffer.push(...event.data)
       }
       this.mediaStreamAudioSourceNode
