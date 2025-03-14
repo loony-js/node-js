@@ -50,17 +50,19 @@ export class ImplsAudioContext implements LoonyWebAudioApi {
 
   socketConnect(socket: WebSocket) {
     if (this.audioWorkletNode) {
-      let payload: Float32Array = []
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let payload: any = []
       this.audioWorkletNode.port.onmessage = (
         event: MessageEvent<Float32Array>,
       ) => {
         if (payload.length >= 4096) {
-          const x = convertFloat32ToInt16(payload)
-          socket.send(x)
-          payload = [...event.data]
+          socket.send(convertFloat32ToInt16(payload))
+          payload = []
+          payload.push(...event.data)
         } else {
-          payload = [...payload, ...event.data]
+          payload.push(...event.data)
         }
+        this.buffer.push(...event.data)
       }
       this.mediaStreamAudioSourceNode
         ?.connect(this.audioWorkletNode)

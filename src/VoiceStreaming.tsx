@@ -25,7 +25,7 @@ export default function VoiceStreaming() {
       setTimeout(() => {
         mediaRecorderRef.current?.socketConnect(socket as WebSocket)
         setRecording(true)
-      }, 2000)
+      }, 500)
     }
   }
   const stopRecording = () => {
@@ -35,7 +35,6 @@ export default function VoiceStreaming() {
       setRecording(false)
       const url = mediaRecorderRef.current?.getAudioUrl()
       setAudioUrl(url)
-      disconnect()
     }
   }
 
