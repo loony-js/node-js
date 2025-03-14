@@ -20,14 +20,17 @@ export default function VoiceStreaming() {
 
   const startRecording = () => {
     if (mediaRecorderRef && socket) {
-      socket.send("start")
-      // mediaRecorderRef.current?.socketConnect(socket as WebSocket)
-      // setRecording(true)
+      socket.send("START_VOICE_RECORDING")
+
+      setTimeout(() => {
+        mediaRecorderRef.current?.socketConnect(socket as WebSocket)
+        setRecording(true)
+      }, 2000)
     }
   }
   const stopRecording = () => {
     if (socket) {
-      socket.send("end")
+      socket.send("STOP_VOICE_RECORDING")
       mediaRecorderRef.current?.disconnect()
       setRecording(false)
       const url = mediaRecorderRef.current?.getAudioUrl()
@@ -35,7 +38,7 @@ export default function VoiceStreaming() {
       disconnect()
     }
   }
-  console.log(socket?.OPEN)
+
   return (
     <div className="centered-con">
       <div className="">
