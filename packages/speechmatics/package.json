@@ -4,8 +4,8 @@
   "main": "dist/index.js",
   "license": "MIT",
   "scripts": {
-    "build": "./scripts/build.sh",
-    "dev": "node ./dist/index.js"
+    "build": "rm -rf dist && tsc",
+    "dev": "rm -rf dist && tsc && node ./dist/index.js"
   },
   "dependencies": {
     "@speechmatics/auth": "^0.0.1",

@@ -3,7 +3,7 @@ import http from "http"
 import crypto from "crypto"
 import { connection } from "./connection"
 
-const PORT = process.env.PORT || 1234
+const PORT = process.env.PORT || 2000
 const app = express()
 const server = http.createServer(app)
 
