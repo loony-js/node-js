@@ -27,8 +27,6 @@ export async function connection(socket: internal.Duplex) {
 
   const client = new RealtimeClient()
 
-  let finalText = ""
-
   client.addEventListener(
     "receiveMessage",
     ({ data }: { data: RealtimeServerMessage }) => {
@@ -36,16 +34,16 @@ export async function connection(socket: internal.Duplex) {
         const partialText = data.results
           .map((r) => r.alternatives?.[0].content)
           .join(" ")
-        process.stdout.write(`\r${finalText} \x1b[3m${partialText}\x1b[0m`)
+        console.log(partialText)
       } else if (data.message === "AddTranscript") {
-        const text = data.results
+        const finalText = data.results
           .map((r: RecognitionResult) => r.alternatives?.[0].content)
           .join(" ")
-        finalText += text
-        process.stdout.write(`\r${finalText}`)
+        console.log(finalText)
       } else if (data.message === "EndOfTranscript") {
         process.stdout.write("\n")
-        process.exit(0)
+      } else if (data.message === "Error") {
+        console.log(data.reason)
       }
     },
   )
@@ -66,12 +64,16 @@ export async function connection(socket: internal.Duplex) {
           language: "en",
           enable_partials: true,
         },
+        audio_format: {
+          type: "raw",
+          encoding: "pcm_s16le",
+          sample_rate: 16000,
+        },
       })
     } else if (msg === "STOP_VOICE_RECORDING") {
       console.log("STOP_VOICE_RECORDING")
       client.stopRecognition({ noTimeout: true })
     } else {
-      console.log("audio")
       client.sendAudio(data as unknown as ArrayBufferLike)
     }
   })
