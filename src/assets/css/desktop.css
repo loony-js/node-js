@@ -5,36 +5,9 @@
 /* 
 * @Containers
 */
-.con-50 {
-  width: 50%;
-}
 .flex-center {
   display: flex;
   align-items: center;
-}
-.full-container,
-.full-con {
-  width: 100%;
-  height: 100%;
-}
-.book-container {
-  width: 40%;
-  margin-left: 5%;
-  margin-right: 5%;
-}
-.doc-settings-container {
-  width: 20%;
-}
-.home-container {
-  width: 100%;
-}
-.form-container {
-  margin-left: auto;
-  margin-right: auto;
-  min-height: 50%;
-}
-.documents-container {
-  width: 80%;
 }
 .cards-con {
   flex-wrap: wrap;
@@ -44,15 +17,7 @@
   margin-left: 5%;
   margin-right: 5%;
 }
-.document-nav-container {
-  width: 15%;
-}
-.document-view-container {
-  width: 100%;
-  padding-top: 15px;
-  padding-bottom: 100px;
-  min-height: 100vh;
-}
+
 .flex-row {
   display: flex;
   flex-direction: row;
@@ -92,7 +57,7 @@ input[type="file"]::file-selector-button {
 input:focus,
 input:hover,
 textarea:focus {
-  border: 1px solid #4da6ff;
+  border: 1px solid #444444;
   outline: none;
 }
 
@@ -103,6 +68,7 @@ button {
   border: 1px solid #ccc;
   background-color: white;
   border-radius: 20px;
+  color: #444444;
 }
 button:focus {
   outline: none;
@@ -111,12 +77,17 @@ button:focus {
   background-color: #2d2d2d;
   color: white;
 }
+.grey-bg {
+  background-color: #4d4d4d;
+  color: white;
+}
 .white-bg {
   background-color: #ffffff;
   color: #2d2d2d;
 }
 button:hover {
   cursor: pointer;
+  border: 1px solid #838383;
 }
 .button-none {
   border: none;
@@ -142,6 +113,10 @@ button:hover {
 .btn-action:hover {
   cursor: pointer;
   border: 1px solid #2d2d2d;
+}
+.btn-sm {
+  padding: 5px;
+  border-radius: 3px;
 }
 
 .form-section {

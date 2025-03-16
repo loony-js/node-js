@@ -68,3 +68,34 @@
     margin-bottom: 10px;
   }
 }
+
+@media (min-width: 2300px) {
+  .con-xxl-2 {
+    width: 16.6667%;
+  }
+  .con-xxl-5 {
+    width: 41.6667%;
+  }
+  .con-xxl-11 {
+    width: 91.6667%;
+  }
+  .pad-hor-1 {
+    padding-right: 5%;
+    padding-left: 5%;
+  }
+  .mar-hor-1 {
+    margin-right: auto;
+    margin-left: auto;
+  }
+  .pad-ver-1 {
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+  .mar-top-1 {
+    margin-top: 24px;
+  }
+  .mar-ver-1 {
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
+}

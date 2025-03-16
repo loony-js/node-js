@@ -1,8 +1,7 @@
-import SelectionSort from "./algo/SelectionSort"
-import "./assets/css/hybrid.css"
+import Crypto from "./crypto/index"
 
 function App() {
-  return <SelectionSort />
+  return <Crypto />
 }
 
 export default App
