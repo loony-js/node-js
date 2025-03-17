@@ -46,47 +46,50 @@ export async function connection(socket: internal.Duplex) {
 
   let last_seq_no = 0
   // // Handling WebSocket communication
+
   socket.on("data", async (data) => {
-    const msg = decodeWebSocketMessage(data)
-    if (msg === "START_VOICE_RECORDING") {
-      console.log("START_VOICE_RECORDING")
-      ws.send(
-        JSON.stringify({
-          message: "StartRecognition",
-          audio_format: {
-            type: "raw",
-            // encoding: "pcm_f32le",
-            encoding: "pcm_s16le",
-            sample_rate: 16000,
-          },
-          transcription_config: {
-            language: "en",
-            operating_point: "enhanced",
-            output_locale: "en-US",
-            additional_vocab: ["gnocchi", "bucatini", "bigoli"],
-            diarization: "speaker",
-            enable_partials: false,
-          },
-          translation_config: {
-            target_languages: [],
-            enable_partials: false,
-          },
-          audio_events_config: {
-            types: ["applause", "music"],
-          },
-        }),
-      )
-    } else if (msg === "STOP_VOICE_RECORDING") {
-      console.log("STOP_VOICE_RECORDING")
-      ws.send(
-        JSON.stringify({
-          message: "EndOfStream",
-          last_seq_no: last_seq_no,
-        }),
-      )
-    } else {
+    if (data.length > 50) {
       ws.send(data)
       last_seq_no += 1
+    } else {
+      const msg = decodeWebSocketMessage(data)
+      if (msg === "START_VOICE_RECORDING") {
+        console.log("START_VOICE_RECORDING")
+        ws.send(
+          JSON.stringify({
+            message: "StartRecognition",
+            audio_format: {
+              type: "raw",
+              // encoding: "pcm_f32le",
+              encoding: "pcm_s16le",
+              sample_rate: 16000,
+            },
+            transcription_config: {
+              language: "en",
+              operating_point: "enhanced",
+              output_locale: "en-US",
+              additional_vocab: ["gnocchi", "bucatini", "bigoli"],
+              diarization: "speaker",
+              enable_partials: false,
+            },
+            translation_config: {
+              target_languages: [],
+              enable_partials: false,
+            },
+            audio_events_config: {
+              types: ["applause", "music"],
+            },
+          }),
+        )
+      } else if (msg === "STOP_VOICE_RECORDING") {
+        console.log("STOP_VOICE_RECORDING")
+        ws.send(
+          JSON.stringify({
+            message: "EndOfStream",
+            last_seq_no: last_seq_no,
+          }),
+        )
+      }
     }
   })
 }

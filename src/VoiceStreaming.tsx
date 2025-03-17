@@ -23,7 +23,7 @@ export default function VoiceStreaming() {
       socket.send("START_VOICE_RECORDING")
 
       setTimeout(() => {
-        mediaRecorderRef.current?.socketConnect(socket as WebSocket)
+        mediaRecorderRef.current?.startRecording(socket as WebSocket)
         setRecording(true)
       }, 500)
     }
@@ -31,11 +31,29 @@ export default function VoiceStreaming() {
   const stopRecording = () => {
     if (socket) {
       socket.send("STOP_VOICE_RECORDING")
-      mediaRecorderRef.current?.disconnect()
+      mediaRecorderRef.current?.stopRecording()
       setRecording(false)
       const url = mediaRecorderRef.current?.getAudioUrl()
       setAudioUrl(url)
     }
+  }
+
+  const onChangeFile = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files
+    if (!file || !socket) return
+    socket.send("START_VOICE_RECORDING")
+
+    // Read file as ArrayBuffer
+    const reader = new FileReader()
+    reader.readAsArrayBuffer(file[0])
+
+    reader.onload = () => {
+      const audioBuffer = reader.result
+      socket.send(audioBuffer as ArrayBuffer)
+      socket.send("STOP_VOICE_RECORDING")
+    }
+
+    reader.onerror = (error) => console.error("Error reading file:", error)
   }
 
   return (
@@ -84,6 +102,18 @@ export default function VoiceStreaming() {
             >
               ⏹️ Stop Recording
             </button>
+          </div>
+        </div>
+        <div>
+          <div className="pad-ver-5">
+            {isRecording ? (
+              <span className="green-txt">Recording</span>
+            ) : (
+              <span className="red-txt">Not Recording</span>
+            )}
+          </div>
+          <div className="pad-ver-5">
+            <input type="file" onChange={onChangeFile} />
           </div>
         </div>
         {audioUrl && (

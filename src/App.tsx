@@ -1,7 +1,7 @@
-import Crypto from "./crypto/index"
+import VoiceStreaming from "VoiceStreaming"
 
 function App() {
-  return <Crypto />
+  return <VoiceStreaming />
 }
 
 export default App

@@ -1,6 +1,6 @@
 export interface LoonyWebAudioApi {
   connect(): void
-  socketConnect(socket: WebSocket): void
-  disconnect(): void
+  startRecording(socket: WebSocket): void
+  stopRecording(): void
   getAudioUrl(): string
 }

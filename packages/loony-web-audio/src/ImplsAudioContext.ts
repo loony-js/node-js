@@ -14,10 +14,15 @@ export class ImplsAudioContext implements LoonyWebAudioApi {
     this.mediaStreamAudioSourceNode = this.audioContext.createMediaStreamSource(
       this.micStream,
     )
+
     this.audioWorkletNode = new AudioWorkletNode(
       this.audioContext,
       "LoonyAudioWorkletProcessor",
     )
+
+    this.mediaStreamAudioSourceNode
+      ?.connect(this.audioWorkletNode)
+      .connect(this.audioContext.destination)
   }
 
   static async create() {
@@ -41,45 +46,37 @@ export class ImplsAudioContext implements LoonyWebAudioApi {
       ) => {
         this.buffer.push(...event.data)
       }
-      this.mediaStreamAudioSourceNode
-        ?.connect(this.audioWorkletNode)
-        .connect(this.audioContext.destination)
       this.audioWorkletNode.port.postMessage({ command: "start" })
     }
   }
 
-  socketConnect(socket: WebSocket) {
+  startRecording(socket: WebSocket) {
     if (this.audioWorkletNode) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let payload: any = []
       this.audioWorkletNode.port.onmessage = (
         event: MessageEvent<Float32Array>,
       ) => {
-        console.log(payload.length)
-        if (payload.length >= 8192) {
+        // console.log(payload.length)
+        if (payload.length >= 6000) {
           const __data = convertFloat32ToInt16(payload)
-          console.log(__data)
           socket.send(__data)
           payload = []
           payload.push(...event.data)
         } else {
           payload.push(...event.data)
         }
-        // socket.send(convertFloat32ToInt16(event.data))
         this.buffer.push(...event.data)
       }
-      this.mediaStreamAudioSourceNode
-        ?.connect(this.audioWorkletNode)
-        .connect(this.audioContext.destination)
-      this.audioWorkletNode.port.postMessage({ command: "start" })
+      this.audioWorkletNode.port.postMessage("start")
     }
   }
 
-  disconnect() {
+  stopRecording() {
     if (this.audioWorkletNode) {
-      this.mediaStreamAudioSourceNode?.disconnect()
-      this.audioContext.close()
-      this.audioWorkletNode.port.postMessage({ command: "stop" })
+      // this.mediaStreamAudioSourceNode?.disconnect()
+      // this.audioContext.close()
+      this.audioWorkletNode.port.postMessage("stop")
     }
   }
 
@@ -93,13 +90,27 @@ export class ImplsAudioContext implements LoonyWebAudioApi {
 }
 
 const preProcessor = `class LoonyAudioWorkletProcessor extends AudioWorkletProcessor {
+
+    constructor() {
+      super();
+      this.playing = false;
+      this.port.onmessage = (event) => {
+      console.log(event.data)
+        if (event.data === 'start') this.playing = true;
+        if (event.data === 'pause') this.playing = false;
+        if (event.data === 'stop') {
+          this.playing = false;
+          this.port.postMessage('stopped'); // Notify main thread
+        }
+      }
+    }
+      
     process(inputs, outputs, parameters) {
+        if (!this.playing) return true; // Keep processor alive but do nothing
+
       const input = inputs[0];
       if (input.length > 0) {
-        const channelData = input[0];
-        if (channelData) {
-          this.port.postMessage(channelData);
-        }
+        this.port.postMessage(input[0]);
       }
       return true;
     }

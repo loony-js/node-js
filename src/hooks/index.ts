@@ -27,7 +27,7 @@ export const useWebSocket = (): [
   }, [socket])
 
   const connect = async () => {
-    const ws = new WebSocket("ws://localhost:1234")
+    const ws = new WebSocket("ws://localhost:2000")
 
     ws.onopen = () => {
       setSocket(ws)
