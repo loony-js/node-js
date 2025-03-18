@@ -46,20 +46,11 @@ export class ImplsAudioContext implements LoonyWebAudioApi {
 
   startRecording(socket: WebSocket) {
     if (this.audioWorkletNode) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      let payload: any = []
       this.audioWorkletNode.port.onmessage = (
         event: MessageEvent<Float32Array>,
       ) => {
-        // console.log(payload.length)
-        if (payload.length >= 6000) {
-          const __data = convertFloat32ToInt16(payload)
-          socket.send(__data)
-          payload = []
-          payload.push(...event.data)
-        } else {
-          payload.push(...event.data)
-        }
+        console.log(event.data.length)
+        socket.send(convertFloat32ToInt16(event.data))
         this.buffer.push(...event.data)
       }
       this.audioWorkletNode.port.postMessage("start")
@@ -84,30 +75,38 @@ export class ImplsAudioContext implements LoonyWebAudioApi {
 }
 
 const preProcessor = `class LoonyAudioWorkletProcessor extends AudioWorkletProcessor {
+  constructor() {
+    super()
+    this.playing = false
+    this.buffer = []
+    this.bufferSize = 4096
 
-    constructor() {
-      super();
-      this.playing = false;
-      this.port.onmessage = (event) => {
+    this.port.onmessage = (event) => {
       console.log(event.data)
-        if (event.data === 'start') this.playing = true;
-        if (event.data === 'pause') this.playing = false;
-        if (event.data === 'stop') {
-          this.playing = false;
-          this.port.postMessage('stopped'); // Notify main thread
-        }
+      if (event.data === "start") this.playing = true
+      if (event.data === "pause") this.playing = false
+      if (event.data === "stop") {
+        this.playing = false
+        this.buffer = []
+        this.port.postMessage("stopped")
       }
     }
-      
-    process(inputs, outputs, parameters) {
-        if (!this.playing) return true; // Keep processor alive but do nothing
+  }
 
-      const input = inputs[0];
-      if (input.length > 0) {
-        this.port.postMessage(input[0]);
+  process(inputs) {
+    if (!this.playing) return true
+
+    const input = inputs[0]
+    if (input.length > 0) {
+      this.buffer.push(...input[0])
+
+      if (this.buffer.length >= this.bufferSize) {
+        this.port.postMessage(this.buffer.slice(0, this.bufferSize))
+        this.buffer = this.buffer.slice(this.bufferSize)
       }
-      return true;
     }
+    return true
+  }
 }
-  
-registerProcessor('LoonyAudioWorkletProcessor', LoonyAudioWorkletProcessor);`
+
+registerProcessor("LoonyAudioWorkletProcessor", LoonyAudioWorkletProcessor)`

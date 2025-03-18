@@ -1,44 +1,31 @@
-import { useWebSocket } from "hooks"
-import { ImplsAudioContext } from "loony-web-audio"
-import { useEffect, useState, useRef } from "react"
+import { useWebSocket, useMicrophone } from "hooks"
+import { useEffect } from "react"
 import "./assets/css/desktop.css"
 
 export default function VoiceStreaming() {
-  const [isRecording, setRecording] = useState(false)
-  const [audioUrl, setAudioUrl] = useState<string | undefined>(undefined)
-  const mediaRecorderRef = useRef<ImplsAudioContext | null>(null)
   const [socket, connect, disconnect]: [
     WebSocket | undefined,
     () => void,
     () => void,
   ] = useWebSocket()
+  const [isRecording, createMediaRecorder, startRecording, stopRecording] =
+    useMicrophone()
 
   useEffect(() => {
-    ImplsAudioContext.create().then((res) => {
-      mediaRecorderRef.current = res
-    })
-  }, [])
+    createMediaRecorder()
+  }, [createMediaRecorder])
 
-  const startRecording = () => {
-    if (mediaRecorderRef && socket) {
-      socket.send("START_VOICE_RECORDING")
-
-      setTimeout(() => {
-        mediaRecorderRef.current?.startRecording(socket as WebSocket)
-        setRecording(true)
-      }, 500)
-    }
-  }
-  const stopRecording = () => {
+  const onClickStartRecording = () => {
     if (socket) {
-      socket.send("STOP_VOICE_RECORDING")
-      mediaRecorderRef.current?.stopRecording()
-      setRecording(false)
-      const url = mediaRecorderRef.current?.getAudioUrl()
-      setAudioUrl(url)
+      startRecording(socket)
     }
   }
 
+  const onClickStopRecording = () => {
+    if (socket) {
+      stopRecording(socket)
+    }
+  }
   const onChangeFile = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files
     if (!file || !socket) return
@@ -91,8 +78,9 @@ export default function VoiceStreaming() {
           <div className="pad-ver-5">
             <button
               className="btn-sm"
-              onClick={isRecording ? stopRecording : startRecording}
-              disabled={isRecording}
+              onClick={
+                isRecording ? onClickStopRecording : onClickStartRecording
+              }
             >
               🎙️ {isRecording ? "Stop" : "Start"}
             </button>
@@ -104,12 +92,6 @@ export default function VoiceStreaming() {
             <input type="file" onChange={onChangeFile} />
           </div>
         </div>
-        {audioUrl && (
-          <div className="mt-4">
-            <h3 className="text-lg font-semibold">Playback:</h3>
-            <audio controls src={audioUrl} className="mt-2"></audio>
-          </div>
-        )}
       </div>
     </div>
   )
