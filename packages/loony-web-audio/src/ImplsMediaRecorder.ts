@@ -37,12 +37,7 @@ export class ImplsMediaRecorder implements LoonyWebAudioApi {
     )
   }
 
-  connect() {
-    this.mediaRecorder.ondataavailable = (event) => {
-      this.buffer?.push(event.data)
-    }
-    this.mediaRecorder.start(250)
-  }
+  destroy() {}
 
   getAudioUrl() {
     const audioBlob = new Blob(this.buffer, { type: "audio/wav" })
@@ -50,7 +45,7 @@ export class ImplsMediaRecorder implements LoonyWebAudioApi {
     return audioUrl
   }
 
-  socketConnect(socket: WebSocket) {
+  startRecording(socket: WebSocket) {
     this.mediaRecorder.ondataavailable = async (event: BlobEvent) => {
       this.buffer?.push(event.data)
       socket.send(event.data)
@@ -60,7 +55,7 @@ export class ImplsMediaRecorder implements LoonyWebAudioApi {
     this.mediaRecorder.start(1000)
   }
 
-  disconnect() {
+  stopRecording() {
     this.mediaRecorder.stop()
   }
 }

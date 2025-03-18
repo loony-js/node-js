@@ -39,15 +39,9 @@ export class ImplsAudioContext implements LoonyWebAudioApi {
     return new ImplsAudioContext(micStream, audioContext)
   }
 
-  connect() {
-    if (this.audioWorkletNode) {
-      this.audioWorkletNode.port.onmessage = (
-        event: MessageEvent<Float32Array>,
-      ) => {
-        this.buffer.push(...event.data)
-      }
-      this.audioWorkletNode.port.postMessage({ command: "start" })
-    }
+  destroy() {
+    this.mediaStreamAudioSourceNode?.disconnect()
+    this.audioContext.close()
   }
 
   startRecording(socket: WebSocket) {

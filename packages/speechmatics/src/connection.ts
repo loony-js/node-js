@@ -1,11 +1,8 @@
-import dotenv from "dotenv"
 import internal from "stream"
 import WebSocket from "ws"
 import crypto from "crypto"
 
 export async function connection(socket: internal.Duplex) {
-  dotenv.config()
-
   const apiKey = "evK20Lpk7TTRtpNAv0Cbh4pCBzvr32Y6"
   if (!apiKey) {
     throw new Error("Please set the API_KEY environment variable")
@@ -29,7 +26,7 @@ export async function connection(socket: internal.Duplex) {
   })
 
   ws.on("open", () => {
-    console.log("WebSocket connection established")
+    console.log("Connected to Speechmatics Websocket")
   })
 
   ws.on("message", (message) => {
@@ -37,11 +34,11 @@ export async function connection(socket: internal.Duplex) {
   })
 
   ws.on("error", (error) => {
-    console.error("WebSocket error:", error)
+    console.error("Speechmatics WebSocket error:", error)
   })
 
   ws.on("close", (code, reason) => {
-    console.log(`WebSocket closed: ${code} - ${reason}`)
+    console.log(`Speechmatics WebSocket closed: ${code} - ${reason}`)
   })
 
   let last_seq_no = 0
@@ -54,6 +51,7 @@ export async function connection(socket: internal.Duplex) {
     } else {
       const msg = decodeWebSocketMessage(data)
       if (msg === "START_VOICE_RECORDING") {
+        console.log(data.length, data)
         console.log("START_VOICE_RECORDING")
         ws.send(
           JSON.stringify({

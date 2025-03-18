@@ -1,6 +1,7 @@
 import { useWebSocket } from "hooks"
 import { ImplsAudioContext } from "loony-web-audio"
 import { useEffect, useState, useRef } from "react"
+import "./assets/css/desktop.css"
 
 export default function VoiceStreaming() {
   const [isRecording, setRecording] = useState(false)
@@ -8,8 +9,8 @@ export default function VoiceStreaming() {
   const mediaRecorderRef = useRef<ImplsAudioContext | null>(null)
   const [socket, connect, disconnect]: [
     WebSocket | undefined,
-    () => Promise<void>,
-    () => Promise<void>,
+    () => void,
+    () => void,
   ] = useWebSocket()
 
   useEffect(() => {
@@ -57,7 +58,7 @@ export default function VoiceStreaming() {
   }
 
   return (
-    <div className="centered-con">
+    <div className="con-sm-12 con-xxl-5 mar-hor-1 mar-top-1">
       <div className="">
         <h2 className="">Voice Recorder</h2>
         <hr />
@@ -90,28 +91,15 @@ export default function VoiceStreaming() {
           <div className="pad-ver-5">
             <button
               className="btn-sm"
-              onClick={startRecording}
+              onClick={isRecording ? stopRecording : startRecording}
               disabled={isRecording}
             >
-              🎙️ Start Recording
-            </button>
-            <button
-              className="btn-sm"
-              onClick={stopRecording}
-              disabled={!isRecording}
-            >
-              ⏹️ Stop Recording
+              🎙️ {isRecording ? "Stop" : "Start"}
             </button>
           </div>
         </div>
+        <hr />
         <div>
-          <div className="pad-ver-5">
-            {isRecording ? (
-              <span className="green-txt">Recording</span>
-            ) : (
-              <span className="red-txt">Not Recording</span>
-            )}
-          </div>
           <div className="pad-ver-5">
             <input type="file" onChange={onChangeFile} />
           </div>

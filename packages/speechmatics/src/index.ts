@@ -1,46 +1,15 @@
 import express from "express"
 import http from "http"
-import crypto from "crypto"
-import { connection } from "./connection"
+import internal from "stream"
+import dotenv from "dotenv"
+import { handleWebSocket } from "./socket"
 
+dotenv.config()
 const PORT = process.env.PORT || 2000
 const app = express()
 const server = http.createServer(app)
 
-// Handling WebSocket connections
-server.on("upgrade", (request, socket) => {
-  console.log("Upgrade", request.headers["upgrade"])
-  // WebSocket handshake
-  if (request.headers["upgrade"] !== "websocket") {
-    socket.destroy()
-    return
-  }
-
-  const key = request.headers["sec-websocket-key"]
-  if (!key) {
-    socket.write("HTTP/1.1 400 Bad Request\r\n\r\n")
-    socket.destroy()
-    return
-  }
-
-  const acceptKey = generateWebSocketAcceptKey(key)
-  socket.write(
-    "HTTP/1.1 101 Switching Protocols\r\n" +
-      "Upgrade: websocket\r\n" +
-      "Connection: Upgrade\r\n" +
-      `Sec-WebSocket-Accept: ${acceptKey}\r\n\r\n`,
-  )
-
-  connection(socket)
-
-  socket.on("end", () => {
-    console.log("Client disconnected")
-  })
-
-  socket.on("error", (err) => {
-    console.error("Socket error:", err)
-  })
-})
+const clients: Set<internal.Duplex> = new Set()
 
 // Middleware
 app.use(express.json())
@@ -50,14 +19,36 @@ app.get("/", (req, res) => {
   res.send("Hello, Express!")
 })
 
+handleWebSocket(server, clients)
 // Start Server
 server.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`)
 })
 
-function generateWebSocketAcceptKey(key: string) {
-  return crypto
-    .createHash("sha1")
-    .update(key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11")
-    .digest("base64")
+// Gracefully close WebSocket connections on process termination
+const gracefulShutdown = () => {
+  console.log("Shutting down WebSocket server...")
+
+  // Notify clients about server shutdown
+  clients.forEach((ws) => {
+    if (ws) {
+      ws.emit("Server is shutting down...")
+      ws.destroy()
+    }
+  })
+
+  server.close(() => {
+    console.log("WebSocket server closed")
+    process.exit(0)
+  })
+
+  // Force close after timeout in case some clients hang
+  setTimeout(() => {
+    console.warn("Forcing WebSocket shutdown")
+    process.exit(1)
+  }, 5000)
 }
+
+// Handle termination signals
+process.on("SIGINT", gracefulShutdown)
+process.on("SIGTERM", gracefulShutdown)

@@ -1,50 +1,56 @@
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 
 export const useWebSocket = (): [
   WebSocket | undefined,
-  () => Promise<void>,
-  () => Promise<void>,
+  () => void,
+  () => void,
 ] => {
   const [socket, setSocket] = useState<undefined | WebSocket>()
 
   useEffect(() => {
     if (socket) {
-      // Listen for messages
-      socket.addEventListener("message", (event) => {
+      function handleMessage(event: MessageEvent<unknown>) {
         console.log("Message from server:", event.data)
-      })
-
-      // Handle errors
-      socket.addEventListener("error", (error) => {
-        console.error("WebSocket error:", error)
-      })
-
-      // Handle connection close
-      socket.addEventListener("close", () => {
-        console.log("WebSocket connection closed")
-      })
+      }
+      function handleError(event: Event) {
+        console.error("WebSocket error:", event)
+      }
+      function handleClose(event: Event) {
+        setSocket(undefined)
+        console.log(socket, "socket")
+        console.log("Closed", event)
+      }
+      socket.addEventListener("message", handleMessage)
+      socket.addEventListener("error", handleError)
+      socket.addEventListener("close", handleClose)
+      return () => {
+        socket?.removeEventListener("message", handleMessage)
+        socket?.removeEventListener("error", handleError)
+        socket?.removeEventListener("close", handleClose)
+      }
     }
   }, [socket])
 
-  const connect = async () => {
+  const connect = useCallback(() => {
     const ws = new WebSocket("ws://localhost:2000")
-
-    ws.onopen = () => {
+    function handleOpen(event: Event) {
+      console.log(event, "Websocket connected.")
       setSocket(ws)
-      console.log("WebSocket connected.")
     }
+    ws.addEventListener("open", handleOpen)
+    return () => {
+      ws.removeEventListener("open", handleOpen)
+    }
+  }, [])
 
-    ws.onclose = () => {
-      setSocket(undefined)
-      console.log("WebSocket closed.")
-    }
-  }
-  const disConnect = async () => {
+  const disConnect = useCallback(() => {
     if (socket) {
       socket.send("close")
-      socket.close()
+      setTimeout(() => {
+        socket.close()
+      }, 1000)
     }
-  }
+  }, [socket])
 
   return [socket, connect, disConnect]
 }
