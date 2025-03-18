@@ -1,7 +1,7 @@
 import crypto from "crypto"
 import http from "http"
 import internal from "stream"
-import { connection } from "./connection"
+import { connection, createConnection } from "./connection"
 
 export const handleWebSocket = (
   server: http.Server<typeof http.IncomingMessage, typeof http.ServerResponse>,
@@ -29,15 +29,26 @@ export const handleWebSocket = (
         "Connection: Upgrade\r\n" +
         `Sec-WebSocket-Accept: ${acceptKey}\r\n\r\n`,
     )
-
-    connection(socket)
+    const speechmaticsWS = createConnection()
+    connection(socket, speechmaticsWS)
 
     socket.on("close", () => {
       console.log("on.close")
+      speechmaticsWS.close()
+      socket.destroy()
       clients.delete(socket)
+      console.log(clients.size)
     })
     socket.on("end", () => {
       console.log("on.end")
+      speechmaticsWS.close()
+      socket.write(
+        "HTTP/1.1 200 Success\r\n" +
+          "Connection: close\r\n" +
+          "Content-Length: 0\r\n" +
+          "\r\n",
+      )
+      socket.destroy()
     })
 
     socket.on("error", (err) => {

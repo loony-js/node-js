@@ -3,7 +3,7 @@ import { encodeWAV, convertFloat32ToInt16 } from "./encoder"
 
 export class ImplsAudioContext implements LoonyWebAudioApi {
   private micStream: MediaStream
-  private audioContext: AudioContext
+  private audioContext: AudioContext | null
   private mediaStreamAudioSourceNode: undefined | MediaStreamAudioSourceNode
   private audioWorkletNode: undefined | AudioWorkletNode
   private buffer: number[] = []
@@ -41,7 +41,7 @@ export class ImplsAudioContext implements LoonyWebAudioApi {
 
   destroy() {
     this.mediaStreamAudioSourceNode?.disconnect()
-    this.audioContext.close()
+    this.audioContext?.close()
   }
 
   startRecording(socket: WebSocket) {
@@ -49,7 +49,6 @@ export class ImplsAudioContext implements LoonyWebAudioApi {
       this.audioWorkletNode.port.onmessage = (
         event: MessageEvent<Float32Array>,
       ) => {
-        console.log(event.data.length)
         socket.send(convertFloat32ToInt16(event.data))
         this.buffer.push(...event.data)
       }
@@ -59,9 +58,9 @@ export class ImplsAudioContext implements LoonyWebAudioApi {
 
   stopRecording() {
     if (this.audioWorkletNode) {
-      // this.mediaStreamAudioSourceNode?.disconnect()
-      // this.audioContext.close()
       this.audioWorkletNode.port.postMessage("stop")
+      this.audioContext?.close()
+      this.audioContext = null
     }
   }
 
@@ -82,9 +81,12 @@ const preProcessor = `class LoonyAudioWorkletProcessor extends AudioWorkletProce
     this.bufferSize = 4096
 
     this.port.onmessage = (event) => {
-      console.log(event.data)
-      if (event.data === "start") this.playing = true
-      if (event.data === "pause") this.playing = false
+      if (event.data === "start") {
+        this.playing = true
+      }
+      if (event.data === "pause") {
+        this.playing = false
+      }
       if (event.data === "stop") {
         this.playing = false
         this.buffer = []
@@ -94,8 +96,9 @@ const preProcessor = `class LoonyAudioWorkletProcessor extends AudioWorkletProce
   }
 
   process(inputs) {
-    if (!this.playing) return true
-
+    if (!this.playing) {
+      return true
+    }
     const input = inputs[0]
     if (input.length > 0) {
       this.buffer.push(...input[0])

@@ -1,23 +1,8 @@
-// export default class LoonyAudioWorkletProcessor extends AudioWorkletProcessor {
-//   process(
-//     inputs: Float32Array[][],
-//     outputs: Float32Array[][],
-//     parameters: Record<string, Float32Array>,
-//   ): boolean {
-//     const input = inputs[0]
-//     if (input.length > 0) {
-//       const channelData = input[0]
-//       if (channelData) {
-//         this.port.postMessage(channelData)
-//       }
-//     }
-//     return true
-//   }
-// }
-
-// registerProcessor("LoonyAudioWorkletProcessor", LoonyAudioWorkletProcessor)
-
 class LoonyAudioWorkletProcessor extends AudioWorkletProcessor {
+  playing: boolean
+  buffer: number[]
+  bufferSize: number
+
   constructor() {
     super()
     this.playing = false
@@ -25,19 +10,26 @@ class LoonyAudioWorkletProcessor extends AudioWorkletProcessor {
     this.bufferSize = 4096
 
     this.port.onmessage = (event) => {
-      console.log(event.data)
-      if (event.data === "start") this.playing = true
-      if (event.data === "pause") this.playing = false
+      if (event.data === "start") {
+        this.port.start()
+        this.playing = true
+      }
+      if (event.data === "pause") {
+        this.playing = false
+      }
       if (event.data === "stop") {
         this.playing = false
         this.buffer = []
         this.port.postMessage("stopped")
+        this.port.close()
       }
     }
   }
 
   process(inputs: Float32Array[][]) {
-    if (!this.playing) return true
+    if (!this.playing) {
+      return true
+    }
 
     const input = inputs[0]
     if (input.length > 0) {

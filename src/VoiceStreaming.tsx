@@ -1,5 +1,4 @@
 import { useWebSocket, useMicrophone } from "hooks"
-import { useEffect } from "react"
 import "./assets/css/desktop.css"
 
 export default function VoiceStreaming() {
@@ -8,21 +7,22 @@ export default function VoiceStreaming() {
     () => void,
     () => void,
   ] = useWebSocket()
-  const [isRecording, createMediaRecorder, startRecording, stopRecording] =
-    useMicrophone()
-
-  useEffect(() => {
-    createMediaRecorder()
-  }, [createMediaRecorder])
+  const [isRecording, startRecording, stopRecording] = useMicrophone()
 
   const onClickStartRecording = () => {
     if (socket) {
-      startRecording(socket)
+      socket.send("START_VOICE_RECORDING")
+
+      // We need this timeout to give time to initialize the Speechmatics web socket.
+      setTimeout(() => {
+        startRecording(socket)
+      }, 1000)
     }
   }
 
   const onClickStopRecording = () => {
     if (socket) {
+      socket.send("STOP_VOICE_RECORDING")
       stopRecording(socket)
     }
   }
@@ -92,6 +92,13 @@ export default function VoiceStreaming() {
             <input type="file" onChange={onChangeFile} />
           </div>
         </div>
+      </div>
+
+      <div>
+        Lorem Ipsum is simply dummy text of the printing and typesetting
+        industry. Lorem Ipsum has been the industrys standard dummy text ever
+        since the 1500s, when an unknown printer took a galley of type and
+        scrambled it to make a type specimen book.
       </div>
     </div>
   )
