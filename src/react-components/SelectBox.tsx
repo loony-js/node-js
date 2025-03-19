@@ -18,7 +18,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({ options, onSelect }) => {
   const dropdownRef = useRef<HTMLUListElement>(null)
 
   const filteredOptions = options.filter((option) =>
-    option.value.toLowerCase().includes(searchTerm.toLowerCase()),
+    option.label.toLowerCase().includes(searchTerm.toLowerCase()),
   )
 
   const handleSelect = (option: string) => {
@@ -97,7 +97,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({ options, onSelect }) => {
                 onMouseEnter={() => setHighlightedIndex(index)}
                 onClick={() => handleSelect(option.value)}
               >
-                {option.value}
+                {option.label}
               </li>
             ))
           ) : (
