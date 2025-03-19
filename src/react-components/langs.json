@@ -1,0 +1,1031 @@
+[
+  {
+    "Language code": "af-ZA",
+    "label": "Afrikaans (South Africa)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": "af-ZA-Standard-A",
+    "value": "af-ZA-AdriNeural"
+  },
+  {
+    "Language code": "am-ET",
+    "label": "Amharic (Ethiopia)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": null,
+    "value": "am-ET-AmehaNeural"
+  },
+  {
+    "Language code": "ar-AE",
+    "label": "Arabic (United Arab Emirates)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": null,
+    "value": "ar-AE-FatimaNeural"
+  },
+  {
+    "Language code": "ar-BH",
+    "label": "Arabic (Bahrain)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": null,
+    "value": "ar-BH-AliNeural"
+  },
+  {
+    "Language code": "ar-DZ",
+    "label": "Arabic (Algeria)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": null,
+    "value": "ar-DZ-AminaNeural"
+  },
+  {
+    "Language code": "ar-EG",
+    "label": "Arabic (Egypt)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": null,
+    "value": "ar-EG-SalmaNeural"
+  },
+  {
+    "Language code": "ar-IQ",
+    "label": "Arabic (Iraq)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": null,
+    "value": "ar-IQ-BasselNeural"
+  },
+  {
+    "Language code": "ar-JO",
+    "label": "Arabic (Jordan)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": null,
+    "value": "ar-JO-SanaNeural"
+  },
+  {
+    "Language code": "ar-KW",
+    "label": "Arabic (Kuwait)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": null,
+    "value": "ar-KW-FahedNeural"
+  },
+  {
+    "Language code": "ar-LB",
+    "label": "Arabic (Lebanon)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": null,
+    "value": "ar-LB-LaylaNeural"
+  },
+  {
+    "Language code": "ar-LY",
+    "label": "Arabic (Libya)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": null,
+    "value": "ar-LY-ImanNeural"
+  },
+  {
+    "Language code": "ar-MA",
+    "label": "Arabic (Morocco)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": null,
+    "value": "ar-MA-JamalNeural"
+  },
+  {
+    "Language code": "ar-OM",
+    "label": "Arabic (Oman)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": null,
+    "value": "ar-OM-AbdullahNeural"
+  },
+  {
+    "Language code": "ar-QA",
+    "label": "Arabic (Qatar)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": null,
+    "value": "ar-QA-AmalNeural"
+  },
+  {
+    "Language code": "ar-SA",
+    "label": "Arabic (Saudi Arabia)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": null,
+    "value": "ar-SA-HamedNeural"
+  },
+  {
+    "Language code": "ar-SY",
+    "label": "Arabic (Syria)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": null,
+    "value": "ar-SY-AmanyNeural"
+  },
+  {
+    "Language code": "ar-TN",
+    "label": "Arabic (Tunisia)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": null,
+    "value": "ar-TN-HediNeural"
+  },
+  {
+    "Language code": "ar-YE",
+    "label": "Arabic (Yemen)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": null,
+    "value": "ar-YE-MaryamNeural"
+  },
+  {
+    "Language code": "az-AZ",
+    "label": "Azerbaijani (Latin, Azerbaijan)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": null,
+    "value": "az-AZ-BabekNeural"
+  },
+  {
+    "Language code": "bg-BG",
+    "label": "Bulgarian (Bulgaria)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": "bg-BG-Standard-A",
+    "value": "bg-BG-BorislavNeural"
+  },
+  {
+    "Language code": "bn-BD",
+    "label": "Bangla (Bangladesh)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": null,
+    "value": "bn-BD-NabanitaNeural"
+  },
+  {
+    "Language code": "bn-IN",
+    "label": "Bengali (India)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": "bn-IN-Standard-A",
+    "value": "bn-IN-BashkarNeural"
+  },
+  {
+    "Language code": "bs-BA",
+    "label": "Bosnian (Bosnia and Herzegovina)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": null,
+    "value": "bs-BA-GoranNeural"
+  },
+  {
+    "Language code": "ca-ES",
+    "label": "Catalan (Spain)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": "ca-ES-Standard-A",
+    "value": "ca-ES-AlbaNeural"
+  },
+  {
+    "Language code": "cs-CZ",
+    "label": "Czech (Czechia)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": "cs-CZ-Standard-A",
+    "value": "cs-CZ-AntoninNeural"
+  },
+  {
+    "Language code": "cy-GB",
+    "label": "Welsh (United Kingdom)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": null,
+    "value": "cy-GB-AledNeural"
+  },
+  {
+    "Language code": "da-DK",
+    "label": "Danish (Denmark)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": "da-DK-Standard-A",
+    "value": "da-DK-ChristelNeural"
+  },
+  {
+    "Language code": "de-AT",
+    "label": "German (Austria)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": null,
+    "value": "de-AT-IngridNeural"
+  },
+  {
+    "Language code": "de-CH",
+    "label": "German (Switzerland)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": null,
+    "value": "de-CH-JanNeural"
+  },
+  {
+    "Language code": "de-DE",
+    "label": "German (Germany)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": "de-DE-Neural2-B",
+    "value": "de-DE-AmalaNeural"
+  },
+  {
+    "Language code": "el-GR",
+    "label": "Greek (Greece)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": "el-GR-Standard-A",
+    "value": "el-GR-AthinaNeural"
+  },
+  {
+    "Language code": "en-AU",
+    "label": "English (Australia)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": "en-AU-Neural2-A",
+    "value": "en-AU-AnnetteNeural"
+  },
+  {
+    "Language code": "en-CA",
+    "label": "English (Canada)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": null,
+    "value": "en-CA-ClaraNeural"
+  },
+  {
+    "Language code": "en-GB",
+    "label": "English (United Kingdom)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": "en-GB-Neural2-A",
+    "value": "en-GB-AbbiNeural"
+  },
+  {
+    "Language code": "en-HK",
+    "label": "English (Hong Kong SAR)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": null,
+    "value": "en-HK-SamNeural"
+  },
+  {
+    "Language code": "en-IE",
+    "label": "English (Ireland)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": null,
+    "value": "en-IE-ConnorNeural"
+  },
+  {
+    "Language code": "en-IN",
+    "label": "English (India)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": null,
+    "value": "en-IN-NeerjaNeural"
+  },
+  {
+    "Language code": "en-KE",
+    "label": "English (Kenya)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": null,
+    "value": "en-KE-AsiliaNeural"
+  },
+  {
+    "Language code": "en-NG",
+    "label": "English (Nigeria)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": null,
+    "value": "en-NG-AbeoNeural"
+  },
+  {
+    "Language code": "en-NZ",
+    "label": "English (New Zealand)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": null,
+    "value": "en-NZ-MitchellNeural"
+  },
+  {
+    "Language code": "en-PH",
+    "label": "English (Philippines)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": null,
+    "value": "en-PH-JamesNeural"
+  },
+  {
+    "Language code": "en-SG",
+    "label": "English (Singapore)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": null,
+    "value": "en-SG-LunaNeural"
+  },
+  {
+    "Language code": "en-TZ",
+    "label": "English (Tanzania)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": null,
+    "value": "en-TZ-ElimuNeural"
+  },
+  {
+    "Language code": "en-US",
+    "label": "English (United States)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": "en-US-Neural2-A",
+    "value": "en-US-AIGenerate1Neural"
+  },
+  {
+    "Language code": "en-ZA",
+    "label": "English (South Africa)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": null,
+    "value": "en-ZA-LeahNeural"
+  },
+  {
+    "Language code": "es-AR",
+    "label": "Spanish (Argentina)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": null,
+    "value": "es-AR-ElenaNeural"
+  },
+  {
+    "Language code": "es-BO",
+    "label": "Spanish (Bolivia)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": null,
+    "value": "es-BO-MarceloNeural"
+  },
+  {
+    "Language code": "es-CL",
+    "label": "Spanish (Chile)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": null,
+    "value": "es-CL-CatalinaNeural"
+  },
+  {
+    "Language code": "es-CO",
+    "label": "Spanish (Colombia)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": null,
+    "value": "es-CO-GonzaloNeural"
+  },
+  {
+    "Language code": "es-CR",
+    "label": "Spanish (Costa Rica)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": null,
+    "value": "es-CR-JuanNeural"
+  },
+  {
+    "Language code": "es-CU",
+    "label": "Spanish (Cuba)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": null,
+    "value": "es-CU-BelkysNeural"
+  },
+  {
+    "Language code": "es-DO",
+    "label": "Spanish (Dominican Republic)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": null,
+    "value": "es-DO-EmilioNeural"
+  },
+  {
+    "Language code": "es-EC",
+    "label": "Spanish (Ecuador)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": null,
+    "value": "es-EC-AndreaNeural"
+  },
+  {
+    "Language code": "es-ES",
+    "label": "Spanish (Spain)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": "es-ES-Neural2-A",
+    "value": "es-ES-AbrilNeural"
+  },
+  {
+    "Language code": "es-GQ",
+    "label": "Spanish (Equatorial Guinea)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": null,
+    "value": "es-GQ-JavierNeural"
+  },
+  {
+    "Language code": "es-GT",
+    "label": "Spanish (Guatemala)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": null,
+    "value": "es-GT-AndresNeural"
+  },
+  {
+    "Language code": "es-HN",
+    "label": "Spanish (Honduras)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": null,
+    "value": "es-HN-CarlosNeural"
+  },
+  {
+    "Language code": "es-MX",
+    "label": "Spanish (Mexico)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": null,
+    "value": "es-MX-BeatrizNeural"
+  },
+  {
+    "Language code": "es-NI",
+    "label": "Spanish (Nicaragua)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": null,
+    "value": "es-NI-FedericoNeural"
+  },
+  {
+    "Language code": "es-PA",
+    "label": "Spanish (Panama)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": null,
+    "value": "es-PA-MargaritaNeural"
+  },
+  {
+    "Language code": "es-PE",
+    "label": "Spanish (Peru)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": null,
+    "value": "es-PE-AlexNeural"
+  },
+  {
+    "Language code": "es-PR",
+    "label": "Spanish (Puerto Rico)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": null,
+    "value": "es-PR-KarinaNeural"
+  },
+  {
+    "Language code": "es-PY",
+    "label": "Spanish (Paraguay)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": null,
+    "value": "es-PY-MarioNeural"
+  },
+  {
+    "Language code": "es-SV",
+    "label": "Spanish (El Salvador)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": null,
+    "value": "es-SV-LorenaNeural"
+  },
+  {
+    "Language code": "es-US",
+    "label": "Spanish (United States)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": "es-US-Neural2-A",
+    "value": "es-US-AlonsoNeural"
+  },
+  {
+    "Language code": "es-UY",
+    "label": "Spanish (Uruguay)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": null,
+    "value": "es-UY-MateoNeural"
+  },
+  {
+    "Language code": "es-VE",
+    "label": "Spanish (Venezuela)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": null,
+    "value": "es-VE-PaolaNeural"
+  },
+  {
+    "Language code": "et-EE",
+    "label": "Estonian (Estonia)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": null,
+    "value": "et-EE-AnuNeural"
+  },
+  {
+    "Language code": "eu-ES",
+    "label": "Basque",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": "eu-ES-Standard-A",
+    "value": "eu-ES-AinhoaNeural"
+  },
+  {
+    "Language code": "fa-IR",
+    "label": "Persian (Iran)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": null,
+    "value": "fa-IR-DilaraNeural"
+  },
+  {
+    "Language code": "fi-FI",
+    "label": "Finnish (Finland)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": "fi-FI-Standard-A",
+    "value": "fi-FI-HarriNeural"
+  },
+  {
+    "Language code": "fil-PH",
+    "label": "Filipino (Philippines)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": "fil-PH-Standard-A",
+    "value": "fil-PH-AngeloNeural"
+  },
+  {
+    "Language code": "fr-BE",
+    "label": "French (Belgium)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": null,
+    "value": "fr-BE-CharlineNeural"
+  },
+  {
+    "Language code": "fr-CA",
+    "label": "French (Canada)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": "fr-CA-Neural2-A",
+    "value": "fr-CA-AntoineNeural"
+  },
+  {
+    "Language code": "fr-CH",
+    "label": "French (Switzerland)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": null,
+    "value": "fr-CH-ArianeNeural"
+  },
+  {
+    "Language code": "fr-FR",
+    "label": "French (France)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": "fr-FR-Neural2-A",
+    "value": "fr-FR-AlainNeural"
+  },
+  {
+    "Language code": "ga-IE",
+    "label": "Irish (Ireland)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": null,
+    "value": "ga-IE-ColmNeural"
+  },
+  {
+    "Language code": "gl-ES",
+    "label": "Galician",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": "gl-ES-Standard-A",
+    "value": "gl-ES-RoiNeural"
+  },
+  {
+    "Language code": "gu-IN",
+    "label": "Gujarati (India)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": "gu-IN-Standard-A",
+    "value": "gu-IN-DhwaniNeural"
+  },
+  {
+    "Language code": "he-IL",
+    "label": "Hebrew (Israel)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": "he-IL-Standard-A",
+    "value": "he-IL-AvriNeural"
+  },
+  {
+    "Language code": "hi-IN",
+    "label": "Hindi (India)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": "hi-IN-Neural2-A",
+    "value": "hi-IN-MadhurNeural"
+  },
+  {
+    "Language code": "hr-HR",
+    "label": "Croatian (Croatia)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": null,
+    "value": "hr-HR-GabrijelaNeural"
+  },
+  {
+    "Language code": "hu-HU",
+    "label": "Hungarian (Hungary)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": "hu-HU-Standard-A",
+    "value": "hu-HU-NoemiNeural"
+  },
+  {
+    "Language code": "hy-AM",
+    "label": "Armenian (Armenia)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": null,
+    "value": "hy-AM-AnahitNeural"
+  },
+  {
+    "Language code": "id-ID",
+    "label": "Indonesian (Indonesia)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": "id-ID-Standard-A",
+    "value": "id-ID-ArdiNeural"
+  },
+  {
+    "Language code": "is-IS",
+    "label": "Icelandic (Iceland)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": "is-IS-Standard-A",
+    "value": "is-IS-GudrunNeural"
+  },
+  {
+    "Language code": "it-IT",
+    "label": "Italian (Italy)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": "it-IT-Neural2-A",
+    "value": "it-IT-BenignoNeural"
+  },
+  {
+    "Language code": "ja-JP",
+    "label": "Japanese (Japan)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": "ja-JP-Neural2-B",
+    "value": "ja-JP-AoiNeural"
+  },
+  {
+    "Language code": "jv-ID",
+    "label": "Javanese (Latin, Indonesia)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": null,
+    "value": "jv-ID-DimasNeural"
+  },
+  {
+    "Language code": "ka-GE",
+    "label": "Georgian (Georgia)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": null,
+    "value": "ka-GE-EkaNeural"
+  },
+  {
+    "Language code": "kk-KZ",
+    "label": "Kazakh (Kazakhstan)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": null,
+    "value": "kk-KZ-AigulNeural"
+  },
+  {
+    "Language code": "km-KH",
+    "label": "Khmer (Cambodia)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": null,
+    "value": "km-KH-PisethNeural"
+  },
+  {
+    "Language code": "kn-IN",
+    "label": "Kannada (India)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": "kn-IN-Standard-A",
+    "value": "kn-IN-GaganNeural"
+  },
+  {
+    "Language code": "ko-KR",
+    "label": "Korean (Korea)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": "ko-KR-Neural2-A",
+    "value": "ko-KR-BongJinNeural"
+  },
+  {
+    "Language code": "lo-LA",
+    "label": "Lao (Laos)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": null,
+    "value": "lo-LA-ChanthavongNeural"
+  },
+  {
+    "Language code": "lt-LT",
+    "label": "Lithuanian (Lithuania)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": "lt-LT-Standard-A",
+    "value": "lt-LT-LeonasNeural"
+  },
+  {
+    "Language code": "lv-LV",
+    "label": "Latvian (Latvia)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": "lv-LV-Standard-A",
+    "value": "lv-LV-EveritaNeural"
+  },
+  {
+    "Language code": "mk-MK",
+    "label": "Macedonian (North Macedonia)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": null,
+    "value": "mk-MK-AleksandarNeural"
+  },
+  {
+    "Language code": "ml-IN",
+    "label": "Malayalam (India)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": "ml-IN-Standard-A",
+    "value": "ml-IN-MidhunNeural"
+  },
+  {
+    "Language code": "mn-MN",
+    "label": "Mongolian (Mongolia)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": null,
+    "value": "mn-MN-BataaNeural"
+  },
+  {
+    "Language code": "mr-IN",
+    "label": "Marathi (India)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": "mr-IN-Standard-A",
+    "value": "mr-IN-AarohiNeural"
+  },
+  {
+    "Language code": "ms-MY",
+    "label": "Malay (Malaysia)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": "ms-MY-Standard-A",
+    "value": "ms-MY-OsmanNeural"
+  },
+  {
+    "Language code": "mt-MT",
+    "label": "Maltese (Malta)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": null,
+    "value": "mt-MT-GraceNeural"
+  },
+  {
+    "Language code": "my-MM",
+    "label": "Burmese (Myanmar)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": null,
+    "value": "my-MM-NilarNeural"
+  },
+  {
+    "Language code": "nb-NO",
+    "label": "Norwegian Bokmål (Norway)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": "nb-NO-Standard-A",
+    "value": "nb-NO-FinnNeural"
+  },
+  {
+    "Language code": "ne-NP",
+    "label": "Nepali (Nepal)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": null,
+    "value": "ne-NP-HemkalaNeural"
+  },
+  {
+    "Language code": "nl-BE",
+    "label": "Dutch (Belgium)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": "nl-BE-Standard-A",
+    "value": "nl-BE-ArnaudNeural"
+  },
+  {
+    "Language code": "nl-NL",
+    "label": "Dutch (Netherlands)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": "nl-NL-Standard-A",
+    "value": "nl-NL-ColetteNeural"
+  },
+  {
+    "Language code": "pl-PL",
+    "label": "Polish (Poland)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": "pl-PL-Standard-A",
+    "value": "pl-PL-AgnieszkaNeural"
+  },
+  {
+    "Language code": "ps-AF",
+    "label": "Pashto (Afghanistan)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": null,
+    "value": "ps-AF-GulNawazNeural"
+  },
+  {
+    "Language code": "pt-BR",
+    "label": "Portuguese (Brazil)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": "pt-BR-Neural2-A",
+    "value": "pt-BR-AntonioNeural"
+  },
+  {
+    "Language code": "pt-PT",
+    "label": "Portuguese (Portugal)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": "pt-PT-Standard-A",
+    "value": "pt-PT-DuarteNeural"
+  },
+  {
+    "Language code": "ro-RO",
+    "label": "Romanian (Romania)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": "ro-RO-Standard-A",
+    "value": "ro-RO-AlinaNeural"
+  },
+  {
+    "Language code": "ru-RU",
+    "label": "Russian (Russia)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": "ru-RU-Standard-A",
+    "value": "ru-RU-DariyaNeural"
+  },
+  {
+    "Language code": "si-LK",
+    "label": "Sinhala (Sri Lanka)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": null,
+    "value": "si-LK-SameeraNeural"
+  },
+  {
+    "Language code": "sk-SK",
+    "label": "Slovak (Slovakia)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": "sk-SK-Standard-A",
+    "value": "sk-SK-LukasNeural"
+  },
+  {
+    "Language code": "sl-SI",
+    "label": "Slovenian (Slovenia)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": null,
+    "value": "sl-SI-PetraNeural"
+  },
+  {
+    "Language code": "so-SO",
+    "label": "Somali (Somalia)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": null,
+    "value": "so-SO-MuuseNeural"
+  },
+  {
+    "Language code": "sq-AL",
+    "label": "Albanian (Albania)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": null,
+    "value": "sq-AL-AnilaNeural"
+  },
+  {
+    "Language code": "sr-RS",
+    "label": "Serbian (Cyrillic, Serbia)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": "sr-RS-Standard-A",
+    "value": "sr-RS-NicholasNeural"
+  },
+  {
+    "Language code": "su-ID",
+    "label": "Sundanese (Indonesia)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": null,
+    "value": "su-ID-JajangNeural"
+  },
+  {
+    "Language code": "sv-SE",
+    "label": "Swedish (Sweden)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": "sv-SE-Standard-A",
+    "value": "sv-SE-HilleviNeural"
+  },
+  {
+    "Language code": "sw-KE",
+    "label": "Swahili (Kenya)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": null,
+    "value": "sw-KE-RafikiNeural"
+  },
+  {
+    "Language code": "sw-TZ",
+    "label": "Swahili (Tanzania)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": null,
+    "value": "sw-TZ-DaudiNeural"
+  },
+  {
+    "Language code": "ta-IN",
+    "label": "Tamil (India)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": "ta-IN-Standard-A",
+    "value": "ta-IN-PallaviNeural"
+  },
+  {
+    "Language code": "ta-LK",
+    "label": "Tamil (Sri Lanka)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": null,
+    "value": "ta-LK-KumarNeural"
+  },
+  {
+    "Language code": "ta-MY",
+    "label": "Tamil (Malaysia)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": null,
+    "value": "ta-MY-KaniNeural"
+  },
+  {
+    "Language code": "ta-SG",
+    "label": "Tamil (Singapore)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": null,
+    "value": "ta-SG-AnbuNeural"
+  },
+  {
+    "Language code": "te-IN",
+    "label": "Telugu (India)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": "te-IN-Standard-A",
+    "value": "te-IN-MohanNeural"
+  },
+  {
+    "Language code": "th-TH",
+    "label": "Thai (Thailand)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": "th-TH-Standard-A",
+    "value": "th-TH-AcharaNeural"
+  },
+  {
+    "Language code": "tr-TR",
+    "label": "Turkish (Turkey)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": "tr-TR-Standard-A",
+    "value": "tr-TR-AhmetNeural"
+  },
+  {
+    "Language code": "uk-UA",
+    "label": "Ukrainian (Ukraine)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": "uk-UA-Standard-A",
+    "value": "uk-UA-OstapNeural"
+  },
+  {
+    "Language code": "ur-IN",
+    "label": "Urdu (India)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": null,
+    "value": "ur-IN-GulNeural"
+  },
+  {
+    "Language code": "ur-PK",
+    "label": "Urdu (Pakistan)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": null,
+    "value": "ur-PK-AsadNeural"
+  },
+  {
+    "Language code": "uz-UZ",
+    "label": "Uzbek (Latin, Uzbekistan)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": null,
+    "value": "uz-UZ-MadinaNeural"
+  },
+  {
+    "Language code": "vi-VN",
+    "label": "Vietnamese (Vietnam)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": "vi-VN-Standard-A",
+    "value": "vi-VN-HoaiMyNeural"
+  },
+  {
+    "Language code": "wuu-CN",
+    "label": "Chinese (Wu, Simplified)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": null,
+    "value": "wuu-CN-XiaotongNeural"
+  },
+  {
+    "Language code": "yue-CN",
+    "label": "Chinese (Cantonese, Simplified)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": null,
+    "value": "yue-CN-XiaoMinNeural"
+  },
+  {
+    "Language code": "zh-CN",
+    "label": "Chinese (Mandarin, Simplified)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": null,
+    "value": "zh-CN-XiaochenNeural"
+  },
+  {
+    "Language code": "zh-CN-henan",
+    "label": "Chinese (Zhongyuan Mandarin Henan, Simplified)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": null,
+    "value": "zh-CN-henan-YundengNeural"
+  },
+  {
+    "Language code": "zh-CN-liaoning",
+    "label": "Chinese (Northeastern Mandarin, Simplified)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": null,
+    "value": "zh-CN-liaoning-XiaobeiNeural"
+  },
+  {
+    "Language code": "zh-CN-shaanxi",
+    "label": "Chinese (Zhongyuan Mandarin Shaanxi, Simplified)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": null,
+    "value": "zh-CN-shaanxi-XiaoniNeural"
+  },
+  {
+    "Language code": "zh-CN-shandong",
+    "label": "Chinese (Jilu Mandarin, Simplified)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": null,
+    "value": "zh-CN-shandong-YunxiangNeural"
+  },
+  {
+    "Language code": "zh-CN-sichuan",
+    "label": "Chinese (Southwestern Mandarin, Simplified)",
+    "SSML Gender": "MALE",
+    "voiceNameGoogle": null,
+    "value": "zh-CN-sichuan-YunxiNeural"
+  },
+  {
+    "Language code": "zh-HK",
+    "label": "Chinese (Cantonese, Traditional)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": null,
+    "value": "zh-HK-HiuGaaiNeural"
+  },
+  {
+    "Language code": "zh-TW",
+    "label": "Chinese (Taiwanese Mandarin, Traditional)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": null,
+    "value": "zh-TW-HsiaoChenNeural"
+  },
+  {
+    "Language code": "zu-ZA",
+    "label": "Zulu (South Africa)",
+    "SSML Gender": "FEMALE",
+    "voiceNameGoogle": null,
+    "value": "zu-ZA-ThandoNeural"
+  }
+]

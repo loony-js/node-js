@@ -4,7 +4,6 @@ import crypto from "crypto"
 
 const createConnection = (): Promise<WebSocket> => {
   return new Promise((resolve, reject) => {
-    console.log("Init Speechmatics Web Socket Connection..")
     const apiKey = "evK20Lpk7TTRtpNAv0Cbh4pCBzvr32Y6"
     if (!apiKey) {
       throw new Error("Please set the API_KEY environment variable")
