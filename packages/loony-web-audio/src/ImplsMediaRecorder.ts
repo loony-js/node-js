@@ -1,6 +1,4 @@
-import { LoonyWebAudioApi } from "./types"
-
-export class ImplsMediaRecorder implements LoonyWebAudioApi {
+export class ImplsMediaRecorder {
   private mediaStream: MediaStream
   private mediaRecorder: MediaRecorder
   private audioContext: AudioContext

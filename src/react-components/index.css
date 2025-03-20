@@ -1,10 +1,13 @@
-.custom-select {
+html {
+  font-family: Arial, Helvetica, sans-serif;
+}
+.select-select {
   position: relative;
   width: 250px;
   font-family: Arial, sans-serif;
 }
 
-.custom-input {
+.select-input {
   width: 100%;
   padding: 8px;
   border: 1px solid #ccc;
@@ -12,7 +15,7 @@
   outline: none;
 }
 
-.custom-dropdown {
+.select-dropdown {
   position: absolute;
   width: 100%;
   background: white;
@@ -25,19 +28,25 @@
   z-index: 1000;
 }
 
-.custom-option {
+.select-option {
   padding: 8px;
   cursor: pointer;
 }
 
-.custom-option:hover,
-.custom-option.highlighted {
+.select-option:hover,
+.select-option.highlighted {
   background-color: #007bff;
   color: white;
 }
 
-.custom-no-results {
+.select-no-results {
   padding: 8px;
   color: #999;
   text-align: center;
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }

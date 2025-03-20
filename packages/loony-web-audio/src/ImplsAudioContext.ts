@@ -1,7 +1,12 @@
-import { LoonyWebAudioApi } from "./types"
 import { encodeWAV, convertFloat32ToInt16 } from "./encoder"
 
-export class ImplsAudioContext implements LoonyWebAudioApi {
+export const getVoiceRecorder = async (
+  mediaStreamConstraints: MediaStreamConstraints | undefined,
+) => {
+  return VoiceRecorder.create(mediaStreamConstraints)
+}
+
+class VoiceRecorder {
   private micStream: MediaStream
   private audioContext: AudioContext | null
   private mediaStreamAudioSourceNode: undefined | MediaStreamAudioSourceNode
@@ -25,22 +30,24 @@ export class ImplsAudioContext implements LoonyWebAudioApi {
       .connect(this.audioContext.destination)
   }
 
-  static async create() {
-    const micStream = await navigator.mediaDevices.getUserMedia({
+  static async create(
+    mediaStreamConstraints: MediaStreamConstraints | undefined,
+  ) {
+    const constraints = mediaStreamConstraints || {
       audio: { sampleRate: 16000, channelCount: 2 },
       video: false,
-    })
+    }
+    const micStream = await navigator.mediaDevices.getUserMedia(constraints)
 
     const audioContext = new AudioContext()
     const blob = new Blob([preProcessor], { type: "application/javascript" })
     const moduleURL = URL.createObjectURL(blob)
     await audioContext.audioWorklet.addModule(moduleURL)
 
-    return new ImplsAudioContext(micStream, audioContext)
+    return new VoiceRecorder(micStream, audioContext)
   }
 
   destroy() {
-    this.mediaStreamAudioSourceNode?.disconnect()
     this.audioContext?.close()
   }
 
@@ -58,9 +65,7 @@ export class ImplsAudioContext implements LoonyWebAudioApi {
 
   stopRecording() {
     if (this.audioWorkletNode) {
-      this.audioWorkletNode.port.postMessage("stop")
-      this.audioContext?.close()
-      this.audioContext = null
+      this.audioContext?.suspend()
     }
   }
 

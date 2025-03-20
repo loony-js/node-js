@@ -1,3 +1,3 @@
 export * from "./types"
-export { ImplsAudioContext } from "./ImplsAudioContext"
+export { getVoiceRecorder } from "./ImplsAudioContext"
 export { ImplsMediaRecorder } from "./ImplsMediaRecorder"

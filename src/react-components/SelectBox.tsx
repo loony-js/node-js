@@ -1,16 +1,21 @@
 import React, { useState, useRef, useEffect } from "react"
 import "./index.css"
 
-type Language = {
+type Option = {
   label: string
   value: string
 }
 type CustomSelectProps = {
-  options: Language[]
-  onSelect: (option: string) => void
+  options: Option[]
+  onSelect: (option: Option | null) => void
+  selectedOption: Option | null
 }
 
-const CustomSelect: React.FC<CustomSelectProps> = ({ options, onSelect }) => {
+const CustomSelect: React.FC<CustomSelectProps> = ({
+  options,
+  onSelect,
+  selectedOption,
+}) => {
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const [searchTerm, setSearchTerm] = useState<string>("")
   const [highlightedIndex, setHighlightedIndex] = useState<number>(0)
@@ -21,9 +26,9 @@ const CustomSelect: React.FC<CustomSelectProps> = ({ options, onSelect }) => {
     option.label.toLowerCase().includes(searchTerm.toLowerCase()),
   )
 
-  const handleSelect = (option: string) => {
+  const handleSelect = (option: Option) => {
     onSelect(option)
-    setSearchTerm(option)
+    setSearchTerm(option.label)
     setIsOpen(false)
   }
 
@@ -42,7 +47,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({ options, onSelect }) => {
         return newIndex
       })
     } else if (e.key === "Enter" && filteredOptions[highlightedIndex]) {
-      handleSelect(filteredOptions[highlightedIndex].value)
+      handleSelect(filteredOptions[highlightedIndex])
     } else if (e.key === "Escape") {
       setIsOpen(false)
     }
@@ -58,6 +63,9 @@ const CustomSelect: React.FC<CustomSelectProps> = ({ options, onSelect }) => {
   }
 
   useEffect(() => {
+    if (selectedOption) {
+      setSearchTerm(selectedOption.label)
+    }
     const handleClickOutside = (event: MouseEvent) => {
       if (
         selectRef.current &&
@@ -68,40 +76,44 @@ const CustomSelect: React.FC<CustomSelectProps> = ({ options, onSelect }) => {
     }
     document.addEventListener("mousedown", handleClickOutside)
     return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [])
+  }, [selectedOption])
 
   return (
-    <div className="custom-select" ref={selectRef}>
-      <input
-        type="text"
-        value={searchTerm}
-        onChange={(e) => {
-          setSearchTerm(e.target.value)
-          setIsOpen(true)
-          setHighlightedIndex(0)
-        }}
-        onClick={() => {
-          setIsOpen(true)
-        }}
-        onKeyDown={handleKeyDown}
-        placeholder="Search..."
-        className="custom-input"
-      />
+    <div className="select-container" ref={selectRef}>
+      <div className="select-box-form-control">
+        <input
+          type="text"
+          value={searchTerm}
+          onChange={(e) => {
+            setSearchTerm(e.target.value)
+            setIsOpen(true)
+            setHighlightedIndex(0)
+          }}
+          onClick={() => {
+            setIsOpen(true)
+          }}
+          onKeyDown={handleKeyDown}
+          placeholder="Search..."
+          className="select-input"
+        />
+      </div>
       {isOpen && (
-        <ul className="custom-dropdown" ref={dropdownRef}>
+        <ul className="select-dropdown" ref={dropdownRef}>
           {filteredOptions.length > 0 ? (
             filteredOptions.map((option, index) => (
               <li
                 key={option.value}
-                className={`custom-option ${highlightedIndex === index ? "highlighted" : ""}`}
+                className={`select-option ${
+                  highlightedIndex === index ? "highlighted" : ""
+                }`}
                 onMouseEnter={() => setHighlightedIndex(index)}
-                onClick={() => handleSelect(option.value)}
+                onClick={() => handleSelect(option)}
               >
                 {option.label}
               </li>
             ))
           ) : (
-            <li className="custom-no-results">No results found</li>
+            <li className="select-no-results">No results found</li>
           )}
         </ul>
       )}

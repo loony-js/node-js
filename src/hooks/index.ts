@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState, useRef } from "react"
-import { ImplsAudioContext } from "loony-web-audio"
+import { getVoiceRecorder, VoiceRecorder } from "loony-web-audio"
 
 export const useWebSocket = (): [
   WebSocket | undefined,
@@ -60,11 +60,11 @@ export const useMicrophone = (): [
   () => string | undefined,
 ] => {
   const [isRecording, setRecording] = useState(false)
-  const recorder = useRef<ImplsAudioContext | null>(null)
+  const recorder = useRef<VoiceRecorder | null>(null)
 
   const startRecording = (socket: WebSocket) => {
     if (!recorder.current && socket) {
-      ImplsAudioContext.create().then((res) => {
+      getVoiceRecorder(undefined).then((res) => {
         recorder.current = res
         recorder.current?.startRecording(socket as WebSocket)
         setRecording(true)

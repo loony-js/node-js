@@ -1,8 +1,7 @@
-import SelectBox from "./react-components/SelectBox"
-import data from "./react-components/langs.json"
+import VoiceStreaming from "VoiceStreaming"
 
 function App() {
-  return <SelectBox options={data} onSelect={() => {}} />
+  return <VoiceStreaming />
 }
 
 export default App
