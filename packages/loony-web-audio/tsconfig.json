@@ -2,16 +2,18 @@
   "compilerOptions": {
     "lib": ["DOM", "ESNext"],
     "typeRoots": ["../../node_modules/@types"],
-    "target": "ESNext",
     "module": "ESNext",
-    "moduleResolution": "node",
+    "target": "ES6",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "baseUrl": ".",
-    "outDir": "./dist",
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "outDir": "lib",
+    "declaration": true,
+    "moduleResolution": "Node",
+    "declarationDir": "./types"
   }
 }

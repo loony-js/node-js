@@ -45,6 +45,7 @@ config/
 
 # Rust
 target/
+tests/
 
 # Python
 __pycache__/

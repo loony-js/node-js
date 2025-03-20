@@ -26,7 +26,6 @@ export default [
     rules: {
       ...reactHooks.configs.recommended.rules,
       "react/prop-types": "off",
-      semi: ["error", "never"],
     },
   },
   { ignores: ["dist/"] },
