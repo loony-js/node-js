@@ -36,7 +36,7 @@ module.exports = function (buffer: Buffer) {
     readUInt32(buffer, startingOffset + 4, bigEndian) + startingOffset
   if (ifdOffset < 8) throw new Error("Invalid EXIF data: ifdOffset < 8")
 
-  let result = { bigEndian }
+  const result = { bigEndian }
   result.Image = readTags(
     buffer,
     ifdOffset,
