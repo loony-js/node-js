@@ -1,10 +1,13 @@
 import crypto from "crypto"
 import http from "http"
 import internal from "stream"
+import { RaftNode } from "./node"
+import { Log } from "./logs"
 
 export const handleWebSocket = (
   server: http.Server<typeof http.IncomingMessage, typeof http.ServerResponse>,
   clients: Set<internal.Duplex>,
+  raftNode: RaftNode,
 ) => {
   // Handling WebSocket connections
   server.on("upgrade", (request, socket) => {
@@ -48,13 +51,13 @@ export const handleWebSocket = (
       console.error("Socket error:", err)
     })
 
-    handleMessage(socket)
+    handleMessage(socket, raftNode)
 
     clients.add(socket)
   })
 }
 
-export function handleMessage(socket: internal.Duplex) {
+export function handleMessage(socket: internal.Duplex, raftNode: RaftNode) {
   socket.on("data", async (data) => {
     if (data.length < 2) return // Ignore invalid frames
 
@@ -85,7 +88,7 @@ export function handleMessage(socket: internal.Duplex) {
     }
     switch (opcode) {
       case 0x1: // Text Frame
-        console.log(payload.toString())
+        handleTextMessage(payload, raftNode)
         break
 
       case 0x2: // Binary Frame
@@ -114,4 +117,16 @@ function generateWebSocketAcceptKey(key: string) {
     .createHash("sha1")
     .update(key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11")
     .digest("base64")
+}
+
+function handleTextMessage(payload: Buffer<ArrayBuffer>, raftNode: RaftNode) {
+  console.log(payload.toString(), "========")
+  const data: { event: string; data: Log } = JSON.parse(payload.toString())
+  if (data.event === "INSERT") {
+    raftNode.insert(data.data)
+  }
+
+  if (data.event === "PING") {
+    console.log(data.data)
+  }
 }

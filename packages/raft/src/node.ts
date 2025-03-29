@@ -1,4 +1,4 @@
-import { NodeLogs } from "./logs"
+import { Log, NodeLogs } from "./logs"
 import WebSocket from "ws"
 
 type Follower = 1
@@ -36,7 +36,31 @@ export class RaftNode {
 
   pingPeers() {
     this.peers.forEach((peer) => {
-      peer.send("Hello")
+      peer.send(
+        JSON.stringify({
+          event: "PING",
+          data: "Hello",
+        }),
+      )
     })
+  }
+
+  get() {}
+
+  set(data: Log) {
+    this.logs.push(data)
+    this.peers.forEach((peer) => {
+      peer.send(
+        JSON.stringify({
+          event: "INSERT",
+          data,
+        }),
+      )
+    })
+  }
+
+  insert(data: Log) {
+    this.logs.push(data)
+    console.log(this.logs, "INSERT")
   }
 }

@@ -6,9 +6,10 @@ import { app, server } from "./app"
 import { RaftNode } from "./node"
 
 const CONNECTED_PEERS: WebSocket[] = []
+const raftNode = new RaftNode(parseInt(PORT), CONNECTED_PEERS)
 // Middleware
 app.use(express.json())
-app.locals.RaftNode = new RaftNode(parseInt(PORT), CONNECTED_PEERS)
+app.locals.RaftNode = raftNode
 // Simple Route
 app.get("/", (req, res) => {
   res.send("Hello, Express!")
@@ -25,7 +26,19 @@ app.get("/pingPeers", (req, res) => {
   res.send("Ok")
 })
 
-handleWebSocket(server, WS_CLIENTS)
+app.get("/get", (req, res) => {
+  const raftNode: RaftNode = req.app.locals.RaftNode
+  raftNode.get()
+  res.send("Ok")
+})
+
+app.post("/set", (req, res) => {
+  const raftNode: RaftNode = req.app.locals.RaftNode
+  raftNode.set(req.body)
+  res.send("Ok")
+})
+
+handleWebSocket(server, WS_CLIENTS, raftNode)
 
 function connectPeers() {
   PEERS.forEach((peer) => {
