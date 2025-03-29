@@ -4,7 +4,7 @@ import fs from "fs"
 import internal from "stream"
 
 dotenv.config()
-const PORT = process.env.PORT
+const PORT = process.env.PORT || "2000"
 const WS_CLIENTS: Set<internal.Duplex> = new Set()
 const PEERS_FILE_PATH = process.env.PEERS_FILE_PATH
 let PEERS: number[] = []

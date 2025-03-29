@@ -30,13 +30,11 @@ export const handleWebSocket = (
     )
 
     socket.on("close", () => {
-      console.log("on.close")
       socket.destroy()
       clients.delete(socket)
       console.log(clients.size)
     })
     socket.on("end", () => {
-      console.log("on.end")
       socket.write(
         "HTTP/1.1 200 Success\r\n" +
           "Connection: close\r\n" +
@@ -47,7 +45,6 @@ export const handleWebSocket = (
     })
 
     socket.on("error", (err) => {
-      console.log("on.error")
       console.error("Socket error:", err)
     })
 

@@ -3,11 +3,12 @@ import { handleWebSocket } from "./socket"
 import WebSocket from "ws"
 import { PEERS, PORT, WS_CLIENTS } from "./config"
 import { app, server } from "./app"
+import { RaftNode } from "./node"
 
 const CONNECTED_PEERS: WebSocket[] = []
 // Middleware
 app.use(express.json())
-
+app.locals.RaftNode = new RaftNode(parseInt(PORT), CONNECTED_PEERS)
 // Simple Route
 app.get("/", (req, res) => {
   res.send("Hello, Express!")
@@ -19,14 +20,9 @@ app.get("/connectPeers", (req, res) => {
 })
 
 app.get("/pingPeers", (req, res) => {
-  if (CONNECTED_PEERS.length === 0) {
-    res.send("Not connected to peers.")
-  } else {
-    CONNECTED_PEERS.forEach((peer) => {
-      peer.send(`Hello from ${peer.url}`)
-    })
-    res.send("Ok")
-  }
+  const raftNode: RaftNode = req.app.locals.RaftNode
+  raftNode.pingPeers()
+  res.send("Ok")
 })
 
 handleWebSocket(server, WS_CLIENTS)
