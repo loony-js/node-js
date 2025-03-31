@@ -1,12 +1,10 @@
 import express from "express"
 import { handleWebSocket } from "./socket"
-import WebSocket from "ws"
-import { PEERS, PORT, WS_CLIENTS } from "./config"
+import { PORT, WS_CLIENTS } from "./config"
 import { app, server } from "./app"
 import { RaftNode } from "./node"
 
-const CONNECTED_PEERS: WebSocket[] = []
-const raftNode = new RaftNode(parseInt(PORT), CONNECTED_PEERS)
+const raftNode = new RaftNode(parseInt(PORT))
 // Middleware
 app.use(express.json())
 app.locals.RaftNode = raftNode
@@ -16,45 +14,23 @@ app.get("/", (req, res) => {
 })
 
 app.get("/connectPeers", (req, res) => {
-  connectPeers()
-  res.send("Ok")
-})
-
-app.get("/pingPeers", (req, res) => {
-  const raftNode: RaftNode = req.app.locals.RaftNode
-  raftNode.pingPeers()
   res.send("Ok")
 })
 
 app.get("/get", (req, res) => {
-  const raftNode: RaftNode = req.app.locals.RaftNode
-  raftNode.get()
   res.send("Ok")
 })
 
 app.post("/set", (req, res) => {
+  if (!req.body) {
+    res.status(400).send("Body cannot be empty")
+  }
   const raftNode: RaftNode = req.app.locals.RaftNode
   raftNode.set(req.body)
   res.send("Ok")
 })
 
 handleWebSocket(server, WS_CLIENTS, raftNode)
-
-function connectPeers() {
-  PEERS.forEach((peer) => {
-    const url = `ws://localhost:${peer}`
-    const ws = new WebSocket(url)
-    ws.onopen = () => {
-      console.log(`Connected to ${peer}`)
-    }
-
-    ws.onclose = () => {}
-
-    ws.onmessage = () => {}
-
-    CONNECTED_PEERS.push(ws)
-  })
-}
 
 server.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`)

@@ -37,13 +37,7 @@ module.exports = function (buffer: Buffer) {
   if (ifdOffset < 8) throw new Error("Invalid EXIF data: ifdOffset < 8")
 
   const result = { bigEndian }
-  result.Image = readTags(
-    buffer,
-    ifdOffset,
-    bigEndian,
-    tags.Image,
-    startingOffset,
-  )
+  result.Image = readTags(buffer, ifdOffset, bigEndian, Image, startingOffset)
 
   if (buffer.length >= ifdOffset + 2) {
     let numEntries = readUInt16(buffer, ifdOffset, bigEndian)
@@ -54,7 +48,7 @@ module.exports = function (buffer: Buffer) {
           buffer,
           ifdOffset + startingOffset,
           bigEndian,
-          tags.Image,
+          Image,
           startingOffset,
         )
     }
@@ -66,7 +60,7 @@ module.exports = function (buffer: Buffer) {
         buffer,
         result.Image.ExifTag + startingOffset,
         bigEndian,
-        tags.Photo,
+        Photo,
         startingOffset,
       )
 
@@ -75,7 +69,7 @@ module.exports = function (buffer: Buffer) {
         buffer,
         result.Image.GPSTag + startingOffset,
         bigEndian,
-        tags.GPSInfo,
+        GPSInfo,
         startingOffset,
       )
   }
@@ -84,7 +78,7 @@ module.exports = function (buffer: Buffer) {
       buffer,
       result.Photo.InteroperabilityTag + startingOffset,
       bigEndian,
-      tags.Iop,
+      Iop,
       startingOffset,
     )
   }
@@ -101,26 +95,27 @@ const DATE_KEYS = {
 function readTags(
   buffer: Buffer,
   offset: number,
-  bigEndian,
-  tags,
+  bigEndian: boolean,
+  tags: Record<number, string>,
   startingOffset: number,
 ) {
   if (buffer.length < offset + 2) {
     return null
   }
-  let numEntries = readUInt16(buffer, offset, bigEndian)
+  const numEntries = readUInt16(buffer, offset, bigEndian)
   offset += 2
 
-  let res = {}
+  const res = {}
+  let tag
   for (let i = 0; i < numEntries; i++) {
     if (buffer.length >= offset + 2) {
-      let tag = readUInt16(buffer, offset, bigEndian)
+      tag = readUInt16(buffer, offset, bigEndian)
     } else {
       return null
     }
     offset += 2
 
-    let key = tags[tag] || tag
+    const key = tags[tag] || tag
     let val = readTag(buffer, offset, bigEndian, startingOffset)
 
     if (key in DATE_KEYS) val = parseDate(val)
@@ -134,7 +129,12 @@ function readTags(
 
 const SIZE_LOOKUP = [1, 1, 2, 4, 8, 1, 1, 2, 4, 8]
 
-function readTag(buffer: Buffer, offset: number, bigEndian, startingOffset) {
+function readTag(
+  buffer: Buffer,
+  offset: number,
+  bigEndian: boolean,
+  startingOffset: number,
+) {
   if (buffer.length < offset + 7) {
     return null
   }
@@ -183,7 +183,12 @@ function readTag(buffer: Buffer, offset: number, bigEndian, startingOffset) {
   return res
 }
 
-function readValue(buffer: Buffer, offset: number, bigEndian, type) {
+function readValue(
+  buffer: Buffer,
+  offset: number,
+  bigEndian: boolean,
+  type: number,
+) {
   switch (type) {
     case 1: // uint8
       if (buffer.length < offset + 1) {
@@ -250,7 +255,15 @@ function parseDate(string: string) {
   if (!match) return null
 
   return new Date(
-    Date.UTC(match[1], match[2] - 1, match[3], match[4], match[5], match[6], 0),
+    Date.UTC(
+      parseInt(match[1], 10),
+      parseInt(match[2]) - 1,
+      parseInt(match[3]),
+      parseInt(match[4]),
+      parseInt(match[5]),
+      parseInt(match[6]),
+      0,
+    ),
   )
 }
 
@@ -259,25 +272,25 @@ function isPositiveInteger(value: string | number) {
 }
 
 // Buffer reading helpers to help switching between endianness
-function readUInt16(buffer: Buffer, offset: number, bigEndian) {
+function readUInt16(buffer: Buffer, offset: number, bigEndian: boolean) {
   if (bigEndian) return buffer.readUInt16BE(offset)
 
   return buffer.readUInt16LE(offset)
 }
 
-function readUInt32(buffer: Buffer, offset: number, bigEndian) {
+function readUInt32(buffer: Buffer, offset: number, bigEndian: boolean) {
   if (bigEndian) return buffer.readUInt32BE(offset)
 
   return buffer.readUInt32LE(offset)
 }
 
-function readInt16(buffer: Buffer, offset: number, bigEndian) {
+function readInt16(buffer: Buffer, offset: number, bigEndian: boolean) {
   if (bigEndian) return buffer.readInt16BE(offset)
 
   return buffer.readInt16LE(offset)
 }
 
-function readInt32(buffer: Buffer, offset: number, bigEndian) {
+function readInt32(buffer: Buffer, offset: number, bigEndian: boolean) {
   if (bigEndian) return buffer.readInt32BE(offset)
 
   return buffer.readInt32LE(offset)
