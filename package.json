@@ -16,6 +16,7 @@
   "dependencies": {
     "loony-sdk": "0.1.0",
     "loony-web-audio": "0.1.0",
+    "loony-utils": "0.1.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "socket.io": "^4.8.1",
