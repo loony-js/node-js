@@ -6,9 +6,9 @@ type Follower = 1
 type Candidate = 2
 type Leader = 3
 
-type NodeType = Follower | Candidate | Leader
+export type NodeType = Follower | Candidate | Leader
 
-class ConnectedPeers {
+export class ConnectedPeers {
   peers: WebSocket[] = []
   constructor(peers = []) {
     this.peers = peers

@@ -1,14 +1,20 @@
-import express, { Request, Response } from "express"
-import { request } from "loony-utils"
+import { Request, Response } from "express"
+// import { request } from "loony-utils"
+// import { ConnectedPeers } from "./node"
 
 interface LogEntry {
   term: number
   command: string
 }
 
-class RaftNode {
+const HEARTBEAT_INTERVAL = 1500
+const ELECTION_TIMER = 3000
+
+export class RaftNode {
   id: string
   peers: string[]
+  // peers: ConnectedPeers | undefined
+
   state: "follower" | "candidate" | "leader"
   currentTerm: number
   votedFor: string | null
@@ -31,14 +37,17 @@ class RaftNode {
     this.lastApplied = 0
     this.leaderId = null
     this.electionTimeout = this.resetElectionTimeout()
-    this.heartbeatInterval = 150
+    this.heartbeatInterval = 1500
     this.electionTimer = null
 
     this.startElectionTimer()
   }
 
   resetElectionTimeout(): number {
-    return Math.floor(Math.random() * (300 - 150) + 150)
+    return Math.floor(
+      Math.random() * (ELECTION_TIMER - HEARTBEAT_INTERVAL) +
+        HEARTBEAT_INTERVAL,
+    )
   }
 
   startElectionTimer(): void {
@@ -71,14 +80,15 @@ class RaftNode {
               candidateId: this.id,
             }),
           }).then((res) => res.json())
-          const data = res.data
-          if (data.voteGranted) votes++
-        } catch (error) {
-          console.error("Vote request failed", error)
+
+          if (res.voteGranted) votes++
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (error: any) {
+          console.error("Vote request failed", error.message)
         }
       }),
     )
-
+    console.log(votes, "votes")
     if (votes > Math.floor((this.peers.length + 1) / 2)) {
       this.becomeLeader()
     } else {
@@ -100,14 +110,19 @@ class RaftNode {
       await Promise.all(
         this.peers.map(async (peer) => {
           try {
-            request(`${peer}/heartbeat`, {
-              body: {
+            await fetch(`${peer}/heartbeat`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
                 term: this.currentTerm,
                 leaderId: this.id,
-              },
-            })
-          } catch (error) {
-            console.error("Heartbeat failed", error)
+              }),
+            }).then((res) => res.json())
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          } catch (error: any) {
+            console.error("Heartbeat failed", error.message)
           }
         }),
       )
@@ -134,24 +149,28 @@ class RaftNode {
       this.state = "follower"
       this.startElectionTimer()
     }
+    if (term / 10 === 0) {
+      console.clear()
+    }
+    console.log(req.body)
     res.json({ success: true })
   }
 }
 
-// Setting up Express server
-const app = express()
-app.use(express.json())
+// // Setting up Express server
+// const app = express()
+// app.use(express.json())
 
-const node = new RaftNode("node1", [
-  "http://localhost:5001",
-  "http://localhost:5002",
-])
+// const node = new RaftNode("node1", [
+//   "http://localhost:5001",
+//   "http://localhost:5002",
+// ])
 
-app.post("/vote", (req: Request, res: Response) =>
-  node.handleVoteRequest(req, res),
-)
-app.post("/heartbeat", (req: Request, res: Response) =>
-  node.handleHeartbeat(req, res),
-)
+// app.post("/vote", (req: Request, res: Response) =>
+//   node.handleVoteRequest(req, res),
+// )
+// app.post("/heartbeat", (req: Request, res: Response) =>
+//   node.handleHeartbeat(req, res),
+// )
 
-app.listen(5000, () => console.log("Raft Node running on port 5000"))
+// app.listen(5000, () => console.log("Raft Node running on port 5000"))
