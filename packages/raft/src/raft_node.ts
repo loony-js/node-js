@@ -19,8 +19,8 @@ export class RaftNode {
   currentTerm: number
   votedFor: string | null
   log: LogEntry[]
-  commitIndex: number
-  lastApplied: number
+  // commitIndex: number
+  // lastApplied: number
   leaderId: string | null
   electionTimeout: number
   heartbeatInterval: number
@@ -33,8 +33,8 @@ export class RaftNode {
     this.currentTerm = 0
     this.votedFor = null
     this.log = []
-    this.commitIndex = 0
-    this.lastApplied = 0
+    // this.commitIndex = 0
+    // this.lastApplied = 0
     this.leaderId = null
     this.electionTimeout = this.resetElectionTimeout()
     this.heartbeatInterval = 1500
@@ -88,7 +88,7 @@ export class RaftNode {
         }
       }),
     )
-    console.log(votes, "votes")
+
     if (votes > Math.floor((this.peers.length + 1) / 2)) {
       this.becomeLeader()
     } else {
@@ -152,25 +152,6 @@ export class RaftNode {
     if (term / 10 === 0) {
       console.clear()
     }
-    console.log(req.body)
     res.json({ success: true })
   }
 }
-
-// // Setting up Express server
-// const app = express()
-// app.use(express.json())
-
-// const node = new RaftNode("node1", [
-//   "http://localhost:5001",
-//   "http://localhost:5002",
-// ])
-
-// app.post("/vote", (req: Request, res: Response) =>
-//   node.handleVoteRequest(req, res),
-// )
-// app.post("/heartbeat", (req: Request, res: Response) =>
-//   node.handleHeartbeat(req, res),
-// )
-
-// app.listen(5000, () => console.log("Raft Node running on port 5000"))
