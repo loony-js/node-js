@@ -58,9 +58,9 @@ app.post("/command", (req, res) => {
 
   if (!command) {
     res.status(400).json({ error: "Missing command" })
+    return
   }
 
-  const newLogIndex = raftLog.getNewLogIndex()
   // Generate log entry
   const logEntry: LogEntry = {
     term: node.currentTerm,
@@ -68,28 +68,26 @@ app.post("/command", (req, res) => {
   }
 
   // Append locally
-  const success = raftLog.appendEntries([logEntry])
+  const success = raftLog.appendEntry(logEntry)
 
   if (!success) {
     res.status(500).json({ error: "Failed to append log" })
+    return
   }
 
-  // Normally: send AppendEntries RPC to followers
-  // Simulate commit for demo:
-  raftLog.setCommitIndex(newLogIndex)
-
-  // Apply to state machine (not shown here)
-  console.log(`Committed log entry:`, logEntry)
+  raftLog.commit()
 
   res.json({ success: true, entry: logEntry })
 })
 
 // Get all log entries
 app.get("/log", (req, res) => {
-  const entries = raftLog.getEntries(
-    raftLog.getLastLogIndex() > 0 ? 1 : 0,
-    raftLog.getLastLogIndex() + 1,
-  )
+  const entries = raftLog.getEntries(0, 2)
+  res.json(entries)
+})
+
+app.get("/status", (req, res) => {
+  const entries = raftLog.status()
   res.json(entries)
 })
 

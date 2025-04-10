@@ -6,8 +6,6 @@ export type LogEntry<T = any> = {
 
 export class RaftLog<T = any> {
   private data: LogEntry<T>[] = []
-  private baseIndex = 0
-  private baseTerm = 0
   private commitIndex: number = -1
   private lastApplied: number = -1
 
@@ -18,18 +16,24 @@ export class RaftLog<T = any> {
     }
   }
 
+  status() {
+    return {
+      entries: this.data.length,
+      commitIndex: this.getCommitIndex(),
+      lastLogIndex: this.getLastLogIndex(),
+      lastApplied: this.getLastApplied(),
+    }
+  }
+
   // Add a new log entry
-  appendEntry(entry: Omit<LogEntry, "index">): void {
+  appendEntry(entry: Omit<LogEntry, "index">): boolean {
     this.data.push(entry)
+    return true
   }
 
   // Last log index
   getLastLogIndex(): number {
     return this.data.length > 0 ? this.data.length - 1 : -1
-  }
-
-  getNewLogIndex(): number {
-    return this.data.length > 0 ? this.data.length : 0
   }
 
   // Last log term
@@ -55,9 +59,11 @@ export class RaftLog<T = any> {
 
   // Set commit index (only if advancing)
   setCommitIndex(newIndex: number): void {
-    if (newIndex > this.commitIndex && newIndex < this.data.length) {
-      this.commitIndex = newIndex
-    }
+    this.commitIndex = newIndex
+  }
+
+  commit() {
+    this.setCommitIndex(this.getLastLogIndex())
   }
 
   // Last applied
@@ -67,9 +73,7 @@ export class RaftLog<T = any> {
 
   // Get entry at a specific index
   getEntry(index: number): LogEntry<T> | undefined {
-    if (index <= this.baseIndex) return undefined
-    const i = index - this.baseIndex - 1
-    return this.data[i]
+    return this.data[index]
   }
 
   // Apply entries to state machine up to commitIndex
@@ -93,29 +97,12 @@ export class RaftLog<T = any> {
     return true
   }
 
-  // Delete all log entries starting from `index`
-  deleteFrom(index: number): void {
-    if (index <= this.baseIndex) return
-    this.data.splice(index - this.baseIndex - 1)
-  }
-
   // Get entries between two indices (inclusive start, exclusive end)
-  getEntries(from: number, to: number): LogEntry<T>[] {
-    const start = from - this.baseIndex - 1
-    const end = to - this.baseIndex - 1
-    return this.data.slice(start, end)
+  getEntries(from: number, length: number): LogEntry<T>[] {
+    return this.data.slice(from, length)
   }
 
   printLog(): void {
     console.log("Raft Log:", this.data)
-  }
-
-  // Compact log up to a certain index (snapshot, not implemented)
-  compact(upToIndex: number, term: number): void {
-    if (upToIndex <= this.baseIndex) return
-    const newStart = upToIndex - this.baseIndex
-    this.data = this.data.slice(newStart)
-    this.baseIndex = upToIndex
-    this.baseTerm = term
   }
 }
