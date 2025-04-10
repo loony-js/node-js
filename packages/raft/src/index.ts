@@ -36,7 +36,7 @@ app.post("/set", (req, res) => {
   res.send("Ok")
 })
 
-const node = new RaftNode(
+const raftNode = new RaftNode(
   `${PORT}`,
   PEERS.map((peer) => {
     return `http://localhost:${peer}`
@@ -46,10 +46,10 @@ const node = new RaftNode(
 const raftLog = new RaftLog()
 
 app.post("/vote", (req, res) => {
-  node.handleVoteRequest(req, res)
+  raftNode.handleVoteRequest(req, res)
 })
 app.post("/heartbeat", (req, res) => {
-  node.handleHeartbeat(req, res)
+  raftNode.handleHeartbeat(req, res)
 })
 
 // Endpoint to accept a command from client
@@ -63,7 +63,7 @@ app.post("/command", (req, res) => {
 
   // Generate log entry
   const logEntry: LogEntry = {
-    term: node.currentTerm,
+    term: raftNode.currentTerm,
     command,
   }
 
@@ -74,10 +74,36 @@ app.post("/command", (req, res) => {
     res.status(500).json({ error: "Failed to append log" })
     return
   }
+  raftNode.sendLogAppendEntryToPeers(logEntry)
+  raftLog.commit()
+
+  res.json({ success: true, status: 200 })
+})
+
+app.post("/appendEntry", (req, res) => {
+  const { entry, term } = req.body
+
+  if (raftNode.currentTerm !== term) {
+    res.status(400).json({ error: "Invalid term." })
+    return
+  }
+
+  if (!entry) {
+    res.status(400).json({ error: "Missing command" })
+    return
+  }
+
+  // Append locally
+  const success = raftLog.appendEntry(entry)
+
+  if (!success) {
+    res.status(500).json({ error: "Failed to append log" })
+    return
+  }
 
   raftLog.commit()
 
-  res.json({ success: true, entry: logEntry })
+  res.json({ success: true, status: 200 })
 })
 
 // Get all log entries

@@ -154,4 +154,27 @@ export class RaftNode {
     }
     res.json({ success: true })
   }
+
+  async sendLogAppendEntryToPeers(entry: LogEntry) {
+    await Promise.all(
+      this.peers.map(async (peer) => {
+        try {
+          await fetch(`${peer}/appendEntry`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              term: this.currentTerm,
+              entry,
+            }),
+          }).then((res) => res.json())
+
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (error: any) {
+          console.error("Vote request failed", error.message)
+        }
+      }),
+    )
+  }
 }
