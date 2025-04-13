@@ -28,7 +28,9 @@
       "loony-utils": ["packages/loony-utils/src"],
       "loony-utils/*": ["packages/loony-utils/src/*"],
       "speechmatics": ["packages/speechmatics/src"],
-      "speechmatics/*": ["packages/speechmatics/src/*"]
+      "speechmatics/*": ["packages/speechmatics/src/*"],
+      "loony-timer": ["packages/loony-timer/src"],
+      "loony-timer/*": ["packages/loony-timer/src/*"]
     },
     "baseUrl": "src"
   },
