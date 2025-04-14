@@ -2,20 +2,31 @@
 // const encode = require("encoding-down")
 // const levelup = require("levelup")
 // const PromiseQueue = require("promise-queue")
-import { AbstractLevel } from "abstract-level"
+// import { AbstractLevel } from "abstract-level"
 import { Level } from "level"
 import { KeyStream } from "level-read-stream"
 
-const db = new Level("example", { valueEncoding: "json" })
-
-const keyEncoding = {
-  decode: function (raw: string) {
-    return parseInt(raw)
-  },
-  encode: function (key: number) {
-    return key.toString(16).padStart(8, "0")
-  },
+type Entry = {
+  term: any
+  index: any
+  committed: boolean
+  responses: {
+    address: any
+    ack: boolean
+  }[]
+  command: any
 }
+
+const db = new Level<string, Entry>("example", { valueEncoding: "json" })
+
+// const keyEncoding = {
+//   decode: function (raw: string) {
+//     return parseInt(raw)
+//   },
+//   encode: function (key: number) {
+//     return key.toString(16).padStart(8, "0")
+//   },
+// }
 
 class PromiseQueue {
   private queue: (() => Promise<any>)[] = []
@@ -60,8 +71,9 @@ class PromiseQueue {
  * @property {object}  command The command to be used in the raft state machine
  */
 class Log {
-  db: Level
+  db: Level<string, Entry>
   committedIndex: number
+  commandAckQueue: PromiseQueue
 
   /**
    * @class
@@ -71,11 +83,11 @@ class Log {
    * @param {string}   Options.[path='./']    Path to save the log db to
    * @return {Log}
    */
-  constructor(node, { adapter = require("leveldown"), path = "" }) {
-    this.node = node
+  constructor() {
+    // this.node = node
     this.committedIndex = 0
     this.db = db
-    this.commandAckQueue = new PromiseQueue(1, Infinity)
+    this.commandAckQueue = new PromiseQueue()
   }
 
   /**
@@ -93,7 +105,7 @@ class Log {
    * @param {number} [index] Index to save the entry with. This is used by the followers
    * @return {Promise<entry>} Description
    */
-  async saveCommand(command, term, index) {
+  async saveCommand(command: string, term: number, index: number) {
     if (!index) {
       const { index: lastIndex } = await this.getLastInfo()
 
@@ -106,7 +118,8 @@ class Log {
       committed: false,
       responses: [
         {
-          address: this.node.address, // start with vote from leader
+          //   address: this.node.address, // start with vote from leader
+          address: "",
           ack: true,
         },
       ],
@@ -125,7 +138,7 @@ class Log {
    * @return {Promise<void>} Resolves once entry is saved
    * @public
    */
-  put(entry) {
+  put(entry: Entry) {
     return this.db.put(entry.index, entry)
   }
 
@@ -136,11 +149,11 @@ class Log {
    * @return {Promise<Entry[]>} returns all entries
    * @public
    */
-  getEntriesAfter(index: number): Promise<Level<string, string>> {
+  getEntriesAfter(index: number): Promise<Level<string, Entry>> {
     // const entries = []
     return new Promise((resolve) => {
-      const strm = new KeyStream(this.db, { gt: index })
-
+      const strm = new KeyStream(this.db, { gt: index }).db
+      resolve(strm)
       //   this.db
       //     .createReadStream({ gt: index })
       //     .on("data", (data) => {
@@ -163,13 +176,14 @@ class Log {
    * @return {Promise<void>} Returns once all antries are removed
    * @public
    */
-  async removeEntriesAfter(index) {
+  async removeEntriesAfter(index: number) {
     const entries = await this.getEntriesAfter(index)
-    return Promise.all(
-      entries.map((entry) => {
-        return this.db.del(entry.index)
-      }),
-    )
+    // new Promise.all(
+    //   ,
+    // )
+    for await (const key of entries.keys()) {
+      this.db.del(key)
+    }
   }
 
   /**
@@ -180,11 +194,13 @@ class Log {
    * @return {boolean} Boolean on whether entry exists at index
    * @public
    */
-  async has(index) {
+  async has(index: string) {
     try {
       const entry = await this.db.get(index)
-      return true
+      if (entry) return true
+      return false
     } catch (err) {
+      console.log(err)
       return false
     }
   }
@@ -196,7 +212,7 @@ class Log {
    * @return {Promise<Entry>} Promise of found entry returns NotFoundError if does not exist
    * @public
    */
-  get(index) {
+  get(index: string) {
     return this.db.get(index)
   }
 
@@ -208,7 +224,14 @@ class Log {
    * @return {Promise<Object>} Last entries index, term and committedIndex
    */
   async getLastInfo() {
-    const { index, term } = await this.getLastEntry()
+    const entry = await this.getLastEntry()
+    let index = null
+    let term = null
+
+    for await (const ent of entry.values()) {
+      index = ent.index
+      term = ent.term
+    }
 
     return {
       index,
@@ -222,27 +245,28 @@ class Log {
    *
    * @return {Promise<Entry>} returns {index: 0, term: node.term} if there are no entries in the log
    */
-  getLastEntry() {
-    return new Promise((resolve, reject) => {
-      let hasResolved = false
-      let entry = {
-        index: 0,
-        term: this.node.term,
-      }
-
-      this.db
-        .createReadStream({ reverse: true, limit: 1 })
-        .on("data", (data) => {
-          hasResolved = true
-          entry = data.value
-        })
-        .on("error", (err) => {
-          hasResolved = true
-          reject(err)
-        })
-        .on("end", () => {
-          resolve(entry)
-        })
+  getLastEntry(): Promise<Level<string, Entry>> {
+    return new Promise((resolve) => {
+      //   let hasResolved = false
+      //   let entry = {
+      //     index: 0,
+      //     term: this.node.term,
+      //   }
+      const strm = new KeyStream(this.db, { reverse: true, limit: 1 }).db
+      resolve(strm)
+      //   this.db
+      //     .createReadStream({ reverse: true, limit: 1 })
+      //     .on("data", (data) => {
+      //       hasResolved = true
+      //       entry = data.value
+      //     })
+      //     .on("error", (err) => {
+      //       hasResolved = true
+      //       reject(err)
+      //     })
+      //     .on("end", () => {
+      //       resolve(entry)
+      //     })
     })
   }
 
@@ -255,9 +279,15 @@ class Log {
    * @param {Entry} entry
    * @return {Promise<object>} {index, term, committedIndex}
    */
-  async getEntryInfoBefore(entry) {
-    const { index, term } = await this.getEntryBefore(entry)
+  async getEntryInfoBefore(entry: Entry) {
+    const getEntry = await this.getEntryBefore(entry)
+    let index = null
+    let term = null
 
+    for await (const ent of getEntry.values()) {
+      index = ent.index
+      term = ent.term
+    }
     return {
       index,
       term,
@@ -274,40 +304,45 @@ class Log {
    *
    * @return {Promise<Entry>}
    */
-  getEntryBefore(entry) {
-    const defaultInfo = {
-      index: 0,
-      term: this.node.term,
-    }
-    // We know it is the first entry, so save the query time
-    if (entry.index === 1) {
-      return Promise.resolve(defaultInfo)
-    }
+  getEntryBefore(entry: Entry): Promise<Level<string, Entry>> {
+    // const defaultInfo = {
+    //   index: 0,
+    //   term: this.node.term,
+    // }
+    // // We know it is the first entry, so save the query time
+    // if (entry.index === 1) {
+    //   return Promise.resolve(defaultInfo)
+    // }
 
-    return new Promise((resolve, reject) => {
-      let hasResolved = false
-
-      this.db
-        .createReadStream({
-          reverse: true,
-          limit: 1,
-          lt: entry.index,
-        })
-        .on("data", (data) => {
-          hasResolved = true
-          resolve(data.value)
-        })
-        .on("error", (err) => {
-          hasResolved = true
-          reject(err)
-        })
-        .on("end", () => {
-          if (!hasResolved) {
-            // Returns empty index if there is no items
-            // before entry or log is empty
-            resolve(defaultInfo)
-          }
-        })
+    return new Promise((resolve) => {
+      //   let hasResolved = false
+      const strm = new KeyStream(this.db, {
+        reverse: true,
+        limit: 1,
+        lt: entry.index,
+      }).db
+      resolve(strm)
+      //   this.db
+      //     .createReadStream({
+      //       reverse: true,
+      //       limit: 1,
+      //       lt: entry.index,
+      //     })
+      //     .on("data", (data) => {
+      //       hasResolved = true
+      //       resolve(data.value)
+      //     })
+      //     .on("error", (err) => {
+      //       hasResolved = true
+      //       reject(err)
+      //     })
+      //     .on("end", () => {
+      //       if (!hasResolved) {
+      //         // Returns empty index if there is no items
+      //         // before entry or log is empty
+      //         resolve(defaultInfo)
+      //       }
+      //     })
     })
   }
 
@@ -321,34 +356,34 @@ class Log {
    * @param {string} address Address of follower that has stored log
    * @return {Promise<Entry>}
    */
-  async commandAck(index, address) {
-    return this.commandAckQueue.add(async () => {
-      let entry
-      try {
-        entry = await this.get(index)
-      } catch (err) {
-        return {
-          responses: [],
-        }
-      }
+  //   async commandAck(index, address) {
+  //     return this.commandAckQueue.add(async () => {
+  //       let entry
+  //       try {
+  //         entry = await this.get(index)
+  //       } catch (err) {
+  //         return {
+  //           responses: [],
+  //         }
+  //       }
 
-      const entryIndex = await entry.responses.findIndex(
-        (resp) => resp.address === address,
-      )
+  //       const entryIndex = await entry.responses.findIndex(
+  //         (resp) => resp.address === address,
+  //       )
 
-      // node hasn't voted yet. Add response
-      if (entryIndex === -1) {
-        entry.responses.push({
-          address,
-          ack: true,
-        })
-      }
+  //       // node hasn't voted yet. Add response
+  //       if (entryIndex === -1) {
+  //         entry.responses.push({
+  //           address,
+  //           ack: true,
+  //         })
+  //       }
 
-      await this.put(entry)
+  //       await this.put(entry)
 
-      return entry
-    })
-  }
+  //       return entry
+  //     })
+  //   }
 
   /**
    * commit - Set the entry to committed
@@ -358,7 +393,7 @@ class Log {
    *
    * @return {Promise<entry>}
    */
-  async commit(index) {
+  async commit(index: string) {
     const entry = await this.db.get(index)
 
     entry.committed = true
@@ -374,29 +409,29 @@ class Log {
    * @return {Promise<Entry[]}
    * @private
    */
-  getUncommittedEntriesUpToIndex(index) {
-    return new Promise((resolve, reject) => {
-      let hasResolved = false
-      const entries = []
+  //   getUncommittedEntriesUpToIndex(index) {
+  //     return new Promise((resolve, reject) => {
+  //       let hasResolved = false
+  //       const entries = []
 
-      this.db
-        .createReadStream({
-          gt: this.committedIndex,
-          lte: index,
-        })
-        .on("data", (data) => {
-          if (!data.value.committed) {
-            entries.push(data.value)
-          }
-        })
-        .on("error", (err) => {
-          reject(err)
-        })
-        .on("end", () => {
-          resolve(entries)
-        })
-    })
-  }
+  //       this.db
+  //         .createReadStream({
+  //           gt: this.committedIndex,
+  //           lte: index,
+  //         })
+  //         .on("data", (data) => {
+  //           if (!data.value.committed) {
+  //             entries.push(data.value)
+  //           }
+  //         })
+  //         .on("error", (err) => {
+  //           reject(err)
+  //         })
+  //         .on("end", () => {
+  //           resolve(entries)
+  //         })
+  //     })
+  //   }
 
   /**
    * end - Log end
@@ -410,4 +445,22 @@ class Log {
   }
 }
 
-module.exports = Log
+// module.exports = Log
+
+const log = new Log()
+log.put({
+  term: 1,
+  index: 1,
+  committed: false,
+  responses: [
+    {
+      address: "",
+      ack: false,
+    },
+  ],
+  command: "select * from users",
+})
+
+log.get("1").then((res) => {
+  console.log(res)
+})
