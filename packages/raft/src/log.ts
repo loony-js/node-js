@@ -105,10 +105,9 @@ class Log {
    * @param {number} [index] Index to save the entry with. This is used by the followers
    * @return {Promise<entry>} Description
    */
-  async saveCommand(command: string, term: number, index: number) {
+  async saveCommand(command: string, term: number, index: number | undefined) {
     if (!index) {
       const { index: lastIndex } = await this.getLastInfo()
-
       index = lastIndex + 1
     }
 
@@ -223,10 +222,14 @@ class Log {
    * @async
    * @return {Promise<Object>} Last entries index, term and committedIndex
    */
-  async getLastInfo() {
+  async getLastInfo(): Promise<{
+    index: number
+    term: number
+    committedIndex: number
+  }> {
     const entry = await this.getLastEntry()
-    let index = null
-    let term = null
+    let index = -1
+    let term = -1
 
     for await (const ent of entry.values()) {
       index = ent.index
@@ -356,34 +359,35 @@ class Log {
    * @param {string} address Address of follower that has stored log
    * @return {Promise<Entry>}
    */
-  //   async commandAck(index, address) {
-  //     return this.commandAckQueue.add(async () => {
-  //       let entry
-  //       try {
-  //         entry = await this.get(index)
-  //       } catch (err) {
-  //         return {
-  //           responses: [],
-  //         }
-  //       }
+  async commandAck(index: string, address: string) {
+    return this.commandAckQueue.add(async () => {
+      let entry
+      try {
+        entry = await this.get(index)
+      } catch (err) {
+        console.log(err)
+        return {
+          responses: [],
+        }
+      }
 
-  //       const entryIndex = await entry.responses.findIndex(
-  //         (resp) => resp.address === address,
-  //       )
+      const entryIndex = await entry.responses.findIndex(
+        (resp) => resp.address === address,
+      )
 
-  //       // node hasn't voted yet. Add response
-  //       if (entryIndex === -1) {
-  //         entry.responses.push({
-  //           address,
-  //           ack: true,
-  //         })
-  //       }
+      // node hasn't voted yet. Add response
+      if (entryIndex === -1) {
+        entry.responses.push({
+          address,
+          ack: true,
+        })
+      }
 
-  //       await this.put(entry)
+      await this.put(entry)
 
-  //       return entry
-  //     })
-  //   }
+      return entry
+    })
+  }
 
   /**
    * commit - Set the entry to committed
@@ -409,29 +413,24 @@ class Log {
    * @return {Promise<Entry[]}
    * @private
    */
-  //   getUncommittedEntriesUpToIndex(index) {
-  //     return new Promise((resolve, reject) => {
-  //       let hasResolved = false
-  //       const entries = []
+  getUncommittedEntriesUpToIndex(index: number): Promise<Entry[]> {
+    return new Promise((resolve) => {
+      const strm = new KeyStream(this.db, {
+        gt: this.committedIndex,
+        lte: index,
+      }).db
 
-  //       this.db
-  //         .createReadStream({
-  //           gt: this.committedIndex,
-  //           lte: index,
-  //         })
-  //         .on("data", (data) => {
-  //           if (!data.value.committed) {
-  //             entries.push(data.value)
-  //           }
-  //         })
-  //         .on("error", (err) => {
-  //           reject(err)
-  //         })
-  //         .on("end", () => {
-  //           resolve(entries)
-  //         })
-  //     })
-  //   }
+      ;(async () => {
+        const entries = []
+        for await (const data of strm.values()) {
+          if (!data.committed) {
+            entries.push(data)
+          }
+        }
+        resolve(entries)
+      })()
+    })
+  }
 
   /**
    * end - Log end
@@ -445,22 +444,23 @@ class Log {
   }
 }
 
+export { Log, Entry, PromiseQueue }
 // module.exports = Log
 
-const log = new Log()
-log.put({
-  term: 1,
-  index: 1,
-  committed: false,
-  responses: [
-    {
-      address: "",
-      ack: false,
-    },
-  ],
-  command: "select * from users",
-})
+// const log = new Log()
+// log.put({
+//   term: 1,
+//   index: 1,
+//   committed: false,
+//   responses: [
+//     {
+//       address: "",
+//       ack: false,
+//     },
+//   ],
+//   command: "select * from users",
+// })
 
-log.get("1").then((res) => {
-  console.log(res)
-})
+// log.get("1").then((res) => {
+//   console.log(res)
+// })
