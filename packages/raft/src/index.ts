@@ -6,8 +6,8 @@ import {
   PEERS,
 } from "./config"
 import { app, server } from "./app"
-import { RaftNode } from "./raft_node"
-import { RaftLog, LogEntry } from "./raft_log"
+import { RaftNode } from "./raftNode-v1"
+import { RaftLog, LogEntry } from "./raftLog"
 // import { RaftNode } from "./node"
 
 // const raftNode = new RaftNode(parseInt(PORT))
