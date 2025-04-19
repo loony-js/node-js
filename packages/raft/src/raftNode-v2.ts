@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import EventEmitter from "node:events"
-import { Tick, Timer } from "loony-timer"
+import { Tick } from "loony-timer"
 import { modification, Changeable } from "loony-utils/src/modification"
 import { Entry, Log } from "./log"
 
@@ -87,7 +87,7 @@ class Raft extends EventEmitter {
 
     this.threshold = options.threshold || 0.8
     this.address = options.address
-    this.timers = new Tick({})
+    this.timers = new Tick()
     this.db = new Log()
     this.log = null
     this.change = change

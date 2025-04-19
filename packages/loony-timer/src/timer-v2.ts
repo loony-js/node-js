@@ -1,19 +1,19 @@
+const TIMEOUT = 3000
+
 class Timer {
-  id: number
-  fn: VoidFunction
+  name: string
+  fn?: VoidFunction
   timer?: NodeJS.Timeout | NodeJS.Immediate
   start: number
   duration: number
+  type: string
 
-  constructor(id: number, fn: VoidFunction, duration: number) {
-    this.id = id
+  constructor(name: string, fn: VoidFunction, duration: number, type: string) {
+    this.name = name
     this.fn = fn
     this.duration = duration
     this.start = +new Date()
-  }
-  run() {
-    const time: NodeJS.Timeout = setTimeout(this.fn, this.duration)
-    this.timer = time
+    this.type = type
   }
 
   remaining() {
@@ -23,26 +23,69 @@ class Timer {
   taken() {
     return +new Date() - this.start
   }
+
+  setTimer(timer: NodeJS.Timeout | NodeJS.Immediate) {
+    this.timer = timer
+  }
 }
 
 class Tick {
-  timers: Record<number, Timer>
+  timers: Record<string, Timer>
   constructor() {
     this.timers = {}
   }
 
-  setTimeout(id: number, fn: VoidFunction, time: number) {
-    const newTimer = new Timer(id, fn, time)
-    this.timers[id] = newTimer
-    newTimer.run()
+  setTimeout(name: string, fn: VoidFunction, duration: number) {
+    const newTimer = new Timer(name, fn, duration, "timeout")
+    newTimer.setTimer(setTimeout(fn, TIMEOUT))
+    this.timers[name] = newTimer
   }
 
-  clear(id: number) {
-    const currentTimer = this.timers[id]
-    clearTimeout(currentTimer.id)
+  setInterval(name: string, fn: VoidFunction, duration: number) {
+    const newTimer = new Timer(name, fn, duration, "interval")
+    newTimer.setTimer(setInterval(fn, TIMEOUT))
+    this.timers[name] = newTimer
+  }
+
+  setImmediate(name: string, fn: VoidFunction) {
+    const newTimer = new Timer(name, fn, 0, "immediate")
+    newTimer.setTimer(setImmediate(fn))
+    this.timers[name] = newTimer
+  }
+
+  clear(names: string[]) {
+    names.forEach((name) => {
+      const currentTimer = this.timers[name]
+      if (name === "timeout") {
+        clearTimeout(currentTimer.timer as NodeJS.Timeout)
+      } else if (name === "interval") {
+        clearInterval(currentTimer.timer as NodeJS.Timeout)
+      } else if (name === "immediate" && currentTimer.name) {
+        clearImmediate(currentTimer.timer as NodeJS.Immediate)
+      }
+    })
+  }
+
+  active(name: string) {
+    if (!this.timers) return
+    return name in this.timers
+  }
+
+  adjust(name: string, duration: number) {
+    const timer = this.timers[name]
+    this.clear([timer.type])
+    if (timer.type === "timeout") {
+      this.setTimeout(name, timer.fn ? timer.fn : voidfn, duration)
+    } else if (timer.type === "interval") {
+      this.setInterval(name, timer.fn ? timer.fn : voidfn, duration)
+    } else if (timer.type === "immediate") {
+      this.setImmediate(name, timer.fn ? timer.fn : voidfn)
+    }
   }
 
   check() {}
 }
 
-export { Timer, Tick }
+export { Tick }
+
+function voidfn() {}
