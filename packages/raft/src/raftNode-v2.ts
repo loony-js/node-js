@@ -136,7 +136,7 @@ class Raft extends EventEmitter {
     // the heartbeat will automatically be broadcasted to users as well.
     //
     this.on("state change", (state) => {
-      this.timers?.clear("heartbeat, election")
+      this.timers?.clear(["heartbeat", "election"])
       this.heartbeat(
         RAFT_STATE.LEADER === this.state ? this.beat : this.timeout(),
       )
@@ -789,12 +789,10 @@ class Raft extends EventEmitter {
     // reached within the set timeout we will attempt it again.
     //
     if (this.timers) {
-      const x = this.timers?.clear("heartbeat, election")
-      if (x) {
-        const timeout = this.timeout()
-        if (timeout) {
-          x.setTimeout("election", this.promote, timeout)
-        }
+      const x = this.timers?.clear(["heartbeat", "election"])
+      const timeout = this.timeout()
+      if (timeout) {
+        this.timers.setTimeout("election", this.promote, timeout)
       }
     }
 
@@ -976,7 +974,7 @@ class Raft extends EventEmitter {
       }
 
     this.emit("end")
-    this.timers?.end()
+    this.timers?.end(["heartbeat", "election"])
     this.removeAllListeners()
 
     if (this.log) this.db.end()

@@ -84,6 +84,13 @@ class Tick {
   }
 
   check() {}
+
+  end(names: string[]) {
+    this.clear(names)
+    this.timers = {}
+
+    return true
+  }
 }
 
 export { Tick }
