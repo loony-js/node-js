@@ -1,11 +1,9 @@
 import { useCallback, useEffect, useState, useRef } from "react"
 import { getVoiceRecorder, VoiceRecorder } from "loony-web-audio"
 
-export const useWebSocket = (): [
-  WebSocket | undefined,
-  () => void,
-  () => void,
-] => {
+export const useWebSocket = (
+  url: string,
+): [WebSocket | undefined, () => void, () => void] => {
   const [socket, setSocket] = useState<undefined | WebSocket>()
 
   useEffect(() => {
@@ -32,7 +30,7 @@ export const useWebSocket = (): [
   }, [socket])
 
   const connect = useCallback(() => {
-    const ws = new WebSocket("ws://localhost:2000")
+    const ws = new WebSocket(url)
     function handleOpen() {
       console.log("Websocket connected.")
       setSocket(ws)
@@ -53,35 +51,53 @@ export const useWebSocket = (): [
   return [socket, connect, disConnect]
 }
 
-export const useMicrophone = (): [
-  boolean,
-  (socket: WebSocket) => void,
-  (socket: WebSocket) => void,
-  () => string | undefined,
-] => {
+export const useMicrophone = (): {
+  isRecording: boolean
+  startRecordingWithSocket: (socket: WebSocket) => void
+  startRecording: () => void
+  stopRecording: () => void
+  getAudioUrl: () => string | undefined
+} => {
   const [isRecording, setRecording] = useState(false)
   const recorder = useRef<VoiceRecorder | null>(null)
 
-  const startRecording = (socket: WebSocket) => {
+  const startRecordingWithSocket = (socket: WebSocket) => {
     if (!recorder.current && socket) {
       getVoiceRecorder(undefined).then((res) => {
         recorder.current = res
-        recorder.current?.startRecording(socket as WebSocket)
+        recorder.current?.startRecordingWithSocket(socket as WebSocket)
         setRecording(true)
       })
     }
   }
-  const stopRecording = (socket: WebSocket) => {
-    if (socket) {
-      recorder.current?.stopRecording()
-      recorder.current = null
-      setRecording(false)
+
+  const startRecording = () => {
+    recorder.current = null
+    if (!recorder.current) {
+      getVoiceRecorder(undefined).then((res) => {
+        recorder.current = res
+        recorder.current?.startRecording()
+        setRecording(true)
+      })
     }
   }
 
-  const getAudioUrl = () => {
-    return recorder.current?.getAudioUrl()
+  const stopRecording = () => {
+    recorder.current?.stopRecording()
+    setRecording(false)
   }
 
-  return [isRecording, startRecording, stopRecording, getAudioUrl]
+  const getAudioUrl = () => {
+    const url = recorder.current?.getAudioUrl()
+    recorder.current = null
+    return url
+  }
+
+  return {
+    isRecording,
+    startRecordingWithSocket,
+    startRecording,
+    stopRecording,
+    getAudioUrl,
+  }
 }

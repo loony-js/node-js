@@ -1,1 +1,1 @@
-export { getVoiceRecorder } from "./ImplsAudioContext"
+export { getVoiceRecorder, VoiceRecorder } from "./ImplsAudioContext"

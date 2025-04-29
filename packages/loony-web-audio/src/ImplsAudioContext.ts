@@ -6,7 +6,7 @@ export const getVoiceRecorder = async (
   return VoiceRecorder.create(mediaStreamConstraints)
 }
 
-class VoiceRecorder {
+export class VoiceRecorder {
   private micStream: MediaStream
   private audioContext: AudioContext | null
   private mediaStreamAudioSourceNode: undefined | MediaStreamAudioSourceNode
@@ -51,12 +51,23 @@ class VoiceRecorder {
     this.audioContext?.close()
   }
 
-  startRecording(socket: WebSocket) {
+  startRecordingWithSocket(socket: WebSocket) {
     if (this.audioWorkletNode) {
       this.audioWorkletNode.port.onmessage = (
         event: MessageEvent<Float32Array>,
       ) => {
         socket.send(convertFloat32ToInt16(event.data))
+        this.buffer.push(...event.data)
+      }
+      this.audioWorkletNode.port.postMessage("start")
+    }
+  }
+
+  startRecording() {
+    if (this.audioWorkletNode) {
+      this.audioWorkletNode.port.onmessage = (
+        event: MessageEvent<Float32Array>,
+      ) => {
         this.buffer.push(...event.data)
       }
       this.audioWorkletNode.port.postMessage("start")
@@ -74,6 +85,7 @@ class VoiceRecorder {
       type: "audio/wav",
     })
     const audioUrl = URL.createObjectURL(audioBlob)
+    console.log(audioUrl)
     return audioUrl
   }
 }

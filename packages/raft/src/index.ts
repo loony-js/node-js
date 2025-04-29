@@ -1,124 +1,57 @@
-import express from "express"
-// import { handleWebSocket } from "./socket"
-import {
-  PORT,
-  // WS_CLIENTS,
-  PEERS,
-} from "./config"
-import { app, server } from "./app"
-import { RaftNode } from "./raftNode-v1"
-import { RaftLog, LogEntry } from "./raftLog"
-// import { RaftNode } from "./node"
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// const debug = require("diagnostics")("raft")
+// const argv = require("argh").argv
+// const LifeRaft = require("../")
+// const net = require("net")
+import { Raft } from "./raftNode-v3"
+import { Message } from "./utils"
+// import { Message } from "./utils"
 
-// const raftNode = new RaftNode(parseInt(PORT))
-// Middleware
-app.use(express.json())
-// app.locals.RaftNode = raftNode
-// Simple Route
-app.get("/", (req, res) => {
-  res.send("Hello, Express!")
-})
-
-app.get("/connectPeers", (req, res) => {
-  res.send("Ok")
-})
-
-app.get("/get", (req, res) => {
-  res.send("Ok")
-})
-
-app.post("/set", (req, res) => {
-  if (!req.body) {
-    res.status(400).send("Body cannot be empty")
-  }
-  // const raftNode: RaftNode = req.app.locals.RaftNode
-  // raftNode.set(req.body)
-  res.send("Ok")
-})
-
-const raftNode = new RaftNode(
-  `${PORT}`,
-  PEERS.map((peer) => {
-    return `http://localhost:${peer}`
-  }),
-)
-
-const raftLog = new RaftLog()
-
-app.post("/vote", (req, res) => {
-  raftNode.handleVoteRequest(req, res)
-})
-app.post("/heartbeat", (req, res) => {
-  raftNode.handleHeartbeat(req, res)
-})
-
-// Endpoint to accept a command from client
-app.post("/command", (req, res) => {
-  const { command } = req.body
-
-  if (!command) {
-    res.status(400).json({ error: "Missing command" })
-    return
+//
+// Create a custom Raft instance which uses a plain TCP server and client to
+// communicate back and forth.
+//
+class TCPRaft extends Raft {
+  constructor(port: any, options: any) {
+    super(port, options)
+    this.init()
   }
 
-  // Generate log entry
-  const logEntry: LogEntry = {
-    term: raftNode.currentTerm,
-    command,
+  init() {
+    this.on(Message.CANDIDATE, () => {
+      console.log(Message.CANDIDATE)
+    })
   }
+}
 
-  // Append locally
-  const success = raftLog.appendEntry(logEntry)
+//
+// We're going to start with a static list of servers. A minimum cluster size is
+// 4 as that only requires majority of 3 servers to have a new leader to be
+// assigned. This allows the failure of one single server.
+//
+const ports = [8081, 8082, 8083, 8084, 8085, 8086]
 
-  if (!success) {
-    res.status(500).json({ error: "Failed to append log" })
-    return
-  }
-  raftNode.sendLogAppendEntryToPeers(logEntry)
-  raftLog.commit()
+//
+// The port number of this Node process.
+//
+const port = process.env.PORT ? +process.env.PORT : ports[0]
 
-  res.json({ success: true, status: 200 })
+//
+// Now that we have all our variables we can safely start up our server with our
+// assigned port number.
+//
+const raft = new TCPRaft(port, {
+  election: {
+    min: 2000,
+    max: 5000,
+  },
+  heartbeat: 1000,
+  address: port,
 })
 
-app.post("/appendEntry", (req, res) => {
-  const { entry, term } = req.body
-
-  if (raftNode.currentTerm !== term) {
-    res.status(400).json({ error: "Invalid term." })
-    return
-  }
-
-  if (!entry) {
-    res.status(400).json({ error: "Missing command" })
-    return
-  }
-
-  // Append locally
-  const success = raftLog.appendEntry(entry)
-
-  if (!success) {
-    res.status(500).json({ error: "Failed to append log" })
-    return
-  }
-
-  raftLog.commit()
-
-  res.json({ success: true, status: 200 })
+raft.on(Message.CANDIDATE, () => {
+  console.log("----------------------------------")
+  console.log("I am starting as candidate")
+  console.log("----------------------------------")
 })
-
-// Get all log entries
-app.get("/log", (req, res) => {
-  const entries = raftLog.getEntries(0, 2)
-  res.json(entries)
-})
-
-app.get("/status", (req, res) => {
-  const entries = raftLog.status()
-  res.json(entries)
-})
-
-// handleWebSocket(server, WS_CLIENTS, raftNode)
-
-server.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`)
-})
+setTimeout(() => {}, 3000)

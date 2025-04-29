@@ -1,31 +1,53 @@
 import { useWebSocket, useMicrophone } from "hooks"
 import "./assets/css/desktop.css"
+import { useState } from "react"
+
+const withSocket = true
+const defaultSocketUrl = `ws://localhost:2000/ws`
 
 export default function VoiceStreaming() {
+  const [url, setUrl] = useState(defaultSocketUrl)
   const [socket, connect, disconnect]: [
     WebSocket | undefined,
     () => void,
     () => void,
-  ] = useWebSocket()
-  const [isRecording, startRecording, stopRecording] = useMicrophone()
+  ] = useWebSocket(url)
+
+  const [audioUrl, setAudioUrl] = useState<string | undefined>()
+
+  const {
+    isRecording,
+    startRecordingWithSocket,
+    startRecording,
+    stopRecording,
+    getAudioUrl,
+  } = useMicrophone()
 
   const onClickStartRecording = () => {
-    if (socket) {
+    if (withSocket && socket) {
       socket.send("START_VOICE_RECORDING")
 
       // We need this timeout to give time to initialize the Speechmatics web socket.
       setTimeout(() => {
-        startRecording(socket)
+        startRecordingWithSocket(socket)
       }, 1000)
+    } else {
+      startRecording()
     }
   }
 
   const onClickStopRecording = () => {
-    if (socket) {
+    if (withSocket && socket) {
       socket.send("STOP_VOICE_RECORDING")
-      stopRecording(socket)
+      stopRecording()
+      setAudioUrl(getAudioUrl())
+    } else {
+      stopRecording()
+      const audiourl = getAudioUrl()
+      setAudioUrl(audiourl)
     }
   }
+
   const onChangeFile = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files
     if (!file || !socket) return
@@ -56,6 +78,15 @@ export default function VoiceStreaming() {
             ) : (
               <span className="red-txt">Socket Disconnected</span>
             )}
+            <div>
+              Port:{" "}
+              <input
+                onChange={(e) => {
+                  setUrl(e.target.value)
+                }}
+                value={defaultSocketUrl}
+              />
+            </div>
           </div>
           <div className="pad-ver-5">
             <button
@@ -92,14 +123,33 @@ export default function VoiceStreaming() {
             <input type="file" onChange={onChangeFile} />
           </div>
         </div>
+
+        {audioUrl && (
+          <div>
+            <audio src={audioUrl} controls>
+              {/* <source src={audioUrl} type="audio/wav"></source> */}
+            </audio>
+          </div>
+        )}
       </div>
 
-      <div>
-        Lorem Ipsum is simply dummy text of the printing and typesetting
-        industry. Lorem Ipsum has been the industrys standard dummy text ever
-        since the 1500s, when an unknown printer took a galley of type and
-        scrambled it to make a type specimen book.
+      <div style={{ marginTop: 25 }}>
+        <ul>
+          {texts.map((t, index) => {
+            return <li key={index}>{t}</li>
+          })}
+        </ul>
       </div>
     </div>
   )
 }
+
+const texts = [
+  "that will cost nine hundred dollars.",
+  "my phone number is one eight hundred, four five six, eight nine ten.",
+  "the time is six forty five p m.",
+  "I live on thirty five lexington avenue",
+  "the answer is six point five.",
+  "send it to support at help dot com",
+  "the options are apple forward slash banana forward slash orange period",
+]
