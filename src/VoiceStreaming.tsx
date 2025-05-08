@@ -84,7 +84,7 @@ export default function VoiceStreaming() {
                 onChange={(e) => {
                   setUrl(e.target.value)
                 }}
-                value={defaultSocketUrl}
+                value={url}
               />
             </div>
           </div>

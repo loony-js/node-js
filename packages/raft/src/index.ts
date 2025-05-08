@@ -1,57 +1,41 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// const debug = require("diagnostics")("raft")
-// const argv = require("argh").argv
-// const LifeRaft = require("../")
-// const net = require("net")
-import { Raft } from "./raftNode-v3"
-import { Message } from "./utils"
-// import { Message } from "./utils"
+import { RaftNode } from "./raftNode-v1"
+import WebSocket from "ws"
 
-//
-// Create a custom Raft instance which uses a plain TCP server and client to
-// communicate back and forth.
-//
-class TCPRaft extends Raft {
-  constructor(port: any, options: any) {
-    super(port, options)
-    this.init()
-  }
+class HandleRaft extends RaftNode {}
 
-  init() {
-    this.on(Message.CANDIDATE, () => {
-      console.log(Message.CANDIDATE)
-    })
-  }
-}
+const port = 2000
+const ports = [2000, 2001, 2002]
 
-//
-// We're going to start with a static list of servers. A minimum cluster size is
-// 4 as that only requires majority of 3 servers to have a new leader to be
-// assigned. This allows the failure of one single server.
-//
-const ports = [8081, 8082, 8083, 8084, 8085, 8086]
-
-//
-// The port number of this Node process.
-//
-const port = process.env.PORT ? +process.env.PORT : ports[0]
-
-//
-// Now that we have all our variables we can safely start up our server with our
-// assigned port number.
-//
-const raft = new TCPRaft(port, {
-  election: {
-    min: 2000,
-    max: 5000,
+const node = new HandleRaft(port, ports)
+const wss = new WebSocket.Server({
+  port: 8080,
+  perMessageDeflate: {
+    zlibDeflateOptions: {
+      // See zlib defaults.
+      chunkSize: 1024,
+      memLevel: 7,
+      level: 3,
+    },
+    zlibInflateOptions: {
+      chunkSize: 10 * 1024,
+    },
+    // Other options settable:
+    clientNoContextTakeover: true, // Defaults to negotiated value.
+    serverNoContextTakeover: true, // Defaults to negotiated value.
+    serverMaxWindowBits: 10, // Defaults to negotiated value.
+    // Below options specified as default values.
+    concurrencyLimit: 10, // Limits zlib concurrency for perf.
+    threshold: 1024, // Size (in bytes) below which messages
+    // should not be compressed if context takeover is disabled.
   },
-  heartbeat: 1000,
-  address: port,
 })
 
-raft.on(Message.CANDIDATE, () => {
-  console.log("----------------------------------")
-  console.log("I am starting as candidate")
-  console.log("----------------------------------")
+wss.on("connection", function connection(ws) {
+  ws.on("error", console.error)
+
+  ws.on("message", function message(data) {
+    console.log("received: %s", data)
+  })
+
+  ws.send("something")
 })
-setTimeout(() => {}, 3000)

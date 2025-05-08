@@ -1,6 +1,7 @@
-import { Request, Response } from "express"
-// import { request } from "loony-utils"
-// import { ConnectedPeers } from "./node"
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// deno-lint-ignore-file
+
+import EventEmitter from "node:events"
 
 interface LogEntry {
   term: number
@@ -10,28 +11,62 @@ interface LogEntry {
 const HEARTBEAT_INTERVAL = 1500
 const ELECTION_TIMER = 3000
 
-export class RaftNode {
-  id: string
-  peers: string[]
+enum RAFT_STATE {
+  STOPPED = 0,
+  LEADER = 1,
+  CANDIDATE = 2,
+  FOLLOWER = 3,
+  CHILD = 4,
+}
+
+export enum MESSAGE {
+  TERM_CHANGE = "TC",
+  STATE_CHANGE = "SC",
+  DATA = "DATA",
+  PING = "PING",
+}
+
+export type Packet = {
+  state: number
+  term: number
+  address: number
+  type: string
+  leader: number | null
+  candidateId?: number
+  leaderId?: number
+  last?: any // Mark as optional since it's conditionally added
+  data?: any // Also optional
+}
+
+export class RaftNode extends EventEmitter {
+  id: number
+  peers: number[]
   // peers: ConnectedPeers | undefined
 
-  state: "follower" | "candidate" | "leader"
-  currentTerm: number
-  votedFor: string | null
+  state: RAFT_STATE
+  term: number
+  vote: {
+    for: number | null
+    granted: number
+  }
   log: LogEntry[]
   // commitIndex: number
   // lastApplied: number
-  leaderId: string | null
+  leaderId: number | null
   electionTimeout: number
   heartbeatInterval: number
-  electionTimer: NodeJS.Timeout | null
+  electionTimer: number | null
 
-  constructor(id: string, peers: string[]) {
+  constructor(id: number, peers: number[]) {
+    super()
     this.id = id
     this.peers = peers
-    this.state = "follower"
-    this.currentTerm = 0
-    this.votedFor = null
+    this.state = RAFT_STATE.FOLLOWER
+    this.term = 0
+    this.vote = {
+      for: null,
+      granted: 0,
+    }
     this.log = []
     // this.commitIndex = 0
     // this.lastApplied = 0
@@ -39,6 +74,13 @@ export class RaftNode {
     this.electionTimeout = this.resetElectionTimeout()
     this.heartbeatInterval = 1500
     this.electionTimer = null
+    this.__initialize()
+  }
+
+  __initialize() {
+    this.on("setter", (a, b) => {
+      console.log(a, b)
+    })
 
     this.startElectionTimer()
   }
@@ -51,21 +93,23 @@ export class RaftNode {
   }
 
   startElectionTimer(): void {
-    if (this.electionTimer) clearTimeout(this.electionTimer)
-    this.electionTimer = setTimeout(
-      () => this.startElection(),
-      this.electionTimeout,
-    )
+    // if (this.electionTimer) clearTimeout(this.electionTimer)
+    // this.electionTimer = setTimeout(
+    //   () => this.startElection(),
+    //   this.electionTimeout,
+    // )
   }
 
-  async startElection(): Promise<void> {
-    this.state = "candidate"
-    this.currentTerm++
-    this.votedFor = this.id
-    let votes = 1
-    console.log(
-      `Node ${this.id} is starting an election for term ${this.currentTerm}`,
-    )
+  async startElection() {}
+
+  async startElectionSafe(): Promise<void> {
+    this.state = RAFT_STATE.CANDIDATE
+    this.term++
+    this.vote = {
+      for: this.id,
+      granted: 1,
+    }
+    console.log(`Node ${this.id} is starting an election for term ${this.term}`)
 
     await Promise.all(
       this.peers.map(async (peer) => {
@@ -76,12 +120,12 @@ export class RaftNode {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              term: this.currentTerm,
+              term: this.term,
               candidateId: this.id,
             }),
           }).then((res) => res.json())
 
-          if (res.voteGranted) votes++
+          if (res.voteGranted) this.vote.granted++
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {
           console.error("Vote request failed", error.message)
@@ -89,7 +133,7 @@ export class RaftNode {
       }),
     )
 
-    if (votes > Math.floor((this.peers.length + 1) / 2)) {
+    if (this.vote.granted > Math.floor((this.peers.length + 1) / 2)) {
       this.becomeLeader()
     } else {
       this.startElectionTimer()
@@ -97,14 +141,14 @@ export class RaftNode {
   }
 
   becomeLeader(): void {
-    this.state = "leader"
+    this.state = RAFT_STATE.LEADER
     this.leaderId = this.id
     console.log(`Node ${this.id} is now the leader`)
     this.sendHeartbeats()
   }
 
   async sendHeartbeats(): Promise<void> {
-    if (this.state !== "leader") return
+    if (this.state !== RAFT_STATE.LEADER) return
 
     setInterval(async () => {
       await Promise.all(
@@ -116,7 +160,7 @@ export class RaftNode {
                 "Content-Type": "application/json",
               },
               body: JSON.stringify({
-                term: this.currentTerm,
+                term: this.term,
                 leaderId: this.id,
               }),
             }).then((res) => res.json())
@@ -129,30 +173,34 @@ export class RaftNode {
     }, this.heartbeatInterval)
   }
 
-  handleVoteRequest(req: Request, res: Response): void {
-    const { term, candidateId } = req.body
-    if (term > this.currentTerm) {
-      this.currentTerm = term
-      this.votedFor = candidateId
+  handleVoteRequest(packet: Packet): boolean {
+    const { term, candidateId } = packet
+    if (term > this.term) {
+      this.term = term
+      if (candidateId) {
+        this.vote.for = candidateId
+      }
       this.startElectionTimer()
-      res.json({ voteGranted: true })
+      return true
     } else {
-      res.json({ voteGranted: false })
+      return false
     }
   }
 
-  handleHeartbeat(req: Request, res: Response): void {
-    const { term, leaderId } = req.body
-    if (term >= this.currentTerm) {
-      this.currentTerm = term
-      this.leaderId = leaderId
-      this.state = "follower"
+  handleHeartbeat(packet: Packet): boolean {
+    const { term, leaderId } = packet
+    if (term >= this.term) {
+      this.term = term
+      if (leaderId) {
+        this.leaderId = leaderId
+      }
+      this.state = RAFT_STATE.FOLLOWER
       this.startElectionTimer()
     }
     if (term / 10 === 0) {
       console.clear()
     }
-    res.json({ success: true })
+    return true
   }
 
   async sendLogAppendEntryToPeers(entry: LogEntry) {
@@ -165,7 +213,7 @@ export class RaftNode {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              term: this.currentTerm,
+              term: this.term,
               entry,
             }),
           }).then((res) => res.json())
