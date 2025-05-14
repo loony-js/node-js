@@ -4,14 +4,16 @@
   "description": "Raft implementation in Javascript",
   "main": "./dist/index.js",
   "scripts": {
-    "build": "rm -rf dist && tsc",
-    "dev": "rm -rf dist && tsc && node ./dist/index.js"
+    "build": "./scripts/build.sh",
+    "dev": "node ./dist/index.js",
+    "grpc:server": "node ./dist/grpc.server.js",
+    "grpc:client": "node ./dist/grpc.client.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@grpc/grpc-js": "^1.13.2",
-    "@grpc/proto-loader": "^0.7.13",
+    "@grpc/grpc-js": "^1.13.3",
+    "@grpc/proto-loader": "^0.7.15",
     "abstract-level": "^3.1.0",
     "argh": "^1.0.0",
     "axon": "^2.0.3",

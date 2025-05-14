@@ -1,41 +1,51 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import process from "node:process"
 import { RaftNode } from "./raftNode-v1"
-import WebSocket from "ws"
+import config from "./config.json"
+import { server as grpcServer } from "./grpc.server"
+import { client as grpcClient } from "./grpc.client"
+import * as grpc from "@grpc/grpc-js"
 
-class HandleRaft extends RaftNode {}
+const ports = config.ports
 
-const port = 2000
-const ports = [2000, 2001, 2002]
-
-const node = new HandleRaft(port, ports)
-const wss = new WebSocket.Server({
-  port: 8080,
-  perMessageDeflate: {
-    zlibDeflateOptions: {
-      // See zlib defaults.
-      chunkSize: 1024,
-      memLevel: 7,
-      level: 3,
-    },
-    zlibInflateOptions: {
-      chunkSize: 10 * 1024,
-    },
-    // Other options settable:
-    clientNoContextTakeover: true, // Defaults to negotiated value.
-    serverNoContextTakeover: true, // Defaults to negotiated value.
-    serverMaxWindowBits: 10, // Defaults to negotiated value.
-    // Below options specified as default values.
-    concurrencyLimit: 10, // Limits zlib concurrency for perf.
-    threshold: 1024, // Size (in bytes) below which messages
-    // should not be compressed if context takeover is disabled.
-  },
-})
-
-wss.on("connection", function connection(ws) {
-  ws.on("error", console.error)
-
-  ws.on("message", function message(data) {
-    console.log("received: %s", data)
+const nodeExists = () => {
+  return new Promise((resolve, reject) => {
+    grpcClient.PingRequest({}, (err: any) => {
+      if (err) {
+        reject(false)
+      } else {
+        resolve(true)
+      }
+    })
   })
+}
 
-  ws.send("something")
-})
+;(async () => {
+  let port = null
+  let c = 0
+  while (c !== ports.length) {
+    try {
+      await nodeExists()
+      c += 1
+    } catch (err) {
+      console.log(err)
+      port = ports[c]
+      c += 1
+      break
+    }
+  }
+
+  if (!port) {
+    process.exit()
+  }
+
+  class RaftHandler extends RaftNode {}
+
+  new RaftHandler(port, ports)
+
+  const url = `0.0.0.0:${port}`
+  grpcServer.bindAsync(url, grpc.ServerCredentials.createInsecure(), () => {
+    console.log(`gRPC server running at ${url}`)
+    // server.start()
+  })
+})()

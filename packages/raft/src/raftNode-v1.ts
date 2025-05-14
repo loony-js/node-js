@@ -55,7 +55,8 @@ export class RaftNode extends EventEmitter {
   leaderId: number | null
   electionTimeout: number
   heartbeatInterval: number
-  electionTimer: number | null
+  electionTimer: NodeJS.Timeout | null
+  write: any
 
   constructor(id: number, peers: number[]) {
     super()
@@ -78,11 +79,16 @@ export class RaftNode extends EventEmitter {
   }
 
   __initialize() {
-    this.on("setter", (a, b) => {
-      console.log(a, b)
+    this.on("setter", (write) => {
+      console.log(write, "write")
+      this.write = write
     })
+  }
 
-    this.startElectionTimer()
+  addNode() {
+    if (this.peers.length >= 3) {
+      this.startElectionTimer()
+    }
   }
 
   resetElectionTimeout(): number {
@@ -93,11 +99,11 @@ export class RaftNode extends EventEmitter {
   }
 
   startElectionTimer(): void {
-    // if (this.electionTimer) clearTimeout(this.electionTimer)
-    // this.electionTimer = setTimeout(
-    //   () => this.startElection(),
-    //   this.electionTimeout,
-    // )
+    if (this.electionTimer) clearTimeout(this.electionTimer)
+    this.electionTimer = setTimeout(
+      () => this.startElection(),
+      this.electionTimeout,
+    )
   }
 
   async startElection() {}

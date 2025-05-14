@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package raft;
+
+service RaftService {
+  rpc SayHello (HelloRequest) returns (HelloReply);
+  rpc PingRequest (Ping) returns (Pong);
+}
+
+message HelloRequest {
+  string title = 1;
+}
+
+message HelloReply {
+  string title = 1;
+}
+
+message Ping {
+}
+
+message Pong {
+  string message = 1;
+}
