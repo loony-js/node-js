@@ -2,6 +2,7 @@
 // deno-lint-ignore-file
 
 import EventEmitter from "node:events"
+import * as grpc from "@grpc/grpc-js"
 
 interface LogEntry {
   term: number
@@ -83,6 +84,15 @@ export class RaftNode extends EventEmitter {
       console.log(write, "write")
       this.write = write
     })
+  }
+
+  addPeer(
+    call: grpc.ServerUnaryCall<any, any>,
+    callback: grpc.sendUnaryData<any>,
+  ) {
+    const peerId = call.request.peerId
+    this.peers.push(peerId)
+    callback(null, {})
   }
 
   addNode() {

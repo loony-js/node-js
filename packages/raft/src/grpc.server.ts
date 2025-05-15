@@ -9,16 +9,16 @@ const packageDefinition = protoLoader.loadSync(
 const grpcPackageDef = grpc.loadPackageDefinition(packageDefinition) as any
 const raftProto = grpcPackageDef.raft
 
-function sayHello(
-  call: grpc.ServerUnaryCall<any, any>,
-  callback: grpc.sendUnaryData<any>,
-) {
-  // console.log(`From client: ${call.request.title}`)
-  callback(null, { title: `Hello, from raft server` })
-}
+// function nodeAlive(
+//   call: grpc.ServerUnaryCall<any, any>,
+//   callback: grpc.sendUnaryData<any>,
+// ) {
+//   // console.log(`From client: ${call.request.title}`)
+//   callback(null, { alive: true })
+// }
 
 const server = new grpc.Server()
-server.addService(raftProto.RaftService.service, { SayHello: sayHello })
+// server.addService(raftProto.RaftService.service, { NodeAlive: nodeAlive })
 // server.bindAsync(
 //   "0.0.0.0:50051",
 //   grpc.ServerCredentials.createInsecure(),
@@ -28,4 +28,4 @@ server.addService(raftProto.RaftService.service, { SayHello: sayHello })
 //   },
 // )
 
-export { server }
+export { server, raftProto }
