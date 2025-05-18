@@ -36,7 +36,7 @@ export type Packet = {
   candidateId?: number
   leaderId?: number
   last?: any // Mark as optional since it's conditionally added
-  data?: any // Also optional
+  entry?: any // Also optional
 }
 
 export class RaftNode extends EventEmitter {
@@ -59,7 +59,7 @@ export class RaftNode extends EventEmitter {
   electionTimer: NodeJS.Timeout | null
   write: any
 
-  constructor(id: number) {
+  constructor(id: number, peers: any | undefined) {
     super()
     this.id = id
     this.state = RAFT_STATE.FOLLOWER
@@ -75,15 +75,12 @@ export class RaftNode extends EventEmitter {
     this.electionTimeout = this.resetElectionTimeout()
     this.heartbeatInterval = 1500
     this.electionTimer = null
-    this.peers = []
+    this.peers = peers.map((p: number) => `http://localhost:${p}`)
     this.__initialize()
   }
 
   __initialize() {
-    this.on("setter", (write) => {
-      console.log(write, "write")
-      this.write = write
-    })
+    this.startElectionTimer()
   }
 
   addPeer(peer: string) {
@@ -117,6 +114,14 @@ export class RaftNode extends EventEmitter {
     }
     console.log(`Node ${this.id} is starting an election for term ${this.term}`)
 
+    const handleVotes = () => {
+      if (this.vote.granted > Math.floor((this.peers.length + 1) / 2)) {
+        this.becomeLeader()
+      } else {
+        this.startElectionTimer()
+      }
+    }
+
     await Promise.all(
       this.peers.map(async (peer) => {
         const url = `${peer}/voteRequest`
@@ -124,17 +129,14 @@ export class RaftNode extends EventEmitter {
           term: this.term,
           candidateId: this.id,
         }
-        post(url, body).then((res: any) => {
-          if (res.voteGranted) this.vote.granted++
-        })
+        post(url, body)
+          .then((res: any) => {
+            if (res.voteGranted) this.vote.granted++
+            handleVotes()
+          })
+          .catch(() => {})
       }),
     )
-
-    if (this.vote.granted > Math.floor((this.peers.length + 1) / 2)) {
-      this.becomeLeader()
-    } else {
-      this.startElectionTimer()
-    }
   }
 
   becomeLeader(): void {
@@ -155,13 +157,13 @@ export class RaftNode extends EventEmitter {
             term: this.term,
             leaderId: this.id,
           }
-          post(url, body)
+          post(url, body).catch(() => {})
         }),
       )
     }, this.heartbeatInterval)
   }
 
-  handleVoteRequest(packet: Packet): boolean {
+  handleVoteRequest(packet: Packet): any {
     const { term, candidateId } = packet
     if (term > this.term) {
       this.term = term
@@ -169,9 +171,13 @@ export class RaftNode extends EventEmitter {
         this.vote.for = candidateId
       }
       this.startElectionTimer()
-      return true
+      return {
+        voteGranted: true,
+      }
     } else {
-      return false
+      return {
+        voteGranted: false,
+      }
     }
   }
 
@@ -199,9 +205,15 @@ export class RaftNode extends EventEmitter {
           term: this.term,
           entry,
         }
-        post(url, body)
+        post(url, body).catch(() => {})
       }),
     )
+  }
+
+  handleAppendEntry(packet: Packet) {
+    if (packet.term === this.term) {
+      this.log.push(packet.entry)
+    }
   }
 }
 

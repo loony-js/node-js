@@ -4,9 +4,9 @@ import { RaftNode } from "./raftNode-v1"
 import express from "express"
 import http from "http"
 
-import { HTTP_PORT } from "./init"
+import { HTTP_PORT, PEERS } from "./init"
 
-const node = new RaftNode(HTTP_PORT)
+const node = new RaftNode(HTTP_PORT, PEERS)
 
 // const grpcServer = new GrpcHandler()
 // grpcServer.start(GRPC_PORT)
@@ -32,8 +32,12 @@ app.post("/heartbeat", (req, res) => {
   res.send("Ok")
 })
 
-app.post("/vote", (req, res) => {
-  node.handleVoteRequest(req.body)
+app.post("/voteRequest", (req, res) => {
+  res.send(node.handleVoteRequest(req.body))
+})
+
+app.post("/appendEntry", (req, res) => {
+  node.handleAppendEntry(req.body)
   res.send("Ok")
 })
 
