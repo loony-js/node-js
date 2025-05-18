@@ -2,7 +2,7 @@
 // deno-lint-ignore-file
 
 import EventEmitter from "node:events"
-import * as grpc from "@grpc/grpc-js"
+// import * as grpc from "@grpc/grpc-js"
 
 interface LogEntry {
   term: number
@@ -41,7 +41,7 @@ export type Packet = {
 
 export class RaftNode extends EventEmitter {
   id: number
-  peers: number[]
+  peers: string[]
   // peers: ConnectedPeers | undefined
 
   state: RAFT_STATE
@@ -59,10 +59,9 @@ export class RaftNode extends EventEmitter {
   electionTimer: NodeJS.Timeout | null
   write: any
 
-  constructor(id: number, peers: number[]) {
+  constructor(id: number) {
     super()
     this.id = id
-    this.peers = peers
     this.state = RAFT_STATE.FOLLOWER
     this.term = 0
     this.vote = {
@@ -76,6 +75,7 @@ export class RaftNode extends EventEmitter {
     this.electionTimeout = this.resetElectionTimeout()
     this.heartbeatInterval = 1500
     this.electionTimer = null
+    this.peers = []
     this.__initialize()
   }
 
@@ -86,16 +86,8 @@ export class RaftNode extends EventEmitter {
     })
   }
 
-  addPeer(
-    call: grpc.ServerUnaryCall<any, any>,
-    callback: grpc.sendUnaryData<any>,
-  ) {
-    const peerId = call.request.peerId
-    this.peers.push(peerId)
-    callback(null, {})
-  }
-
-  addNode() {
+  addPeer(peer: string) {
+    this.peers.push(peer)
     if (this.peers.length >= 3) {
       this.startElectionTimer()
     }
@@ -116,9 +108,7 @@ export class RaftNode extends EventEmitter {
     )
   }
 
-  async startElection() {}
-
-  async startElectionSafe(): Promise<void> {
+  async startElection(): Promise<void> {
     this.state = RAFT_STATE.CANDIDATE
     this.term++
     this.vote = {
@@ -129,23 +119,14 @@ export class RaftNode extends EventEmitter {
 
     await Promise.all(
       this.peers.map(async (peer) => {
-        try {
-          const res = await fetch(`${peer}/vote`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              term: this.term,
-              candidateId: this.id,
-            }),
-          }).then((res) => res.json())
-
-          if (res.voteGranted) this.vote.granted++
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } catch (error: any) {
-          console.error("Vote request failed", error.message)
+        const url = `${peer}/voteRequest`
+        const body = {
+          term: this.term,
+          candidateId: this.id,
         }
+        post(url, body).then((res: any) => {
+          if (res.voteGranted) this.vote.granted++
+        })
       }),
     )
 
@@ -169,21 +150,12 @@ export class RaftNode extends EventEmitter {
     setInterval(async () => {
       await Promise.all(
         this.peers.map(async (peer) => {
-          try {
-            await fetch(`${peer}/heartbeat`, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                term: this.term,
-                leaderId: this.id,
-              }),
-            }).then((res) => res.json())
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          } catch (error: any) {
-            console.error("Heartbeat failed", error.message)
+          const url = `${peer}/heartbeat`
+          const body = {
+            term: this.term,
+            leaderId: this.id,
           }
+          post(url, body)
         }),
       )
     }, this.heartbeatInterval)
@@ -222,23 +194,37 @@ export class RaftNode extends EventEmitter {
   async sendLogAppendEntryToPeers(entry: LogEntry) {
     await Promise.all(
       this.peers.map(async (peer) => {
-        try {
-          await fetch(`${peer}/appendEntry`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              term: this.term,
-              entry,
-            }),
-          }).then((res) => res.json())
-
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } catch (error: any) {
-          console.error("Vote request failed", error.message)
+        const url = `${peer}/appendEntry`
+        const body = {
+          term: this.term,
+          entry,
         }
+        post(url, body)
       }),
     )
   }
+}
+
+const post = async (url: string, body: any) => {
+  return new Promise((resolve, reject) => {
+    try {
+      fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
+      })
+        .then((res) => res.json())
+        .then((res) => {
+          resolve(res)
+        })
+        .catch((err) => {
+          reject(err)
+        })
+    } catch (error: any) {
+      reject(error)
+      console.error("Vote request failed", error.message)
+    }
+  })
 }

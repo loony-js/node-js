@@ -14,4 +14,12 @@ const client = new raftPackage.RaftService(
   grpc.credentials.createInsecure(),
 )
 
+//  client.AppendEntries(data, (err: grpc.ServiceError | null, response: any) => {
+//     if (err) {
+//       console.error('AppendEntries failed:', err);
+//     } else {
+//       console.log('AppendEntries response:', response);
+//     }
+//   });
+
 export { client }

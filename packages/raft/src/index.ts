@@ -1,51 +1,43 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { RaftNode } from "./raftNode-v1"
-import config from "./config.json"
-import { server as grpcServer, raftProto } from "./grpc.server"
-import * as grpc from "@grpc/grpc-js"
+// import { GrpcHandler } from "./grpc.server"
+import express from "express"
+import http from "http"
 
-const peers = []
-const nodePorts: Record<string, number[]> = config.ports
+import { HTTP_PORT } from "./init"
 
-function nodeAlive(
-  call: grpc.ServerUnaryCall<any, any>,
-  callback: grpc.sendUnaryData<any>,
-) {
-  // console.log(`From client: ${call.request.title}`)
-  callback(null, { alive: true })
-}
+const node = new RaftNode(HTTP_PORT)
 
-;(async () => {
-  const thisPort: string | undefined = process.env.PORT
-  if (!thisPort) {
-    process.exit()
-  }
-  const ports: number[] = nodePorts[thisPort]
-  const PORT = parseInt(thisPort)
+// const grpcServer = new GrpcHandler()
+// grpcServer.start(GRPC_PORT)
 
-  class RaftHandler extends RaftNode {}
+const app = express()
+const server = http.createServer(app)
 
-  const node = new RaftHandler(PORT, ports)
+// Middleware
+app.use(express.json())
 
-  const url = `0.0.0.0:${PORT}`
+// Simple Route
+app.get("/", (req, res) => {
+  res.send("Hello, Express!")
+})
 
-  grpcServer.addService(raftProto.RaftService.service, {
-    NodeAlive: nodeAlive,
-    AddPeer: node.addPeer,
-  })
+app.post("/addNode", (req, res) => {
+  node.addPeer(req.body.peerId)
+  res.send("Ok")
+})
 
-  grpcServer.bindAsync(url, grpc.ServerCredentials.createInsecure(), () => {
-    console.log(`gRPC server running at ${url}`)
-    // server.start()
-  })
+app.post("/heartbeat", (req, res) => {
+  node.handleHeartbeat(req.body)
+  res.send("Ok")
+})
 
-  for (let index = 0; index < ports.length; index++) {
-    const currentPort = ports[index]
-    peers.push(
-      new raftProto.RaftService(
-        `localhost:${currentPort}`,
-        grpc.credentials.createInsecure(),
-      ),
-    )
-  }
-})()
+app.post("/vote", (req, res) => {
+  node.handleVoteRequest(req.body)
+  res.send("Ok")
+})
+
+// Start Server
+server.listen(HTTP_PORT, () => {
+  console.log(`HTTP Server is running on http://localhost:${HTTP_PORT}`)
+})
