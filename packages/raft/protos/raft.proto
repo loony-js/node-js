@@ -3,94 +3,118 @@ syntax = "proto3";
 package raft;
 
 service RaftService {
-  rpc NodeAlive(Empty) returns (NodeAliveResponse);
-  rpc RequestVote(RequestVoteRequest) returns (RequestVoteResponse);
-  rpc AppendEntries(AppendEntriesRequest) returns (AppendEntriesResponse);
-  rpc InstallSnapshot(InstallSnapshotRequest) returns (InstallSnapshotResponse);
+  rpc IsAlive(Empty) returns (Alive);
+  rpc OnHeartbeat(Heartbeat) returns (HeartbeatResponse);
+  rpc OnVoteRequest(VoteRequest) returns (VoteRequestResponse);
+  // rpc NodeAlive(Empty) returns (NodeAliveResponse);
+  // rpc RequestVote(RequestVoteRequest) returns (RequestVoteResponse);
+  // rpc AppendEntries(AppendEntriesRequest) returns (AppendEntriesResponse);
+  // rpc InstallSnapshot(InstallSnapshotRequest) returns (InstallSnapshotResponse);
 
-  // Stream-based log replication (alternative to AppendEntries)
-  rpc StreamEntries(stream AppendEntriesRequest) returns (stream AppendEntriesResponse);
+  // // Stream-based log replication (alternative to AppendEntries)
+  // rpc StreamEntries(stream AppendEntriesRequest) returns (stream AppendEntriesResponse);
 
-  // Cluster management
-  rpc AddPeer(PeerRequest) returns (PeerResponse);
-  rpc RemovePeer(PeerRequest) returns (PeerResponse);
-  rpc ListPeers(Empty) returns (PeerListResponse);
+  // // Cluster management
+  // rpc AddPeer(PeerRequest) returns (PeerResponse);
+  // rpc RemovePeer(PeerRequest) returns (PeerResponse);
+  // rpc ListPeers(Empty) returns (PeerListResponse);
 }
 
-// Raft RPCs
+message Alive {
+  bool alive = 1;
+}
 
-// message NodeAliveRequest {
-//     uint32 node_id = 1;
+message Heartbeat {
+  uint32 term = 1;
+  uint32 leaderId = 2;
+}
+message HeartbeatResponse {
+  bool result = 1;
+}
+
+message VoteRequest {
+  uint32 term = 1;
+  uint32 candidateId = 2;
+}
+message VoteRequestResponse {
+  bool voteGranted = 1;
+}
+
+// message Packet {
+//   uint64 term = 1;
+//   string candidate_id = 2;
+//   uint64 last_log_index = 3;
+//   uint64 last_log_term = 4;
 // }
 
-message NodeAliveResponse {
-    bool alive = 1;
-}
+// message NodeAliveResponse {
+//     bool alive = 1;
+// }
 
-message RequestVoteRequest {
-  uint64 term = 1;
-  string candidate_id = 2;
-  uint64 last_log_index = 3;
-  uint64 last_log_term = 4;
-}
+// message RequestVoteRequest {
+//   uint64 term = 1;
+//   string candidate_id = 2;
+//   uint64 last_log_index = 3;
+//   uint64 last_log_term = 4;
+// }
 
-message RequestVoteResponse {
-  uint64 term = 1;
-  bool vote_granted = 2;
-}
+// message RequestVoteResponse {
+//   uint64 term = 1;
+//   bool vote_granted = 2;
+// }
 
-message AppendEntriesRequest {
-  uint64 term = 1;
-  string leader_id = 2;
-  uint64 prev_log_index = 3;
-  uint64 prev_log_term = 4;
-  repeated LogEntry entries = 5;
-  uint64 leader_commit = 6;
-}
+// message AppendEntriesRequest {
+//   uint64 term = 1;
+//   string leader_id = 2;
+//   uint64 prev_log_index = 3;
+//   uint64 prev_log_term = 4;
+//   repeated LogEntry entries = 5;
+//   uint64 leader_commit = 6;
+// }
 
-message AppendEntriesResponse {
-  uint64 term = 1;
-  bool success = 2;
-  uint64 match_index = 3;
-}
+// message AppendEntriesResponse {
+//   uint64 term = 1;
+//   bool success = 2;
+//   uint64 match_index = 3;
+// }
 
-message InstallSnapshotRequest {
-  uint64 term = 1;
-  string leader_id = 2;
-  uint64 last_included_index = 3;
-  uint64 last_included_term = 4;
-  bytes data = 5;
-  bool done = 6;
-}
+// message InstallSnapshotRequest {
+//   uint64 term = 1;
+//   string leader_id = 2;
+//   uint64 last_included_index = 3;
+//   uint64 last_included_term = 4;
+//   bytes data = 5;
+//   bool done = 6;
+// }
 
-message InstallSnapshotResponse {
-  uint64 term = 1;
-}
+// message InstallSnapshotResponse {
+//   uint64 term = 1;
+// }
 
-message LogEntry {
-  uint64 term = 1;
-  bytes command = 2;
-}
+// message LogEntry {
+//   uint64 term = 1;
+//   bytes command = 2;
+// }
 
-// Cluster management
+// // Cluster management
 
-message PeerRequest {
-  string peer_id = 1;
-  string address = 2;
-}
+// message PeerRequest {
+//   string peer_id = 1;
+//   string address = 2;
+// }
 
-message PeerResponse {
-  bool success = 1;
-  string message = 2;
-}
+// message PeerResponse {
+//   bool success = 1;
+//   string message = 2;
+// }
 
-message PeerListResponse {
-  repeated Peer peers = 1;
-}
+// message PeerListResponse {
+//   repeated Peer peers = 1;
+// }
 
-message Peer {
-  string peer_id = 1;
-  string address = 2;
-}
+// message Peer {
+//   string peer_id = 1;
+//   string address = 2;
+// }
 
 message Empty {}
