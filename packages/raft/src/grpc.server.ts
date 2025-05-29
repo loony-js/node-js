@@ -62,16 +62,16 @@ class GrpcHandler extends EventEmitter {
 
   addServices() {
     this.server.addService(this.raft.RaftService.service, {
-      OnHeartbeat: this.handleHeartbeat.bind(this),
-      OnVoteRequest: this.handleVoteRequest.bind(this),
-      IsAlive: this.nodeAlive.bind(this),
+      OnHeartbeat: this.handleHeartbeat,
+      OnVoteRequest: this.handleVoteRequest,
+      IsAlive: this.nodeAlive,
     })
   }
 
-  nodeAlive(
+  nodeAlive = (
     call: grpc.ServerUnaryCall<null, { alive: boolean }>,
     callback: grpc.sendUnaryData<{ alive: boolean }>,
-  ) {
+  ) => {
     callback(null, { alive: true })
   }
 
@@ -91,20 +91,20 @@ class GrpcHandler extends EventEmitter {
     })
   }
 
-  handleVoteRequest(
+  handleVoteRequest = (
     call: grpc.ServerUnaryCall<
       { term: number; candidateId: number },
       { voteGranted: boolean }
     >,
     callback: grpc.sendUnaryData<{ voteGranted: boolean }>,
-  ): any {
+  ) => {
     this.raftNode.handleVoteRequest(call.request, callback)
   }
 
-  handleHeartbeat(
+  handleHeartbeat = (
     call: grpc.ServerUnaryCall<any, any>,
     callback: grpc.sendUnaryData<any>,
-  ) {
+  ) => {
     this.raftNode.handleHeartbeat(call.request, callback)
   }
 
