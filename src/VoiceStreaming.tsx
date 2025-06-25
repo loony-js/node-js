@@ -85,12 +85,13 @@ export default function VoiceStreaming() {
                   setUrl(e.target.value)
                 }}
                 value={url}
+                type="text"
               />
             </div>
           </div>
           <div className="pad-ver-5">
             <button
-              className="btn-sm"
+              className="btn btn-sm"
               onClick={socket?.OPEN ? disconnect : connect}
             >
               🎙️ {socket?.OPEN ? "DisConnect" : "Connect"}

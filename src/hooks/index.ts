@@ -39,7 +39,7 @@ export const useWebSocket = (
     return () => {
       ws.removeEventListener("open", handleOpen)
     }
-  }, [])
+  }, [url])
 
   const disConnect = useCallback(() => {
     if (socket) {

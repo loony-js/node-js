@@ -6,6 +6,8 @@
     "build": "rsbuild build",
     "check": "biome check --write",
     "dev": "rsbuild dev --open",
+    "frontend": "rsbuild dev --open",
+    "backend": "node ./src/api.tsx",
     "format": "prettier --write .",
     "lint": "eslint .",
     "preview": "rsbuild preview"
