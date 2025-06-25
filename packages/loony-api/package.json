@@ -3,9 +3,10 @@
   "version": "0.1.0",
   "main": "dist/index.js",
   "license": "MIT",
-  "type": "module",
+  "types": "dist/index.d.ts",
   "scripts": {
-    "dev": "node ./src/index.ts"
+    "build": "tsc",
+    "dev": "node dist/index.js"
   },
   "dependencies": {
     "dotenv": "^16.5.0",

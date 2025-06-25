@@ -17,11 +17,13 @@
   ],
   "dependencies": {
     "loony-sdk": "0.1.0",
-    "loony-web-audio": "0.1.0",
-    "loony-utils": "0.1.0",
     "loony-timer": "0.1.0",
+    "loony-utils": "0.1.0",
+    "loony-web-audio": "0.1.0",
+    "pg": "^8.16.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-router": "^7.6.2",
     "socket.io": "^4.8.1",
     "socket.io-client": "^4.8.1",
     "speechmatics": "0.1.0"
@@ -32,6 +34,7 @@
     "@eslint/js": "^9.21.0",
     "@rsbuild/core": "^1.2.8",
     "@rsbuild/plugin-react": "^1.1.0",
+    "@types/pg": "^8.15.4",
     "@types/react": "^19.0.9",
     "@types/react-dom": "^19.0.3",
     "eslint": "^9.21.0",

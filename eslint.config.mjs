@@ -27,6 +27,7 @@ export default [
       ...reactHooks.configs.recommended.rules,
       "react/prop-types": "off",
       "@typescript-eslint/no-require-imports": "off",
+      "@typescript-eslint/no-explicit-any": "off",
     },
   },
   { ignores: ["dist/"] },

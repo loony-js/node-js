@@ -1,35 +1,18 @@
+import { app, server } from "./init"
+import config from "./config"
 import express from "express"
-import http from "http"
-import dotenv from "dotenv"
-import { encrypt, decrypt } from "loony-sdk"
+import creds from "./creds"
+import crypto from "./crypto"
 
-dotenv.config()
-const PORT = process.env.PORT || 2000
-const app = express()
-const server = http.createServer(app)
-
+const { PORT } = config
 // Middleware
 app.use(express.json())
+app.use(creds)
+app.use(crypto)
 
 // Simple Route
 app.get("/", (req, res) => {
   res.send("Hello, Express!")
-})
-
-app.post("/encrypt", (req, res) => {
-  const { text, password } = req.body
-  const encryptedText = encrypt(text, password)
-  res.send({ text: encryptedText })
-})
-
-app.post("/decrypt", (req, res) => {
-  try {
-    const { text, password } = req.body
-    const result = decrypt(text, password)
-    res.send({ text: result })
-  } catch (error) {
-    res.send({ text: error })
-  }
 })
 
 // Start Server

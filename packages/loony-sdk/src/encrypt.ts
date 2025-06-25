@@ -6,6 +6,8 @@ import {
 } from "node:crypto"
 import { Buffer } from "node:buffer"
 
+// IV=Initialization Vector
+
 // Constants for encryption
 const algorithm = "aes-256-cbc" // AES encryption algorithm
 // const _keyLength = 32 // 256 bits (32 bytes)

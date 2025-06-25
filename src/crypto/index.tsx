@@ -3,22 +3,32 @@ import { callApi } from "../api/index"
 import "../assets/css/desktop.css"
 
 function Crypto() {
-  const [text, setText] = useState("")
-  const [password, setPassword] = useState("")
+  const [state, setState] = useState({
+    name: "",
+    username: "",
+    password: "",
+  })
   const [res, setRes] = useState("")
-  const [state, setState] = useState(1)
+  const [tab, setTab] = useState(1)
 
   const updateRes = (data: Record<string, string>) => {
     setRes(data.data)
   }
 
   const makeRequest = () => {
-    if (state === 1) {
-      callApi("encrypt", { text, password }, updateRes)
+    if (tab === 1) {
+      callApi("encrypt", state, updateRes)
     }
-    if (state === 2) {
-      callApi("decrypt", { text, password }, updateRes)
+    if (tab === 2) {
+      callApi("decrypt", state, updateRes)
     }
+  }
+
+  const onChangeText = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setState({
+      ...state,
+      [event.target.name]: event.target.value,
+    })
   }
 
   return (
@@ -27,17 +37,17 @@ function Crypto() {
       <hr />
       <div>
         <span
-          className={`${state === 1 && "grey-bg"} btn-sm cursor`}
+          className={`${tab === 1 && "grey-bg"} btn-sm cursor`}
           onClick={() => {
-            setState(1)
+            setTab(1)
           }}
         >
           Encrypt
         </span>
         <span
-          className={`${state === 2 && "grey-bg"} btn-sm cursor`}
+          className={`${tab === 2 && "grey-bg"} btn-sm cursor`}
           onClick={() => {
-            setState(2)
+            setTab(2)
           }}
         >
           Decrypt
@@ -46,21 +56,28 @@ function Crypto() {
       <div className="form-section">
         <input
           type="text"
-          placeholder="Text"
-          value={text}
-          onChange={(e) => {
-            setText(e.target.value)
-          }}
+          name="name"
+          placeholder="Name"
+          value={state.name}
+          onChange={onChangeText}
+        />
+      </div>
+      <div className="form-section">
+        <input
+          type="text"
+          name="username"
+          placeholder="Username"
+          value={state.username}
+          onChange={onChangeText}
         />
       </div>
       <div className="form-section">
         <input
           placeholder="password"
           type="password"
-          value={password}
-          onChange={(e) => {
-            setPassword(e.target.value)
-          }}
+          name="password"
+          value={state.password}
+          onChange={onChangeText}
         />
       </div>
       <div>
