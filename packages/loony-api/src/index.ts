@@ -1,14 +1,10 @@
 import { app, server } from "./init"
 import config from "./config"
-import express from "express"
-import creds from "./creds"
-import crypto from "./crypto"
+import aegis from "./aegis"
 
 const { PORT } = config
 // Middleware
-app.use(express.json())
-app.use(creds)
-app.use(crypto)
+app.use(aegis)
 
 // Simple Route
 app.get("/", (req, res) => {

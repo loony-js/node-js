@@ -254,6 +254,10 @@ button:hover {
   font-weight: bold;
   color: #2d2d2d;
 }
+.logo {
+  color: white;
+  font-weight: bold;
+}
 .logo,
 .nav-menu-btn {
   display: flex;
@@ -511,6 +515,24 @@ code {
   /* background: linear-gradient(to right, #ffffff, #ffffff); */
   background-color: #f8f9fa;
   padding: 10px;
+}
+
+.tab {
+  display: flex;
+  flex-direction: row;
+  border-bottom: 1px solid #ccc;
+}
+.active-tab {
+  background-color: #525252;
+  color: white;
+}
+.tab-item {
+  min-width: 18%;
+  padding: 10px;
+  text-align: center;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+  cursor: pointer;
 }
 
 @import url("navbar.css");
