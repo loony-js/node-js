@@ -6,4 +6,11 @@ export default defineConfig({
   html: {
     template: "./public/index.html",
   },
+  tools: {
+    postcss: {
+      postcssOptions: {
+        plugins: [require("@tailwindcss/postcss"), require("autoprefixer")],
+      },
+    },
+  },
 })

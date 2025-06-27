@@ -1,5 +1,4 @@
 import { useWebSocket, useMicrophone } from "hooks"
-import "./assets/css/desktop.css"
 import { useState } from "react"
 
 const withSocket = true

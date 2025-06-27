@@ -1,7 +1,7 @@
 import { Routes, Route } from "react-router"
 
 import Home from "Home"
-import Crypto from "./crypto/index"
+import Crypto from "./aegis/index"
 import VoiceStreaming from "VoiceStreaming"
 import Navbar from "Navbar"
 
