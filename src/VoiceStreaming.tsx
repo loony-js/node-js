@@ -66,78 +66,98 @@ export default function VoiceStreaming() {
   }
 
   return (
-    <div className="con-sm-12 con-xxl-5 mar-hor-1 mar-top-1">
-      <div className="">
-        <h2 className="">Voice Recorder</h2>
-        <hr />
-        <div className="">
-          <div className="pad-ver-5">
+    <div className="w-[60%] mx-auto p-4 space-y-6">
+      <div className="space-y-4 bg-white border rounded-lg shadow p-6">
+        {/* Title */}
+        <h2 className="text-2xl font-semibold text-gray-800">Voice Recorder</h2>
+        <hr className="border-gray-300" />
+
+        {/* Socket Status */}
+        <div className="space-y-4">
+          <div>
             {socket?.OPEN ? (
-              <span className="green-txt">Socket Connected</span>
+              <span className="text-green-600 font-medium">
+                Socket Connected
+              </span>
             ) : (
-              <span className="red-txt">Socket Disconnected</span>
+              <span className="text-red-600 font-medium">
+                Socket Disconnected
+              </span>
             )}
-            <div>
-              Port:{" "}
-              <input
-                onChange={(e) => {
-                  setUrl(e.target.value)
-                }}
-                value={url}
-                type="text"
-              />
-            </div>
           </div>
-          <div className="pad-ver-5">
+
+          {/* Port Input */}
+          <div className="flex items-center gap-2">
+            <label className="text-gray-700 font-medium">Port:</label>
+            <input
+              type="text"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              className="px-3 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          {/* Connect/Disconnect Button */}
+          <div>
             <button
-              className="btn btn-sm"
               onClick={socket?.OPEN ? disconnect : connect}
+              className="px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700 transition"
             >
-              🎙️ {socket?.OPEN ? "DisConnect" : "Connect"}
+              🎙️ {socket?.OPEN ? "Disconnect" : "Connect"}
             </button>
           </div>
         </div>
-        <hr />
-        <div>
-          <div className="pad-ver-5">
+
+        <hr className="border-gray-300" />
+
+        {/* Recording Status */}
+        <div className="space-y-4">
+          <div>
             {isRecording ? (
-              <span className="green-txt">Recording</span>
+              <span className="text-green-600 font-medium">Recording</span>
             ) : (
-              <span className="red-txt">Not Recording</span>
+              <span className="text-red-600 font-medium">Not Recording</span>
             )}
           </div>
-          <div className="pad-ver-5">
+
+          {/* Start/Stop Button */}
+          <div>
             <button
-              className="btn-sm"
               onClick={
                 isRecording ? onClickStopRecording : onClickStartRecording
               }
+              className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition"
             >
               🎙️ {isRecording ? "Stop" : "Start"}
             </button>
           </div>
         </div>
-        <hr />
+
+        <hr className="border-gray-300" />
+
+        {/* Upload File */}
         <div>
-          <div className="pad-ver-5">
-            <input type="file" onChange={onChangeFile} />
-          </div>
+          <input
+            type="file"
+            onChange={onChangeFile}
+            className="block w-full text-sm text-gray-700 file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+          />
         </div>
 
+        {/* Audio Playback */}
         {audioUrl && (
           <div>
-            <audio src={audioUrl} controls>
-              {/* <source src={audioUrl} type="audio/wav"></source> */}
-            </audio>
+            <audio src={audioUrl} controls className="w-full mt-2" />
           </div>
         )}
       </div>
 
-      <div style={{ marginTop: 25 }}>
-        <ul>
-          {texts.map((t, index) => {
-            return <li key={index}>{t}</li>
-          })}
+      {/* Transcription List */}
+      <div className="mt-6 bg-gray-50 border rounded-lg p-4">
+        <ul className="list-disc list-inside space-y-1 text-gray-800">
+          {texts.map((t, index) => (
+            <li key={index}>{t}</li>
+          ))}
         </ul>
       </div>
     </div>
