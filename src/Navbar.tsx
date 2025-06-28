@@ -1,6 +1,7 @@
+import { AuthStatus } from "context/AuthContext"
 import { useState } from "react"
 
-const Navbar = () => {
+const Navbar = ({ authContext }: { authContext: any }) => {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
@@ -44,43 +45,57 @@ const Navbar = () => {
         <div
           className={`md:flex md:items-center ${isOpen ? "block" : "hidden"}`}
         >
-          <ul className="flex flex-col md:flex-row md:space-x-6 mt-3 md:mt-0">
-            <li>
-              <a
-                href="#"
-                className="block py-2 text-gray-700 hover:text-blue-600"
-              >
-                Home
-              </a>
-            </li>
-            <li>
-              <a
-                href="#"
-                className="block py-2 text-gray-700 hover:text-blue-600"
-              >
-                About
-              </a>
-            </li>
-            <li>
-              <a
-                href="#"
-                className="block py-2 text-gray-700 hover:text-blue-600"
-              >
-                Services
-              </a>
-            </li>
-            <li>
-              <a
-                href="#"
-                className="block py-2 text-gray-700 hover:text-blue-600"
-              >
-                Contact
-              </a>
-            </li>
-          </ul>
+          {authContext.status === AuthStatus.AUTHORIZED ? (
+            <AuthNavRight />
+          ) : (
+            <NotAuthNavRight />
+          )}
         </div>
       </div>
     </nav>
+  )
+}
+
+const AuthNavRight = () => {
+  return (
+    <>
+      <ul className="flex flex-col md:flex-row md:space-x-6 mt-3 md:mt-0">
+        <li>
+          <a href="#" className="block py-2 text-gray-700 hover:text-blue-600">
+            Home
+          </a>
+        </li>
+        <li>
+          <a href="#" className="block py-2 text-gray-700 hover:text-blue-600">
+            About
+          </a>
+        </li>
+        <li>
+          <a href="#" className="block py-2 text-gray-700 hover:text-blue-600">
+            Services
+          </a>
+        </li>
+        <li>
+          <a href="#" className="block py-2 text-gray-700 hover:text-blue-600">
+            Contact
+          </a>
+        </li>
+      </ul>
+    </>
+  )
+}
+
+const NotAuthNavRight = () => {
+  return (
+    <>
+      <ul className="flex flex-col md:flex-row md:space-x-6 mt-3 md:mt-0">
+        <li>
+          <a href="#" className="block py-2 text-gray-700 hover:text-blue-600">
+            Login
+          </a>
+        </li>
+      </ul>
+    </>
   )
 }
 

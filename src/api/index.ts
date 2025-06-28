@@ -1,16 +1,16 @@
 const cleanUrl = (url: string) => (url[0] === "/" ? url.slice(1) : url)
 
-const GET = (url: string, cb: (res: Record<string, string>) => void) => {
+const GET = <R>(url: string, cb: (res: R | null, err: any) => void) => {
   const newUrl = cleanUrl(url)
   fetch(`http://localhost:2000/${newUrl}`, {
     method: "GET",
   })
     .then((res) => res.json())
-    .then((res: Record<string, string>) => {
-      cb(res)
+    .then((res: R) => {
+      cb(res, null)
     })
     .catch((e) => {
-      console.log(e)
+      cb(null, e)
     })
 }
 
