@@ -6,4 +6,6 @@ rm -rf dist && tsc
 cp -r protos dist/
 
 echo "Copied protos to dist/"
-echo "Completed"
+echo "Build Completed."
+
+echo "Run the app. GRPC_PORT=<> node ./dist/index.js"

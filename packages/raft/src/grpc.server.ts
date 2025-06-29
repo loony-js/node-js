@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as grpc from "@grpc/grpc-js"
 import * as protoLoader from "@grpc/proto-loader"
 import EventEmitter from "node:events"
@@ -8,7 +7,7 @@ class GrpcHandler extends EventEmitter {
   server: grpc.Server
   grpcObject: grpc.GrpcObject
   raft: any
-  clients: any[]
+  clients: any
   connectedClients: number
   raftNode: any
 
@@ -22,7 +21,7 @@ class GrpcHandler extends EventEmitter {
     ) as grpc.GrpcObject
     this.raft = this.grpcObject.raft
     this.server = new grpc.Server()
-    this.clients = []
+    this.clients = {}
     this.connectedClients = 0
   }
 
@@ -46,17 +45,24 @@ class GrpcHandler extends EventEmitter {
       } else {
         this.connectedClients = 0
       }
-      this.clients.map(async (peer) => {
-        peer.IsAlive({}, (err: Error | null, response: { alive: boolean }) => {
-          if (err) {
-            console.error("Error:", err.message)
-          } else {
-            if (response.alive) {
-              this.connectedClients += 1
+      for (const peer in this.clients) {
+        const client = this.clients[peer]
+        client.IsAlive(
+          {},
+          (err: Error | null, response: { alive: boolean }) => {
+            if (err) {
+              console.error("Error:", err.message)
+            } else {
+              if (response.alive) {
+                this.connectedClients += 1
+              }
             }
-          }
-        })
-      })
+          },
+        )
+      }
+      // this.clients.map(async (peer) => {
+
+      // })
     }, 5000)
   }
 
@@ -76,12 +82,11 @@ class GrpcHandler extends EventEmitter {
   }
 
   addClient(port: number) {
-    this.clients.push(
-      new this.raft.RaftService(
-        `localhost:${port}`,
-        grpc.credentials.createInsecure(),
-      ),
+    const peer = new this.raft.RaftService(
+      `localhost:${port}`,
+      grpc.credentials.createInsecure(),
     )
+    this.clients[port] = peer
     console.log(`Client Id: ${port} added as peer.`)
   }
 
@@ -113,8 +118,8 @@ class GrpcHandler extends EventEmitter {
       case "REQUEST_VOTE":
         break
       case "APPEND_ENTRIES":
-        for (let index = 0; index < this.clients.length; index++) {
-          const client = this.clients[index]
+        for (const peer in this.clients) {
+          const client = this.clients[peer]
           client.AppendEntries(
             data,
             (err: grpc.ServiceError | null, response: any) => {

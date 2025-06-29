@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-this-alias */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// deno-lint-ignore-file
 import * as grpc from "@grpc/grpc-js"
 import EventEmitter from "node:events"
 import GrpcHandler from "./grpc.server"
@@ -41,6 +38,15 @@ export type Packet = {
   entry?: any // Also optional
 }
 
+export type AppendEntriesRPC = {
+  term: number
+  leaderId: number
+  prevLogIndex: number
+  prevLogTerm: number
+  entries: any[]
+  leaderCommit: number
+}
+
 export class RaftNode extends EventEmitter {
   id: number
   // peers: ConnectedPeers | undefined
@@ -60,6 +66,8 @@ export class RaftNode extends EventEmitter {
   electionTimer: NodeJS.Timeout | null
   write: any
   grpc: GrpcHandler | undefined
+  commitIndex: number
+  lastApplied: number
 
   constructor(id: number) {
     super()
@@ -77,6 +85,8 @@ export class RaftNode extends EventEmitter {
     this.electionTimeout = this.resetElectionTimeout()
     this.heartbeatInterval = 1500
     this.electionTimer = null
+    this.commitIndex = -1
+    this.lastApplied = -1
   }
 
   start() {
@@ -124,8 +134,9 @@ export class RaftNode extends EventEmitter {
     }
 
     if (this.grpc) {
-      this.grpc?.clients.map(async (peer) => {
-        peer.OnVoteRequest(
+      for (const peer in this.grpc.clients) {
+        const client = this.grpc.clients[peer]
+        client.OnVoteRequest(
           { term: raft.term, candidateId: raft.id },
           (err: Error | null, response: { voteGranted: boolean }) => {
             if (err) {
@@ -138,7 +149,7 @@ export class RaftNode extends EventEmitter {
             handleVotes()
           },
         )
-      })
+      }
     }
   }
 
@@ -149,25 +160,24 @@ export class RaftNode extends EventEmitter {
     this.sendHeartbeats()
   }
 
-  async sendHeartbeats(): Promise<void> {
+  async sendHeartbeats() {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const raft = this
     if (this.state !== RAFT_STATE.LEADER) return
 
-    setInterval(async () => {
+    setInterval(() => {
       if (this.grpc) {
-        await Promise.all(
-          this.grpc?.clients.map(async (peer) => {
-            peer.OnHeartbeat(
-              { term: raft.term, leaderId: raft.id },
-              (err: Error | null) => {
-                if (err) {
-                  console.error("Error:", err)
-                }
-              },
-            )
-          }),
-        )
+        for (const peer in this.grpc.clients) {
+          const client = this.grpc?.clients[peer]
+          client.OnHeartbeat(
+            { term: raft.term, leaderId: raft.id },
+            (err: Error | null) => {
+              if (err) {
+                console.error("Error:", err)
+              }
+            },
+          )
+        }
       }
     }, this.heartbeatInterval)
   }
@@ -192,6 +202,7 @@ export class RaftNode extends EventEmitter {
     { term, leaderId }: { term: number; leaderId: number },
     callback: grpc.sendUnaryData<any>,
   ) {
+    console.log(`Received Heartbeat. Term: ${term}. LeaderId: ${leaderId}`)
     if (term >= this.term) {
       this.term = term
       if (leaderId) {
@@ -219,9 +230,149 @@ export class RaftNode extends EventEmitter {
   //     // )
   //   }
 
-  handleAppendEntry(packet: Packet) {
-    if (packet.term === this.term) {
-      this.log.push(packet.entry)
+  handleAppendEntries(rpc: AppendEntriesRPC): boolean {
+    // 1. Reply false if term < currentTerm (§5.1)
+    if (rpc.term < this.term) {
+      return false
+    }
+
+    // 2. If rpc.term > this.term, update this.term and convert to follower
+    if (rpc.term > this.term) {
+      this.term = rpc.term
+      this.state = RAFT_STATE.FOLLOWER
+      this.vote = {
+        for: null,
+        granted: 0,
+      }
+    }
+
+    this.leaderId = rpc.leaderId
+
+    // 3. Reply false if log doesn't contain an entry at prevLogIndex
+    //    whose term matches prevLogTerm (§5.3)
+    if (
+      rpc.prevLogIndex >= 0 &&
+      (rpc.prevLogIndex >= this.log.length ||
+        this.log[rpc.prevLogIndex].term !== rpc.prevLogTerm)
+    ) {
+      return false
+    }
+
+    // 4. If an existing entry conflicts with a new one (same index but different terms),
+    //    delete the existing entry and all that follow it (§5.3)
+    for (let i = 0; i < rpc.entries.length; i++) {
+      const index = rpc.prevLogIndex + 1 + i
+      const incoming = rpc.entries[i]
+
+      if (index < this.log.length) {
+        if (this.log[index].term !== incoming.term) {
+          // Conflict found, delete all entries from this point
+          this.log = this.log.slice(0, index)
+          break
+        }
+      }
+    }
+
+    // 5. Append any new entries not already in the log
+    for (let i = 0; i < rpc.entries.length; i++) {
+      const index = rpc.prevLogIndex + 1 + i
+      if (index >= this.log.length) {
+        this.log.push(rpc.entries[i])
+      }
+    }
+
+    // 6. If leaderCommit > commitIndex, set commitIndex = min(leaderCommit, index of last new entry)
+    if (rpc.leaderCommit > this.commitIndex) {
+      const lastNewIndex = rpc.prevLogIndex + rpc.entries.length
+      this.commitIndex = Math.min(rpc.leaderCommit, lastNewIndex)
+      this.applyCommittedEntries()
+    }
+
+    return true
+  }
+
+  applyCommittedEntries() {
+    while (this.lastApplied < this.commitIndex) {
+      this.lastApplied++
+      const entry = this.log[this.lastApplied]
+      this.apply(entry.command)
+    }
+  }
+
+  apply(command: any) {
+    console.log(`[${this.id}] Applying command:`, command)
+    // Apply command to state machine
+  }
+
+  appendNewEntry(command: any) {
+    if (this.state !== RAFT_STATE.LEADER) return
+
+    this.log.push({ term: this.term, command })
+    // const newIndex = this.log.length - 1
+
+    if (this.grpc) {
+      for (const followerId of this.grpc.clients) {
+        this.sendAppendEntries(followerId)
+      }
+    }
+  }
+
+  // Send AppendEntries RPC to a follower
+  sendAppendEntries(followerId: string, overrideEntries?: LogEntry[]) {
+    const follower = this.grpc?.clients[followerId]
+    const nextIdx = follower.nextIndex
+
+    const prevLogIndex = nextIdx - 1
+    const prevLogTerm = prevLogIndex >= 0 ? this.log[prevLogIndex].term : -1
+
+    const entries =
+      overrideEntries !== undefined ? overrideEntries : this.log.slice(nextIdx)
+
+    const rpc: AppendEntriesRPC = {
+      term: this.currentTerm,
+      leaderId: this.id,
+      prevLogIndex,
+      prevLogTerm,
+      entries,
+      leaderCommit: this.commitIndex,
+    }
+
+    this.sendRPC(followerId, rpc)
+  }
+
+  // Simulated network send
+  sendRPC(followerId: string, rpc: AppendEntriesRPC) {
+    console.log(`Sending AppendEntries to ${followerId}`, rpc)
+    // Implement actual network call or messaging system here
+  }
+
+  // Simulated follower response handler
+  onAppendEntriesResponse(followerId: string, success: boolean) {
+    const follower = this.followers[followerId]
+    if (success) {
+      follower.matchIndex = this.log.length - 1
+      follower.nextIndex = follower.matchIndex + 1
+    } else {
+      follower.nextIndex = Math.max(0, follower.nextIndex - 1)
+      this.sendAppendEntries(followerId) // retry
+    }
+
+    this.updateCommitIndex()
+  }
+
+  updateCommitIndex() {
+    const matchIndices = Object.values(this.followers)
+      .map((f) => f.matchIndex)
+      .concat(this.log.length - 1) // include leader's index
+      .sort((a, b) => b - a)
+
+    const majorityMatch = matchIndices[Math.floor(this.peers.length / 2)]
+    if (
+      majorityMatch > this.commitIndex &&
+      this.log[majorityMatch].term === this.currentTerm
+    ) {
+      this.commitIndex = majorityMatch
+      console.log(`Commit index updated to ${this.commitIndex}`)
     }
   }
 }
