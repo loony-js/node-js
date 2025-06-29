@@ -1,19 +1,27 @@
 import { useState } from "react"
 import { POST } from "../api/index"
+import { AuthStatus } from "context/AuthContext"
 
-function Encrypt() {
+function Login({ authContext }: { authContext: any }) {
   const [form, setState] = useState({
-    name: "",
     username: "",
     password: "",
-    master_password: "",
   })
 
-  const handleSubmit = () => {
-    POST("encrypt", form, () => {})
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault()
+    if (form.username && form.password) {
+      POST("/login", form, () => {
+        authContext.setAuthContext({
+          user: null,
+          status: AuthStatus.AUTHORIZED,
+        })
+      })
+    }
   }
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    event.preventDefault()
     setState({
       ...form,
       [event.target.name]: event.target.value,
@@ -21,14 +29,12 @@ function Encrypt() {
   }
 
   return (
-    <div className="max-w-md mx-auto mt-10 p-6 bg-white dark:bg-gray-900 rounded-lg shadow-lg">
-      <h2 className="text-2xl font-semibold mb-6 text-gray-800 dark:text-white">
-        Login
-      </h2>
+    <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow-lg">
+      <h2 className="text-2xl font-semibold mb-6 text-gray-800">Login</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Username / Email Input */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
             Username or Email
           </label>
           <input
@@ -36,14 +42,14 @@ function Encrypt() {
             name="username"
             value={form.username}
             onChange={handleChange}
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
           />
         </div>
 
         {/* Password Input */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
             Password
           </label>
           <input
@@ -51,7 +57,7 @@ function Encrypt() {
             name="password"
             value={form.password}
             onChange={handleChange}
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
           />
         </div>
@@ -64,8 +70,17 @@ function Encrypt() {
           Sign In
         </button>
       </form>
+      <div className="mt-4 text-center text-sm text-gray-600">
+        <span>Dont have an account?</span>
+        <a
+          href="/register"
+          className="ml-1 font-medium text-blue-600 hover:underline"
+        >
+          Register
+        </a>
+      </div>
     </div>
   )
 }
 
-export default Encrypt
+export default Login

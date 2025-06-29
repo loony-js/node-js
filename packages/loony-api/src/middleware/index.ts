@@ -1,20 +1,18 @@
 import jwt from "jsonwebtoken"
-import { NextFunction, Response } from "express"
 import config from "../config"
 
 const { SECRET_KEY } = config
 
-function authMiddleware(req: any, res: Response, next: NextFunction) {
-  const token = req.header("Authorization")?.split(" ")[1]
-  if (!token)
-    return res.status(401).json({ msg: "No token, authorization denied" })
+function authMiddleware(req: any, res: any, next: any) {
+  const token = req.cookies.token
+  if (!token) return res.status(401).json({ message: "Unauthorized" })
 
   try {
-    const decoded = jwt.verify(token, SECRET_KEY).toString()
+    const decoded = jwt.verify(token, SECRET_KEY)
     req.user = decoded
     next()
   } catch {
-    res.status(400).json({ msg: "Token is not valid" })
+    res.status(403).json({ message: "Invalid token" })
   }
 }
 

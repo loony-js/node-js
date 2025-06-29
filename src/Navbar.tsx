@@ -1,3 +1,4 @@
+import { POST } from "api"
 import { AuthStatus } from "context/AuthContext"
 import { useState } from "react"
 
@@ -46,7 +47,7 @@ const Navbar = ({ authContext }: { authContext: any }) => {
           className={`md:flex md:items-center ${isOpen ? "block" : "hidden"}`}
         >
           {authContext.status === AuthStatus.AUTHORIZED ? (
-            <AuthNavRight />
+            <AuthNavRight authContext={authContext} />
           ) : (
             <NotAuthNavRight />
           )}
@@ -56,7 +57,16 @@ const Navbar = ({ authContext }: { authContext: any }) => {
   )
 }
 
-const AuthNavRight = () => {
+const AuthNavRight = ({ authContext }: { authContext: any }) => {
+  const onLogout = () => {
+    POST("/logout", {}, () => {
+      authContext.setAuthContext({
+        user: null,
+        status: AuthStatus.UNAUTHORIZED,
+      })
+    })
+  }
+
   return (
     <>
       <ul className="flex flex-col md:flex-row md:space-x-6 mt-3 md:mt-0">
@@ -66,18 +76,15 @@ const AuthNavRight = () => {
           </a>
         </li>
         <li>
-          <a href="#" className="block py-2 text-gray-700 hover:text-blue-600">
-            About
-          </a>
-        </li>
-        <li>
-          <a href="#" className="block py-2 text-gray-700 hover:text-blue-600">
-            Services
-          </a>
-        </li>
-        <li>
-          <a href="#" className="block py-2 text-gray-700 hover:text-blue-600">
-            Contact
+          <a
+            href="#"
+            onClick={(e) => {
+              e.preventDefault()
+              onLogout()
+            }}
+            className="block py-2 text-gray-700 hover:text-blue-600"
+          >
+            Logout
           </a>
         </li>
       </ul>
@@ -90,7 +97,10 @@ const NotAuthNavRight = () => {
     <>
       <ul className="flex flex-col md:flex-row md:space-x-6 mt-3 md:mt-0">
         <li>
-          <a href="#" className="block py-2 text-gray-700 hover:text-blue-600">
+          <a
+            href="/login"
+            className="block py-2 text-gray-700 hover:text-blue-600"
+          >
             Login
           </a>
         </li>

@@ -44,22 +44,47 @@ router.post("/login", async (req: Request, res: Response) => {
     const valid = await bcrypt.compare(password, user.password)
     if (!valid) res.status(400).json({ msg: "Invalid credentials" })
 
-    const token = jwt.sign({ id: user.id }, SECRET_KEY, {
-      expiresIn: "1h",
+    const token = jwt.sign(
+      {
+        id: user.id,
+        username: user.username,
+        fname: user.fname,
+        lname: user.lname,
+      },
+      SECRET_KEY,
+      {
+        expiresIn: "6h",
+      },
+    )
+    res.cookie("AUTH_TOKEN", token, {
+      httpOnly: true,
+      secure: false, // true if HTTPS
+      sameSite: "lax",
     })
-    req.session.user = user
     res.json({ token })
   } catch (err: any) {
     res.status(500).json({ error: err.message })
   }
 })
 
-router.get("/session", async (req: Request, res: Response) => {
-  if (req.session.user) {
-    res.json({ loggedIn: true, user: req.session.user })
-  } else {
-    res.json({ loggedIn: false })
+router.get("/session", async (req: any, res: any) => {
+  const token = req.cookies.AUTH_TOKEN
+  if (!token) return res.status(401).json({ message: "Unauthorized" })
+
+  try {
+    const decoded = jwt.verify(token, SECRET_KEY)
+    res.json({
+      loggedIn: true,
+      user: decoded,
+    })
+  } catch {
+    res.status(403).json({ message: "Invalid token" })
   }
+})
+
+router.post("/logout", async (req: any, res: any) => {
+  res.clearCookie("AUTH_TOKEN")
+  res.json({})
 })
 
 export default router

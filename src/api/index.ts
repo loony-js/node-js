@@ -4,6 +4,7 @@ const GET = <R>(url: string, cb: (res: R | null, err: any) => void) => {
   const newUrl = cleanUrl(url)
   fetch(`http://localhost:2000/${newUrl}`, {
     method: "GET",
+    credentials: "include",
   })
     .then((res) => res.json())
     .then((res: R) => {
@@ -22,6 +23,7 @@ const POST = (
   const newUrl = cleanUrl(url)
   fetch(`http://localhost:2000/${newUrl}`, {
     method: "POST",
+    credentials: "include",
     body: JSON.stringify(body),
     headers: {
       "Content-Type": "application/json",

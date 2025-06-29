@@ -43,22 +43,21 @@ const useAuthSession = (): [
   const [authContext, setAuthContext] = useState(authState)
 
   useEffect(() => {
-    GET<{ loggedId: boolean; user: User }>("/auth/session", (data, err) => {
+    GET<{ loggedIn: boolean; user: User }>("/session", (data, err) => {
       if (data) {
-        if (data.loggedId) {
+        if (data.loggedIn) {
           setAuthContext({
             user: data.user,
             status: AuthStatus.AUTHORIZED,
           })
-        }
-        if (!data.loggedId) {
+        } else if (!data.loggedIn) {
           setAuthContext({
             user: null,
             status: AuthStatus.UNAUTHORIZED,
           })
+          console.log(`${AuthStatus.UNAUTHORIZED}`)
         }
-      }
-      if (err) {
+      } else if (err) {
         setAuthContext({
           user: null,
           status: AuthStatus.UNAUTHORIZED,
