@@ -8,4 +8,4 @@ cp -r protos dist/
 echo "Copied protos to dist/"
 echo "Build Completed."
 
-echo "Run the app. GRPC_PORT=<> node ./dist/index.js"
+echo "Run the app. PORT=2000 PEER_ADDRESS=50050 node ./dist/index.js"

@@ -1,33 +1,37 @@
 import dotenv from "dotenv"
-import { exit } from "process"
-import fs from "fs"
-import internal from "stream"
+import { GRPC_PORTS, HTTP_PORTS } from "./config.json"
 
 dotenv.config()
-const PORT = process.env.PORT || "2000"
-const WS_CLIENTS: Set<internal.Duplex> = new Set()
-const PEERS_FILE_PATH = process.env.PEERS_FILE_PATH
-let PEERS: number[] = []
 
-if (!PORT) {
-  console.log("PORT not specified")
-  exit()
+let HTTP_PORT: any = process.env.PORT || process.env.HTTP_PORT
+let PEER_ADDRESS: any = process.env.PEER || process.env.PEER_ADDRESS
+
+if (!HTTP_PORT || !PEER_ADDRESS) {
+  console.log(
+    `Failed to start node. PORT=2000 PEER_ADDRESS=50050  node ./dist/index.js`,
+  )
+  process.exit()
 }
 
-// Close app in PORT is not provided.
-;(async () => {
-  if (!PEERS_FILE_PATH) {
-    exit()
-  }
-  try {
-    const peers = fs.readFileSync(PEERS_FILE_PATH, "utf-8")
-    if (peers) {
-      const allPeers = JSON.parse(peers)
-      PEERS = allPeers[PORT]
-    }
-  } catch (error) {
-    console.log(error)
-  }
-})()
+HTTP_PORT = parseInt(HTTP_PORT)
+PEER_ADDRESS = parseInt(PEER_ADDRESS)
 
-export { WS_CLIENTS, PEERS, PORT }
+const getGrpcConfig = () => {
+  const GRPC_PORT = parseInt(PEER_ADDRESS)
+  return {
+    GRPC_PORT,
+    GRPC_PEERS: GRPC_PORTS.filter((p) => p !== GRPC_PORT),
+  }
+}
+
+const getHttpConfig = () => {
+  const HTTP_PEERS = HTTP_PORTS.filter((p) => p !== HTTP_PORT)
+  return { HTTP_PORT, HTTP_PEERS }
+}
+
+export default {
+  HTTP_PORT,
+  PEER_ADDRESS,
+  getGrpcConfig,
+  getHttpConfig,
+}

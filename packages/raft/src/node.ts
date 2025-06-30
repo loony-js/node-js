@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import * as grpc from "@grpc/grpc-js"
 import EventEmitter from "node:events"
 import GrpcHandler from "./grpc.server"
@@ -49,7 +50,6 @@ export type AppendEntriesRPC = {
 
 export class RaftNode extends EventEmitter {
   id: number
-  // peers: ConnectedPeers | undefined
 
   state: RAFT_STATE
   term: number
@@ -68,6 +68,7 @@ export class RaftNode extends EventEmitter {
   grpc: GrpcHandler | undefined
   commitIndex: number
   lastApplied: number
+  followerStates: any
 
   constructor(id: number) {
     super()
@@ -87,6 +88,7 @@ export class RaftNode extends EventEmitter {
     this.electionTimer = null
     this.commitIndex = -1
     this.lastApplied = -1
+    this.followerStates = {}
   }
 
   start() {
@@ -113,7 +115,6 @@ export class RaftNode extends EventEmitter {
   }
 
   async startElection(): Promise<void> {
-    const raft = this
     this.state = RAFT_STATE.CANDIDATE
     this.term++
     this.vote = {
@@ -133,24 +134,18 @@ export class RaftNode extends EventEmitter {
       }
     }
 
-    if (this.grpc) {
-      for (const peer in this.grpc.clients) {
-        const client = this.grpc.clients[peer]
-        client.OnVoteRequest(
-          { term: raft.term, candidateId: raft.id },
-          (err: Error | null, response: { voteGranted: boolean }) => {
-            if (err) {
-              console.error("Error:", err.message)
-            } else {
-              if (response.voteGranted) {
-                raft.vote.granted++
-              }
-            }
-            handleVotes()
-          },
-        )
+    const cb = (err: Error | null, response: { voteGranted: boolean }) => {
+      if (err) {
+        console.error("Error:", err.message)
+      } else {
+        if (response.voteGranted) {
+          this.vote.granted++
+        }
       }
+      handleVotes()
     }
+    const { term, id } = this
+    this.grpc?.write("voteRequest", { term, candidate: id }, cb)
   }
 
   becomeLeader(): void {
@@ -161,24 +156,18 @@ export class RaftNode extends EventEmitter {
   }
 
   async sendHeartbeats() {
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    const raft = this
     if (this.state !== RAFT_STATE.LEADER) return
 
     setInterval(() => {
-      if (this.grpc) {
-        for (const peer in this.grpc.clients) {
-          const client = this.grpc?.clients[peer]
-          client.OnHeartbeat(
-            { term: raft.term, leaderId: raft.id },
-            (err: Error | null) => {
-              if (err) {
-                console.error("Error:", err)
-              }
-            },
-          )
-        }
-      }
+      this.grpc?.write(
+        "heartbeat",
+        { term: this.term, leaderId: this.id },
+        (err: Error | null) => {
+          if (err) {
+            console.error("Error:", err)
+          }
+        },
+      )
     }, this.heartbeatInterval)
   }
 
@@ -311,15 +300,15 @@ export class RaftNode extends EventEmitter {
     // const newIndex = this.log.length - 1
 
     if (this.grpc) {
-      for (const followerId of this.grpc.clients) {
-        this.sendAppendEntries(followerId)
+      for (const peer of this.grpc.clients) {
+        this.sendAppendEntries(peer)
       }
     }
   }
 
   // Send AppendEntries RPC to a follower
-  sendAppendEntries(followerId: string, overrideEntries?: LogEntry[]) {
-    const follower = this.grpc?.clients[followerId]
+  sendAppendEntries(peer: string, overrideEntries?: LogEntry[]) {
+    const follower = this.grpc?.clients[peer]
     const nextIdx = follower.nextIndex
 
     const prevLogIndex = nextIdx - 1
@@ -329,7 +318,7 @@ export class RaftNode extends EventEmitter {
       overrideEntries !== undefined ? overrideEntries : this.log.slice(nextIdx)
 
     const rpc: AppendEntriesRPC = {
-      term: this.currentTerm,
+      term: this.term,
       leaderId: this.id,
       prevLogIndex,
       prevLogTerm,
@@ -337,42 +326,37 @@ export class RaftNode extends EventEmitter {
       leaderCommit: this.commitIndex,
     }
 
-    this.sendRPC(followerId, rpc)
+    this.sendRPC(peer, rpc)
   }
 
   // Simulated network send
-  sendRPC(followerId: string, rpc: AppendEntriesRPC) {
-    console.log(`Sending AppendEntries to ${followerId}`, rpc)
-    // Implement actual network call or messaging system here
-  }
+  sendRPC(peer: string, rpc: AppendEntriesRPC) {}
 
   // Simulated follower response handler
-  onAppendEntriesResponse(followerId: string, success: boolean) {
-    const follower = this.followers[followerId]
-    if (success) {
-      follower.matchIndex = this.log.length - 1
-      follower.nextIndex = follower.matchIndex + 1
-    } else {
-      follower.nextIndex = Math.max(0, follower.nextIndex - 1)
-      this.sendAppendEntries(followerId) // retry
-    }
-
-    this.updateCommitIndex()
+  onAppendEntriesResponse(peer: string, success: boolean) {
+    // const follower = this.grpc?.clients[peer]
+    // if (success) {
+    //   follower.matchIndex = this.log.length - 1
+    //   follower.nextIndex = follower.matchIndex + 1
+    // } else {
+    //   follower.nextIndex = Math.max(0, follower.nextIndex - 1)
+    //   this.sendAppendEntries(followerId) // retry
+    // }
+    // this.updateCommitIndex()
   }
 
   updateCommitIndex() {
-    const matchIndices = Object.values(this.followers)
-      .map((f) => f.matchIndex)
-      .concat(this.log.length - 1) // include leader's index
-      .sort((a, b) => b - a)
-
-    const majorityMatch = matchIndices[Math.floor(this.peers.length / 2)]
-    if (
-      majorityMatch > this.commitIndex &&
-      this.log[majorityMatch].term === this.currentTerm
-    ) {
-      this.commitIndex = majorityMatch
-      console.log(`Commit index updated to ${this.commitIndex}`)
-    }
+    // const matchIndices = Object.values(this.followers)
+    //   .map((f) => f.matchIndex)
+    //   .concat(this.log.length - 1) // include leader's index
+    //   .sort((a, b) => b - a)
+    // const majorityMatch = matchIndices[Math.floor(this.peers.length / 2)]
+    // if (
+    //   majorityMatch > this.commitIndex &&
+    //   this.log[majorityMatch].term === this.currentTerm
+    // ) {
+    //   this.commitIndex = majorityMatch
+    //   console.log(`Commit index updated to ${this.commitIndex}`)
+    // }
   }
 }

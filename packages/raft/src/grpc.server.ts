@@ -37,7 +37,10 @@ class GrpcHandler extends EventEmitter {
         console.log(`gRPC server running at http://0.0.0.0:${port}`)
       },
     )
+    this.checkConnectedClients()
+  }
 
+  checkConnectedClients() {
     const x = setInterval(() => {
       if (this.connectedClients === this.clients.length) {
         clearInterval(x)
@@ -60,9 +63,6 @@ class GrpcHandler extends EventEmitter {
           },
         )
       }
-      // this.clients.map(async (peer) => {
-
-      // })
     }, 5000)
   }
 
@@ -72,6 +72,30 @@ class GrpcHandler extends EventEmitter {
       OnVoteRequest: this.handleVoteRequest,
       IsAlive: this.nodeAlive,
     })
+  }
+
+  write(key: string, value: any, cb: any) {
+    switch (key) {
+      case "heartbeat":
+        {
+          for (const peer in this.clients) {
+            const client = this.clients[peer]
+            client.OnHeartbeat(value, cb)
+          }
+        }
+        break
+      case "voteRequest":
+        {
+          for (const peer in this.clients) {
+            const client = this.clients[peer]
+            client.OnVoteRequest(value, cb)
+          }
+        }
+        break
+
+      default:
+        break
+    }
   }
 
   nodeAlive = (
