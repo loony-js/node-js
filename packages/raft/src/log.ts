@@ -7,6 +7,8 @@ export class RaftLog<T = any> {
   private data: LogEntry<T>[] = []
   private commitIndex: number = -1
   private lastApplied: number = -1
+  private length: number = 0
+  private peers: any
 
   constructor(data: LogEntry[] = []) {
     this.data = data
@@ -15,18 +17,35 @@ export class RaftLog<T = any> {
     }
   }
 
+  len() {
+    return this.length
+  }
+
   status() {
     return {
       entries: this.data.length,
+      length: this.data.length,
       commitIndex: this.getCommitIndex(),
       lastLogIndex: this.getLastLogIndex(),
       lastApplied: this.getLastApplied(),
     }
   }
 
+  getInfo(prevLogIndex: number) {
+    return {
+      length: this.data.length,
+      prevLogTerm: this.data[prevLogIndex].term,
+    }
+  }
+
+  getLogTerm(index: number): number {
+    return this.data[index].term
+  }
+
   // Add a new log entry
   appendEntry(entry: Omit<LogEntry, "index">): boolean {
     this.data.push(entry)
+    this.length += 1
     return true
   }
 
@@ -51,6 +70,10 @@ export class RaftLog<T = any> {
     return index >= 0 ? this.data[index].term : -1
   }
 
+  getLogTermForIndex(index: number): number {
+    return this.data[index].term
+  }
+
   // Commit index
   getCommitIndex(): number {
     return this.commitIndex
@@ -71,7 +94,7 @@ export class RaftLog<T = any> {
   }
 
   // Get entry at a specific index
-  getEntry(index: number): LogEntry<T> | undefined {
+  getEntry(index: number): LogEntry<T> {
     return this.data[index]
   }
 
@@ -99,6 +122,18 @@ export class RaftLog<T = any> {
   // Get entries between two indices (inclusive start, exclusive end)
   getEntries(from: number, length: number): LogEntry<T>[] {
     return this.data.slice(from, length)
+  }
+
+  getEntriesFrom(from: number): LogEntry<T>[] {
+    return this.data.slice(from)
+  }
+
+  deleteEntries(index: number) {
+    this.data = this.data.slice(0, index)
+  }
+
+  updateEntries(from: number, index: number) {
+    this.data = this.data.slice(from, index)
   }
 
   printLog(): void {

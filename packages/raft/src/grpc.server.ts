@@ -2,6 +2,7 @@ import * as grpc from "@grpc/grpc-js"
 import * as protoLoader from "@grpc/proto-loader"
 import EventEmitter from "node:events"
 import path from "path"
+import { RaftNode } from "./node"
 
 class GrpcHandler extends EventEmitter {
   server: grpc.Server
@@ -9,7 +10,8 @@ class GrpcHandler extends EventEmitter {
   raft: any
   clients: any
   connectedClients: number
-  raftNode: any
+  raftNode: RaftNode | undefined
+  clientsMeta: any
 
   constructor() {
     super()
@@ -22,10 +24,11 @@ class GrpcHandler extends EventEmitter {
     this.raft = this.grpcObject.raft
     this.server = new grpc.Server()
     this.clients = {}
+    this.clientsMeta = {}
     this.connectedClients = 0
   }
 
-  setRaftNode(node: any) {
+  setRaftNode(node: RaftNode) {
     this.raftNode = node
   }
 
@@ -52,18 +55,19 @@ class GrpcHandler extends EventEmitter {
         const client = this.clients[peer]
         client.IsAlive(
           {},
-          (err: Error | null, response: { alive: boolean }) => {
+          (err: Error | null, response: { alive: boolean; node: any }) => {
             if (err) {
               console.error("Error:", err.message)
             } else {
               if (response.alive) {
                 this.connectedClients += 1
+                this.clientsMeta[peer] = response.node
               }
             }
           },
         )
       }
-    }, 5000)
+    }, 3000)
   }
 
   addServices() {
@@ -100,9 +104,14 @@ class GrpcHandler extends EventEmitter {
 
   nodeAlive = (
     call: grpc.ServerUnaryCall<null, { alive: boolean }>,
-    callback: grpc.sendUnaryData<{ alive: boolean }>,
+    callback: grpc.sendUnaryData<{ alive: boolean; node: any }>,
   ) => {
-    callback(null, { alive: true })
+    callback(null, {
+      alive: true,
+      node: {
+        length: this.raftNode?.log.len(),
+      },
+    })
   }
 
   addClient(port: number) {
@@ -127,14 +136,14 @@ class GrpcHandler extends EventEmitter {
     >,
     callback: grpc.sendUnaryData<{ voteGranted: boolean }>,
   ) => {
-    this.raftNode.handleVoteRequest(call.request, callback)
+    this.raftNode?.handleVoteRequest(call.request, callback)
   }
 
   handleHeartbeat = (
     call: grpc.ServerUnaryCall<any, any>,
     callback: grpc.sendUnaryData<any>,
   ) => {
-    this.raftNode.handleHeartbeat(call.request, callback)
+    this.raftNode?.handleHeartbeat(call.request, callback)
   }
 
   callService(requestName: string, data: any) {

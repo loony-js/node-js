@@ -22,6 +22,11 @@ service RaftService {
 
 message Alive {
   bool alive = 1;
+  NodeInfo node = 2;
+}
+
+message NodeInfo {
+  uint32 length = 1;
 }
 
 message Heartbeat {
