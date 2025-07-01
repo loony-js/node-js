@@ -45,7 +45,7 @@ export type AppendEntriesRPC = {
   leaderId: number
   prevLogIndex: number
   prevLogTerm: number
-  entries: any[]
+  entries: string
   leaderCommit: number
 }
 
@@ -89,6 +89,26 @@ export class RaftNode extends EventEmitter {
     this.prevLogIndex = -1
 
     this.states = {}
+  }
+
+  status() {
+    return {
+      commitIndex: this.commitIndex,
+      lastApplied: this.lastApplied,
+      prevLogIndex: this.prevLogIndex,
+      state: this.state,
+      term: this.term,
+      leaderId: this.leaderId,
+      id: this.id,
+    }
+  }
+
+  logStatus() {
+    return this.log.status()
+  }
+
+  getAllEntries() {
+    return this.log.getEntriesFrom(0)
   }
 
   start() {
@@ -215,10 +235,15 @@ export class RaftNode extends EventEmitter {
   //     // )
   //   }
 
-  handleAppendEntries(rpc: AppendEntriesRPC): boolean {
+  handleAppendEntries(rpc: AppendEntriesRPC, cb: any) {
+    console.log("handleAppendEntries", rpc)
+
     // 1. Reply false if term < currentTerm (§5.1)
     if (rpc.term < this.term) {
-      return false
+      cb(null, {
+        success: false,
+      })
+      return
     }
 
     // 2. If rpc.term > this.term, update this.term and convert to follower
@@ -232,7 +257,6 @@ export class RaftNode extends EventEmitter {
     }
 
     this.leaderId = rpc.leaderId
-
     // 3. Reply false if log doesn't contain an entry at prevLogIndex
     //    whose term matches prevLogTerm (§5.3)
     if (
@@ -241,14 +265,18 @@ export class RaftNode extends EventEmitter {
         // this.log[rpc.prevLogIndex].term !== rpc.prevLogTerm
         this.log.getLogTermForIndex(rpc.prevLogIndex) !== rpc.prevLogTerm)
     ) {
-      return false
+      cb(null, {
+        success: false,
+      })
+      return
     }
 
+    const entries = JSON.parse(rpc.entries)
     // 4. If an existing entry conflicts with a new one (same index but different terms),
     //    delete the existing entry and all that follow it (§5.3)
-    for (let i = 0; i < rpc.entries.length; i++) {
+    for (let i = 0; i < entries.length; i++) {
       const index = rpc.prevLogIndex + 1 + i
-      const incoming = rpc.entries[i]
+      const incoming = entries[i]
 
       if (index < this.log.len()) {
         if (this.log.getLogTermForIndex(index) !== incoming.term) {
@@ -260,21 +288,23 @@ export class RaftNode extends EventEmitter {
     }
 
     // 5. Append any new entries not already in the log
-    for (let i = 0; i < rpc.entries.length; i++) {
+    for (let i = 0; i < entries.length; i++) {
       const index = rpc.prevLogIndex + 1 + i
       if (index >= this.log.len()) {
-        this.log.appendEntry(rpc.entries[i])
+        this.log.appendEntry(entries[i])
       }
     }
 
     // 6. If leaderCommit > commitIndex, set commitIndex = min(leaderCommit, index of last new entry)
     if (rpc.leaderCommit > this.commitIndex) {
-      const lastNewIndex = rpc.prevLogIndex + rpc.entries.length
+      const lastNewIndex = rpc.prevLogIndex + entries.length
       this.commitIndex = Math.min(rpc.leaderCommit, lastNewIndex)
       this.applyCommittedEntries()
     }
 
-    return true
+    cb(null, {
+      success: true,
+    })
   }
 
   applyCommittedEntries() {
@@ -297,7 +327,7 @@ export class RaftNode extends EventEmitter {
     // const newIndex = this.log.length - 1
 
     if (this.grpc) {
-      for (const peer of this.grpc.clients) {
+      for (const peer in this.grpc.clients) {
         this.sendAppendEntries(peer)
       }
     }
@@ -306,7 +336,10 @@ export class RaftNode extends EventEmitter {
   // Send AppendEntries RPC to a follower
   sendAppendEntries(peer: string, overrideEntries?: LogEntry[]) {
     const follower = this.grpc?.clientsMeta[peer]
-    const nextIdx = follower.len
+    if (!follower) {
+      return
+    }
+    const nextIdx = follower.length
     const prevLogIndex = nextIdx - 1
 
     const prevLogTerm =
@@ -322,7 +355,7 @@ export class RaftNode extends EventEmitter {
       leaderId: this.id,
       prevLogIndex,
       prevLogTerm,
-      entries,
+      entries: JSON.stringify(entries),
       leaderCommit: this.commitIndex,
     }
 
@@ -330,16 +363,22 @@ export class RaftNode extends EventEmitter {
   }
 
   // Simulated network send
-  sendRPC(peer: string, rpc: AppendEntriesRPC) {}
+  sendRPC(peer: string, rpc: AppendEntriesRPC) {
+    const run = (success: boolean) => {
+      this.onAppendEntriesResponse(success, peer)
+    }
+    this.grpc?.appendEntry(rpc, peer, run)
+  }
 
   // Simulated follower response handler
-  onAppendEntriesResponse(peer: string, success: boolean) {
+  onAppendEntriesResponse(success: boolean, peer: string) {
     const follower = this.grpc?.clients[peer]
     if (success) {
-      follower.matchIndex = this.log.len() - 1
-      follower.nextIndex = follower.matchIndex + 1
+      follower.length += 1
+      // follower.matchIndex = this.log.len() - 1
+      // follower.nextIndex = follower.matchIndex + 1
     } else {
-      follower.nextIndex = Math.max(0, follower.nextIndex - 1)
+      // follower.nextIndex = Math.max(0, follower.nextIndex - 1)
       // this.sendAppendEntries(followerId) // retry
     }
     this.updateCommitIndex()

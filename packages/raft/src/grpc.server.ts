@@ -4,6 +4,10 @@ import EventEmitter from "node:events"
 import path from "path"
 import { RaftNode } from "./node"
 
+type PeerInfo = {
+  length: number
+}
+
 class GrpcHandler extends EventEmitter {
   server: grpc.Server
   grpcObject: grpc.GrpcObject
@@ -11,7 +15,7 @@ class GrpcHandler extends EventEmitter {
   clients: any
   connectedClients: number
   raftNode: RaftNode | undefined
-  clientsMeta: any
+  clientsMeta: Record<string, PeerInfo>
 
   constructor() {
     super()
@@ -30,6 +34,13 @@ class GrpcHandler extends EventEmitter {
 
   setRaftNode(node: RaftNode) {
     this.raftNode = node
+  }
+
+  status() {
+    return {
+      connectedClients: this.connectedClients,
+      clientsMeta: this.clientsMeta,
+    }
   }
 
   start(port: number) {
@@ -74,6 +85,7 @@ class GrpcHandler extends EventEmitter {
     this.server.addService(this.raft.RaftService.service, {
       OnHeartbeat: this.handleHeartbeat,
       OnVoteRequest: this.handleVoteRequest,
+      OnAppendEntries: this.handleAppendEntry,
       IsAlive: this.nodeAlive,
     })
   }
@@ -96,10 +108,15 @@ class GrpcHandler extends EventEmitter {
           }
         }
         break
-
       default:
         break
     }
+  }
+
+  appendEntry(value: any, peer: string, cb: any) {
+    console.log("appendEntry", value, peer)
+    const client = this.clients[peer]
+    client.OnAppendEntries(value, cb)
   }
 
   nodeAlive = (
@@ -146,29 +163,11 @@ class GrpcHandler extends EventEmitter {
     this.raftNode?.handleHeartbeat(call.request, callback)
   }
 
-  callService(requestName: string, data: any) {
-    switch (requestName) {
-      case "REQUEST_VOTE":
-        break
-      case "APPEND_ENTRIES":
-        for (const peer in this.clients) {
-          const client = this.clients[peer]
-          client.AppendEntries(
-            data,
-            (err: grpc.ServiceError | null, response: any) => {
-              if (err) {
-                console.error("AppendEntries failed:", err)
-              } else {
-                console.log("AppendEntries response:", response)
-              }
-            },
-          )
-        }
-        break
-
-      default:
-        break
-    }
+  handleAppendEntry = (
+    call: grpc.ServerUnaryCall<any, any>,
+    callback: grpc.sendUnaryData<{ success: boolean }>,
+  ) => {
+    this.raftNode?.handleAppendEntries(call.request, callback)
   }
 }
 

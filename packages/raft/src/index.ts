@@ -29,6 +29,26 @@ app.post("/set", (req, res) => {
   res.send("Ok.")
 })
 
+app.get("/logStatus", (req, res) => {
+  const data = node.logStatus()
+  res.json(data)
+})
+
+app.get("/nodeStatus", (req, res) => {
+  const data = node.status()
+  res.json(data)
+})
+
+app.get("/peerStatus", (req, res) => {
+  const data = grpcServer.status()
+  res.json(data)
+})
+
+app.get("/entries", (req, res) => {
+  const data = node.getAllEntries()
+  res.json(data)
+})
+
 // Start Server
 server.listen(HTTP_PORT, () => {
   console.log(`Server is running on http://localhost:${HTTP_PORT}`)

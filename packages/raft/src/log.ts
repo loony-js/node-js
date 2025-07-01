@@ -23,7 +23,6 @@ export class RaftLog<T = any> {
 
   status() {
     return {
-      entries: this.data.length,
       length: this.data.length,
       commitIndex: this.getCommitIndex(),
       lastLogIndex: this.getLastLogIndex(),
