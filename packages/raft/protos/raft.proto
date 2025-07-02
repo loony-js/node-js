@@ -3,13 +3,16 @@ syntax = "proto3";
 package raft;
 
 service RaftService {
-  rpc IsAlive(Empty) returns (Alive);
-  rpc OnHeartbeat(Heartbeat) returns (HeartbeatResponse);
-  rpc OnVoteRequest(VoteRequest) returns (VoteRequestResponse);
-  rpc OnAppendEntries(AppendEntriesRequest) returns (AppendEntriesResponse);
+  rpc IsAlive(AliveReq) returns (AliveRes);
+  rpc Heartbeat(HeartbeatReq) returns (HeartbeatRes);
+  rpc VoteRequest(VoteReq) returns (VoteRes);
+  rpc AppendEntries(AppendEntriesReq) returns (AppendEntriesRes);
 }
 
-message Alive {
+message AliveReq {
+}
+
+message AliveRes {
   bool alive = 1;
   NodeInfo node = 2;
 }
@@ -18,24 +21,23 @@ message NodeInfo {
   uint32 length = 1;
 }
 
-message Heartbeat {
+message HeartbeatReq {
   uint32 term = 1;
   uint32 leaderId = 2;
 }
-message HeartbeatResponse {
+message HeartbeatRes {
   bool result = 1;
 }
 
-message VoteRequest {
+message VoteReq {
   uint32 term = 1;
   uint32 candidateId = 2;
 }
-message VoteRequestResponse {
+message VoteRes {
   bool voteGranted = 1;
 }
 
-
-message AppendEntriesRequest {
+message AppendEntriesReq {
   int32 term = 1;
   int32 leaderId = 2;
   int32 prevLogIndex = 3;
@@ -44,13 +46,11 @@ message AppendEntriesRequest {
   int32 leaderCommit = 6;
 }
 
-message LogEntry {
-  int32 term = 1;
-  string command = 2;
-}
-
-message AppendEntriesResponse {
+message AppendEntriesRes {
   bool success = 1;
 }
 
-message Empty {}
+// message LogEntry {
+//   int32 term = 1;
+//   string command = 2;
+// }

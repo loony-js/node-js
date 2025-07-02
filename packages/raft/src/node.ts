@@ -3,6 +3,13 @@ import * as grpc from "@grpc/grpc-js"
 import EventEmitter from "node:events"
 import GrpcHandler from "./grpc.server"
 import { RaftLog } from "./log"
+import messages, {
+  AppendEntriesReq,
+  HeartbeatReq,
+  HeartbeatRes,
+  VoteReq,
+  VoteRes,
+} from "../generated/raft_pb"
 // import * as grpc from "@grpc/grpc-js"
 
 interface LogEntry {
@@ -154,11 +161,11 @@ export class RaftNode extends EventEmitter {
       }
     }
 
-    const cb = (err: Error | null, response: { voteGranted: boolean }) => {
+    const cb = (err: grpc.ServiceError, res: messages.VoteRes) => {
       if (err) {
         console.error("Error:", err.message)
       } else {
-        if (response.voteGranted) {
+        if (res.getVotegranted()) {
           this.vote.granted++
         }
       }
@@ -179,38 +186,35 @@ export class RaftNode extends EventEmitter {
     if (this.state !== RAFT_STATE.LEADER) return
 
     setInterval(() => {
-      this.grpc?.write(
-        "heartbeat",
-        { term: this.term, leaderId: this.id },
-        (err: Error | null) => {
-          if (err) {
-            console.error("Error:", err)
-          }
-        },
-      )
+      const cb = (err: grpc.ServiceError, res: messages.HeartbeatRes) => {
+        if (err) {
+          console.error("Error:", err)
+        }
+      }
+      this.grpc?.write("heartbeat", { term: this.term, leaderId: this.id }, cb)
     }, this.heartbeatInterval)
   }
 
-  handleVoteRequest(
-    { term, candidateId }: { term: number; candidateId: number },
-    callback: grpc.sendUnaryData<{ voteGranted: boolean }>,
-  ): any {
+  handleVoteRequest(req: VoteReq): { voteGranted: boolean } {
+    const term = req.getTerm()
+    const candidateId = req.getCandidateid()
     if (term > this.term) {
       this.term = term
       if (candidateId) {
         this.vote.for = candidateId
       }
       this.startElectionTimer()
-      callback(null, { voteGranted: true })
+      return { voteGranted: true }
     } else {
-      callback(null, { voteGranted: false })
+      return { voteGranted: false }
     }
   }
 
-  handleHeartbeat(
-    { term, leaderId }: { term: number; leaderId: number },
-    callback: grpc.sendUnaryData<any>,
-  ) {
+  handleHeartbeat(req: HeartbeatReq): {
+    result: boolean
+  } {
+    const term = req.getTerm()
+    const leaderId = req.getLeaderid()
     if (term >= this.term) {
       this.term = term
       if (leaderId) {
@@ -219,7 +223,7 @@ export class RaftNode extends EventEmitter {
       this.state = RAFT_STATE.FOLLOWER
       this.startElectionTimer()
     }
-    callback(null, { result: true })
+    return { result: true }
   }
 
   //   async sendLogAppendEntryToPeers(entry: LogEntry) {
@@ -235,20 +239,22 @@ export class RaftNode extends EventEmitter {
   //     // )
   //   }
 
-  handleAppendEntries(rpc: AppendEntriesRPC, cb: any) {
-    console.log("handleAppendEntries", rpc)
+  handleAppendEntries(req: AppendEntriesReq): { success: boolean } {
+    const term = req.getTerm()
+    const leaderId = req.getLeaderid()
+    const prevLogIndex = req.getPrevlogindex()
+    const prevLogTerm = req.getPrevlogterm()
+    const reqEntries = req.getEntries()
+    const leaderCommit = req.getLeadercommit()
 
-    // 1. Reply false if term < currentTerm (§5.1)
-    if (rpc.term < this.term) {
-      cb(null, {
+    if (term < this.term) {
+      return {
         success: false,
-      })
-      return
+      }
     }
 
-    // 2. If rpc.term > this.term, update this.term and convert to follower
-    if (rpc.term > this.term) {
-      this.term = rpc.term
+    if (term > this.term) {
+      this.term = term
       this.state = RAFT_STATE.FOLLOWER
       this.vote = {
         for: null,
@@ -256,26 +262,23 @@ export class RaftNode extends EventEmitter {
       }
     }
 
-    this.leaderId = rpc.leaderId
-    // 3. Reply false if log doesn't contain an entry at prevLogIndex
-    //    whose term matches prevLogTerm (§5.3)
+    this.leaderId = leaderId
     if (
-      rpc.prevLogIndex >= 0 &&
-      (rpc.prevLogIndex >= this.log.len() ||
-        // this.log[rpc.prevLogIndex].term !== rpc.prevLogTerm
-        this.log.getLogTermForIndex(rpc.prevLogIndex) !== rpc.prevLogTerm)
+      prevLogIndex >= 0 &&
+      (prevLogIndex >= this.log.len() ||
+        // this.log[prevLogIndex].term !== rpc.prevLogTerm
+        this.log.getLogTermForIndex(prevLogIndex) !== prevLogTerm)
     ) {
-      cb(null, {
+      return {
         success: false,
-      })
-      return
+      }
     }
 
-    const entries = JSON.parse(rpc.entries)
+    const entries = JSON.parse(reqEntries)
     // 4. If an existing entry conflicts with a new one (same index but different terms),
     //    delete the existing entry and all that follow it (§5.3)
     for (let i = 0; i < entries.length; i++) {
-      const index = rpc.prevLogIndex + 1 + i
+      const index = prevLogIndex + 1 + i
       const incoming = entries[i]
 
       if (index < this.log.len()) {
@@ -289,22 +292,22 @@ export class RaftNode extends EventEmitter {
 
     // 5. Append any new entries not already in the log
     for (let i = 0; i < entries.length; i++) {
-      const index = rpc.prevLogIndex + 1 + i
+      const index = prevLogIndex + 1 + i
       if (index >= this.log.len()) {
         this.log.appendEntry(entries[i])
       }
     }
 
     // 6. If leaderCommit > commitIndex, set commitIndex = min(leaderCommit, index of last new entry)
-    if (rpc.leaderCommit > this.commitIndex) {
-      const lastNewIndex = rpc.prevLogIndex + entries.length
-      this.commitIndex = Math.min(rpc.leaderCommit, lastNewIndex)
+    if (leaderCommit > this.commitIndex) {
+      const lastNewIndex = prevLogIndex + entries.length
+      this.commitIndex = Math.min(leaderCommit, lastNewIndex)
       this.applyCommittedEntries()
     }
 
-    cb(null, {
+    return {
       success: true,
-    })
+    }
   }
 
   applyCommittedEntries() {
@@ -327,19 +330,19 @@ export class RaftNode extends EventEmitter {
     // const newIndex = this.log.length - 1
 
     if (this.grpc) {
-      for (const peer in this.grpc.clients) {
+      for (const peer of this.grpc.ports) {
         this.sendAppendEntries(peer)
       }
     }
   }
 
   // Send AppendEntries RPC to a follower
-  sendAppendEntries(peer: string, overrideEntries?: LogEntry[]) {
+  sendAppendEntries(peer: number, overrideEntries?: LogEntry[]) {
     const follower = this.grpc?.clientsMeta[peer]
     if (!follower) {
       return
     }
-    const nextIdx = follower.length
+    const nextIdx = follower.getLength()
     const prevLogIndex = nextIdx - 1
 
     const prevLogTerm =
@@ -363,7 +366,7 @@ export class RaftNode extends EventEmitter {
   }
 
   // Simulated network send
-  sendRPC(peer: string, rpc: AppendEntriesRPC) {
+  sendRPC(peer: number, rpc: AppendEntriesRPC) {
     const run = (success: boolean) => {
       this.onAppendEntriesResponse(success, peer)
     }
@@ -371,10 +374,11 @@ export class RaftNode extends EventEmitter {
   }
 
   // Simulated follower response handler
-  onAppendEntriesResponse(success: boolean, peer: string) {
-    const follower = this.grpc?.clients[peer]
-    if (success) {
-      follower.length += 1
+  onAppendEntriesResponse(success: boolean, peer: number) {
+    const follower = this.grpc?.clientsMeta[peer]
+    if (success && follower) {
+      const len = follower.getLength()
+      follower?.setLength(len + 1)
       // follower.matchIndex = this.log.len() - 1
       // follower.nextIndex = follower.matchIndex + 1
     } else {

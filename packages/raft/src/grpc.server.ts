@@ -1,35 +1,45 @@
 import * as grpc from "@grpc/grpc-js"
-import * as protoLoader from "@grpc/proto-loader"
-import EventEmitter from "node:events"
-import path from "path"
-import { RaftNode } from "./node"
+import service from "../generated/raft_grpc_pb"
+import messages, {
+  AliveReq,
+  AliveRes,
+  AppendEntriesReq,
+  AppendEntriesRes,
+  HeartbeatReq,
+  HeartbeatRes,
+  NodeInfo,
+  VoteReq,
+  VoteRes,
+} from "../generated/raft_pb"
 
-type PeerInfo = {
-  length: number
-}
+import EventEmitter from "node:events"
+import { AppendEntriesRPC, RaftNode } from "./node"
 
 class GrpcHandler extends EventEmitter {
+  ports: number[]
   server: grpc.Server
-  grpcObject: grpc.GrpcObject
-  raft: any
-  clients: any
+  // grpcObject: grpc.GrpcObject
+  raftService: any
+  // raft
+  clients: Record<number, service.RaftServiceClient>
   connectedClients: number
   raftNode: RaftNode | undefined
-  clientsMeta: Record<string, PeerInfo>
+  clientsMeta: Record<string, NodeInfo | undefined>
 
   constructor() {
     super()
-    const packageDefinition = protoLoader.loadSync(
-      path.resolve(__dirname, "protos/raft.proto"),
-    )
-    this.grpcObject = grpc.loadPackageDefinition(
-      packageDefinition,
-    ) as grpc.GrpcObject
-    this.raft = this.grpcObject.raft
+    // const packageDefinition = protoLoader.loadSync(
+    //   path.resolve(__dirname, "protos/raft.proto"),
+    // )
+    // this.grpcObject = grpc.loadPackageDefinition(
+    //   packageDefinition,
+    // ) as grpc.GrpcObject
+    // this.raft = this.grpcObject.raft
     this.server = new grpc.Server()
     this.clients = {}
     this.clientsMeta = {}
     this.connectedClients = 0
+    this.ports = []
   }
 
   setRaftNode(node: RaftNode) {
@@ -54,39 +64,37 @@ class GrpcHandler extends EventEmitter {
     this.checkConnectedClients()
   }
 
-  checkConnectedClients() {
+  private checkConnectedClients() {
     const x = setInterval(() => {
-      if (this.connectedClients === this.clients.length) {
+      if (this.connectedClients === Object.entries(this.clients).length) {
         clearInterval(x)
         return
       } else {
         this.connectedClients = 0
       }
-      for (const peer in this.clients) {
+      for (const peer of this.ports) {
         const client = this.clients[peer]
-        client.IsAlive(
-          {},
-          (err: Error | null, response: { alive: boolean; node: any }) => {
-            if (err) {
-              console.error("Error:", err.message)
-            } else {
-              if (response.alive) {
-                this.connectedClients += 1
-                this.clientsMeta[peer] = response.node
-              }
+        const request = new messages.AliveReq()
+        client.isAlive(request, (err, response) => {
+          if (err) {
+            console.error("Error:", err.message)
+          } else {
+            if (response.getAlive()) {
+              this.connectedClients += 1
+              this.clientsMeta[peer] = response.getNode()
             }
-          },
-        )
+          }
+        })
       }
     }, 3000)
   }
 
   addServices() {
-    this.server.addService(this.raft.RaftService.service, {
-      OnHeartbeat: this.handleHeartbeat,
-      OnVoteRequest: this.handleVoteRequest,
-      OnAppendEntries: this.handleAppendEntry,
-      IsAlive: this.nodeAlive,
+    this.server.addService(service.RaftServiceService, {
+      heartbeat: this.handleHeartbeat,
+      voteRequest: this.handleVoteRequest,
+      appendEntries: this.handleAppendEntry,
+      isAlive: this.nodeAlive,
     })
   }
 
@@ -94,17 +102,30 @@ class GrpcHandler extends EventEmitter {
     switch (key) {
       case "heartbeat":
         {
-          for (const peer in this.clients) {
+          for (const peer of this.ports) {
             const client = this.clients[peer]
-            client.OnHeartbeat(value, cb)
+            const request = new messages.HeartbeatReq()
+            request.setLeaderid(value.leaderId)
+            request.setTerm(value.term)
+            client.heartbeat(
+              request,
+              (err, response: messages.HeartbeatRes) => {
+                cb(err, response)
+              },
+            )
           }
         }
         break
       case "voteRequest":
         {
-          for (const peer in this.clients) {
+          for (const peer of this.ports) {
             const client = this.clients[peer]
-            client.OnVoteRequest(value, cb)
+            const request = new messages.VoteReq()
+            request.setCandidateid(value.candidateId)
+            request.setTerm(value.term)
+            client.voteRequest(request, (err, response: messages.VoteRes) => {
+              cb(err, response)
+            })
           }
         }
         break
@@ -113,26 +134,24 @@ class GrpcHandler extends EventEmitter {
     }
   }
 
-  appendEntry(value: any, peer: string, cb: any) {
-    console.log("appendEntry", value, peer)
+  appendEntry(value: AppendEntriesRPC, peer: number, cb: any) {
     const client = this.clients[peer]
-    client.OnAppendEntries(value, cb)
-  }
-
-  nodeAlive = (
-    call: grpc.ServerUnaryCall<null, { alive: boolean }>,
-    callback: grpc.sendUnaryData<{ alive: boolean; node: any }>,
-  ) => {
-    callback(null, {
-      alive: true,
-      node: {
-        length: this.raftNode?.log.len(),
-      },
+    const request = new messages.AppendEntriesReq()
+    request.setTerm(value.term)
+    request.setLeaderid(value.leaderId)
+    request.setPrevlogindex(value.prevLogIndex)
+    request.setPrevlogterm(value.prevLogTerm)
+    request.setEntries(value.entries)
+    request.setLeadercommit(value.leaderCommit)
+    client.appendEntries(request, (err, response) => {
+      if (!err) {
+        cb(response.getSuccess())
+      }
     })
   }
 
-  addClient(port: number) {
-    const peer = new this.raft.RaftService(
+  private addClient(port: number) {
+    const peer = new service.RaftServiceClient(
       `localhost:${port}`,
       grpc.credentials.createInsecure(),
     )
@@ -141,33 +160,65 @@ class GrpcHandler extends EventEmitter {
   }
 
   addClients(ports: number[]) {
+    this.ports = ports
     ports.forEach((port) => {
       this.addClient(port)
     })
   }
 
-  handleVoteRequest = (
-    call: grpc.ServerUnaryCall<
-      { term: number; candidateId: number },
-      { voteGranted: boolean }
-    >,
-    callback: grpc.sendUnaryData<{ voteGranted: boolean }>,
+  private nodeAlive = (
+    call: grpc.ServerUnaryCall<AliveReq, AliveRes>,
+    callback: grpc.sendUnaryData<AliveRes>,
   ) => {
-    this.raftNode?.handleVoteRequest(call.request, callback)
+    const reply = new messages.AliveRes()
+    if (this.raftNode) {
+      reply.setAlive(true)
+      const nodeInfo = new messages.NodeInfo()
+      nodeInfo.setLength(this.raftNode.log.len())
+      reply.setNode(nodeInfo)
+      callback(null, reply)
+    } else {
+      reply.setAlive(false)
+      const nodeInfo = new messages.NodeInfo()
+      nodeInfo.setLength(0)
+      reply.setNode(nodeInfo)
+      callback(null, reply)
+    }
   }
 
-  handleHeartbeat = (
-    call: grpc.ServerUnaryCall<any, any>,
-    callback: grpc.sendUnaryData<any>,
+  private handleVoteRequest = (
+    call: grpc.ServerUnaryCall<VoteReq, VoteRes>,
+    callback: grpc.sendUnaryData<VoteRes>,
   ) => {
-    this.raftNode?.handleHeartbeat(call.request, callback)
+    const reply = new messages.VoteRes()
+    if (this.raftNode) {
+      const res = this.raftNode.handleVoteRequest(call.request)
+      reply.setVotegranted(res.voteGranted)
+      callback(null, reply)
+    } else {
+      reply.setVotegranted(false)
+      callback(null, reply)
+    }
   }
 
-  handleAppendEntry = (
-    call: grpc.ServerUnaryCall<any, any>,
-    callback: grpc.sendUnaryData<{ success: boolean }>,
+  private handleHeartbeat = (
+    call: grpc.ServerUnaryCall<HeartbeatReq, HeartbeatRes>,
+    callback: grpc.sendUnaryData<HeartbeatRes>,
   ) => {
-    this.raftNode?.handleAppendEntries(call.request, callback)
+    const res = this.raftNode?.handleHeartbeat(call.request)
+    const reply = new messages.HeartbeatRes()
+    reply.setResult(res?.result || false)
+    callback(null, reply)
+  }
+
+  private handleAppendEntry = (
+    call: grpc.ServerUnaryCall<AppendEntriesReq, AppendEntriesRes>,
+    callback: grpc.sendUnaryData<AppendEntriesRes>,
+  ) => {
+    const res = this.raftNode?.handleAppendEntries(call.request)
+    const reply = new messages.AppendEntriesRes()
+    reply.setSuccess(res?.success || false)
+    callback(null, reply)
   }
 }
 
