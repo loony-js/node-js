@@ -5,8 +5,6 @@ import messages, {
   AliveRes,
   AppendEntriesReq,
   AppendEntriesRes,
-  HeartbeatReq,
-  HeartbeatRes,
   VoteReq,
   VoteRes,
 } from "../generated/raft_pb"
@@ -64,30 +62,32 @@ class GrpcHandler extends EventEmitter {
     const x = setInterval(() => {
       if (this.connectedClients === Object.entries(this.clients).length) {
         clearInterval(x)
+        console.log(`checkConnectedClients interval cleared.`)
         return
       } else {
+        console.log(this.connectedClients, "ConnectedClients")
         this.connectedClients = 0
-      }
-      for (const peer of this.ports) {
-        const client = this.clients[peer]
-        const request = new messages.AliveReq()
-        client.isAlive(request, (err, response) => {
-          if (err) {
-            console.error("Error:", err.message)
-          } else {
-            if (response.getAlive() && response.getNode()) {
-              const node = response.getNode()
-              if (node) {
-                this.connectedClients += 1
-                this.clientsMeta[peer] = {
-                  length: node.getLength(),
-                  nextIndex: node.getLength(),
-                  matchIndex: node.getLength() - 1,
+        for (const peer of this.ports) {
+          const client = this.clients[peer]
+          const request = new messages.AliveReq()
+          client.isAlive(request, (err, response) => {
+            if (err) {
+              console.error("Error:", err.message)
+            } else {
+              if (response.getAlive() && response.getNode()) {
+                const node = response.getNode()
+                if (node) {
+                  this.connectedClients += 1
+                  this.clientsMeta[peer] = {
+                    length: node.getLength(),
+                    nextIndex: node.getLength(),
+                    matchIndex: node.getLength() - 1,
+                  }
                 }
               }
             }
-          }
-        })
+          })
+        }
       }
     }, 3000)
   }
@@ -107,12 +107,16 @@ class GrpcHandler extends EventEmitter {
         {
           for (const peer of this.ports) {
             const client = this.clients[peer]
-            const request = new messages.HeartbeatReq()
-            request.setLeaderid(value.leaderId)
+            const request = new messages.AppendEntriesReq()
             request.setTerm(value.term)
+            request.setLeaderid(value.leaderId)
+            request.setPrevlogindex(value.prevLogIndex)
+            request.setPrevlogterm(value.prevLogTerm)
+            request.setEntries(value.entries)
+            request.setLeadercommit(value.leaderCommit)
             client.heartbeat(
               request,
-              (err, response: messages.HeartbeatRes) => {
+              (err, response: messages.AppendEntriesRes) => {
                 cb(err, response)
               },
             )
@@ -205,12 +209,12 @@ class GrpcHandler extends EventEmitter {
   }
 
   private handleHeartbeat = (
-    call: grpc.ServerUnaryCall<HeartbeatReq, HeartbeatRes>,
-    callback: grpc.sendUnaryData<HeartbeatRes>,
+    call: grpc.ServerUnaryCall<AppendEntriesReq, AppendEntriesRes>,
+    callback: grpc.sendUnaryData<AppendEntriesRes>,
   ) => {
     const res = this.raftNode?.handleHeartbeat(call.request)
-    const reply = new messages.HeartbeatRes()
-    reply.setResult(res?.result || false)
+    const reply = new messages.AppendEntriesRes()
+    reply.setSuccess(res?.result || false)
     callback(null, reply)
   }
 

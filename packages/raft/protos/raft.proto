@@ -4,7 +4,7 @@ package raft;
 
 service RaftService {
   rpc IsAlive(AliveReq) returns (AliveRes);
-  rpc Heartbeat(HeartbeatReq) returns (HeartbeatRes);
+  rpc Heartbeat(AppendEntriesReq) returns (AppendEntriesRes);
   rpc VoteRequest(VoteReq) returns (VoteRes);
   rpc AppendEntries(AppendEntriesReq) returns (AppendEntriesRes);
 }
@@ -19,14 +19,6 @@ message AliveRes {
 
 message NodeInfo {
   uint32 length = 1;
-}
-
-message HeartbeatReq {
-  uint32 term = 1;
-  uint32 leaderId = 2;
-}
-message HeartbeatRes {
-  bool result = 1;
 }
 
 message VoteReq {

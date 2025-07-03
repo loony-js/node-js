@@ -2,11 +2,7 @@ import * as grpc from "@grpc/grpc-js"
 import EventEmitter from "node:events"
 import GrpcHandler from "./grpc.server"
 import { RaftLog } from "./log"
-import messages, {
-  AppendEntriesReq,
-  HeartbeatReq,
-  VoteReq,
-} from "../generated/raft_pb"
+import messages, { AppendEntriesReq, VoteReq } from "../generated/raft_pb"
 
 interface LogEntry {
   term: number
@@ -187,7 +183,21 @@ export class RaftNode extends EventEmitter {
           console.error("Error:", err)
         }
       }
-      this.grpc?.write("heartbeat", { term: this.term, leaderId: this.id }, cb)
+      const prevLogIndex = this.log.len() - 1
+      const prevLogTerm =
+        prevLogIndex >= 0 ? this.log.getLogTerm(prevLogIndex) : 0
+      this.grpc?.write(
+        "heartbeat",
+        {
+          term: this.term,
+          leaderId: this.id,
+          prevLogIndex,
+          prevLogTerm,
+          entries: JSON.stringify([]),
+          leaderCommit: this.commitIndex,
+        },
+        cb,
+      )
     }, this.heartbeatInterval)
   }
 
@@ -206,11 +216,22 @@ export class RaftNode extends EventEmitter {
     }
   }
 
-  handleHeartbeat(req: HeartbeatReq): {
+  handleHeartbeat(req: AppendEntriesReq): {
     result: boolean
   } {
     const term = req.getTerm()
     const leaderId = req.getLeaderid()
+    const leaderCommit = req.getLeadercommit()
+    const prevLogIndex = req.getPrevlogindex()
+    const allEntries = req.getEntries()
+    const entries = JSON.parse(allEntries)
+
+    if (leaderCommit > this.commitIndex) {
+      const lastNewIndex = prevLogIndex + entries.length
+      this.commitIndex = Math.min(leaderCommit, lastNewIndex)
+      this.applyCommittedEntries()
+    }
+
     if (term >= this.term) {
       this.term = term
       if (leaderId) {
@@ -219,21 +240,9 @@ export class RaftNode extends EventEmitter {
       this.state = RAFT_STATE.FOLLOWER
       this.startElectionTimer()
     }
+
     return { result: true }
   }
-
-  //   async sendLogAppendEntryToPeers(entry: LogEntry) {
-  //     // await Promise.all(
-  //     //   this.peers.map(async (peer) => {
-  //     //     const url = `${peer}/appendEntry`
-  //     //     const body = {
-  //     //       term: this.term,
-  //     //       entry,
-  //     //     }
-  //     //     post(url, body).catch(() => {})
-  //     //   }),
-  //     // )
-  //   }
 
   handleAppendEntries(req: AppendEntriesReq): { success: boolean } {
     console.log(`Received append entry.`)

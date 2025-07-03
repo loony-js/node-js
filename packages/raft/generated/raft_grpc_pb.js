@@ -48,28 +48,6 @@ function deserialize_raft_AppendEntriesRes(buffer_arg) {
   return raft_pb.AppendEntriesRes.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
-function serialize_raft_HeartbeatReq(arg) {
-  if (!(arg instanceof raft_pb.HeartbeatReq)) {
-    throw new Error('Expected argument of type raft.HeartbeatReq');
-  }
-  return Buffer.from(arg.serializeBinary());
-}
-
-function deserialize_raft_HeartbeatReq(buffer_arg) {
-  return raft_pb.HeartbeatReq.deserializeBinary(new Uint8Array(buffer_arg));
-}
-
-function serialize_raft_HeartbeatRes(arg) {
-  if (!(arg instanceof raft_pb.HeartbeatRes)) {
-    throw new Error('Expected argument of type raft.HeartbeatRes');
-  }
-  return Buffer.from(arg.serializeBinary());
-}
-
-function deserialize_raft_HeartbeatRes(buffer_arg) {
-  return raft_pb.HeartbeatRes.deserializeBinary(new Uint8Array(buffer_arg));
-}
-
 function serialize_raft_VoteReq(arg) {
   if (!(arg instanceof raft_pb.VoteReq)) {
     throw new Error('Expected argument of type raft.VoteReq');
@@ -109,12 +87,12 @@ var RaftServiceService = exports.RaftServiceService = {
     path: '/raft.RaftService/Heartbeat',
     requestStream: false,
     responseStream: false,
-    requestType: raft_pb.HeartbeatReq,
-    responseType: raft_pb.HeartbeatRes,
-    requestSerialize: serialize_raft_HeartbeatReq,
-    requestDeserialize: deserialize_raft_HeartbeatReq,
-    responseSerialize: serialize_raft_HeartbeatRes,
-    responseDeserialize: deserialize_raft_HeartbeatRes,
+    requestType: raft_pb.AppendEntriesReq,
+    responseType: raft_pb.AppendEntriesRes,
+    requestSerialize: serialize_raft_AppendEntriesReq,
+    requestDeserialize: deserialize_raft_AppendEntriesReq,
+    responseSerialize: serialize_raft_AppendEntriesRes,
+    responseDeserialize: deserialize_raft_AppendEntriesRes,
   },
   voteRequest: {
     path: '/raft.RaftService/VoteRequest',

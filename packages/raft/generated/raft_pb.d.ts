@@ -69,49 +69,6 @@ export namespace NodeInfo {
     }
 }
 
-export class HeartbeatReq extends jspb.Message { 
-    getTerm(): number;
-    setTerm(value: number): HeartbeatReq;
-    getLeaderid(): number;
-    setLeaderid(value: number): HeartbeatReq;
-
-    serializeBinary(): Uint8Array;
-    toObject(includeInstance?: boolean): HeartbeatReq.AsObject;
-    static toObject(includeInstance: boolean, msg: HeartbeatReq): HeartbeatReq.AsObject;
-    static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
-    static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
-    static serializeBinaryToWriter(message: HeartbeatReq, writer: jspb.BinaryWriter): void;
-    static deserializeBinary(bytes: Uint8Array): HeartbeatReq;
-    static deserializeBinaryFromReader(message: HeartbeatReq, reader: jspb.BinaryReader): HeartbeatReq;
-}
-
-export namespace HeartbeatReq {
-    export type AsObject = {
-        term: number,
-        leaderid: number,
-    }
-}
-
-export class HeartbeatRes extends jspb.Message { 
-    getResult(): boolean;
-    setResult(value: boolean): HeartbeatRes;
-
-    serializeBinary(): Uint8Array;
-    toObject(includeInstance?: boolean): HeartbeatRes.AsObject;
-    static toObject(includeInstance: boolean, msg: HeartbeatRes): HeartbeatRes.AsObject;
-    static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
-    static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
-    static serializeBinaryToWriter(message: HeartbeatRes, writer: jspb.BinaryWriter): void;
-    static deserializeBinary(bytes: Uint8Array): HeartbeatRes;
-    static deserializeBinaryFromReader(message: HeartbeatRes, reader: jspb.BinaryReader): HeartbeatRes;
-}
-
-export namespace HeartbeatRes {
-    export type AsObject = {
-        result: boolean,
-    }
-}
-
 export class VoteReq extends jspb.Message { 
     getTerm(): number;
     setTerm(value: number): VoteReq;
