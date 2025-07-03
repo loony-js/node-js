@@ -7,7 +7,6 @@ import messages, {
   AppendEntriesRes,
   HeartbeatReq,
   HeartbeatRes,
-  NodeInfo,
   VoteReq,
   VoteRes,
 } from "../generated/raft_pb"
@@ -15,26 +14,23 @@ import messages, {
 import EventEmitter from "node:events"
 import { AppendEntriesRPC, RaftNode } from "./node"
 
+type PeerInfo = {
+  length: number
+  nextIndex: number
+  matchIndex: number
+}
+
 class GrpcHandler extends EventEmitter {
   ports: number[]
   server: grpc.Server
-  // grpcObject: grpc.GrpcObject
   raftService: any
-  // raft
   clients: Record<number, service.RaftServiceClient>
   connectedClients: number
   raftNode: RaftNode | undefined
-  clientsMeta: Record<string, NodeInfo | undefined>
+  clientsMeta: Record<string, PeerInfo>
 
   constructor() {
     super()
-    // const packageDefinition = protoLoader.loadSync(
-    //   path.resolve(__dirname, "protos/raft.proto"),
-    // )
-    // this.grpcObject = grpc.loadPackageDefinition(
-    //   packageDefinition,
-    // ) as grpc.GrpcObject
-    // this.raft = this.grpcObject.raft
     this.server = new grpc.Server()
     this.clients = {}
     this.clientsMeta = {}
@@ -79,9 +75,16 @@ class GrpcHandler extends EventEmitter {
           if (err) {
             console.error("Error:", err.message)
           } else {
-            if (response.getAlive()) {
-              this.connectedClients += 1
-              this.clientsMeta[peer] = response.getNode()
+            if (response.getAlive() && response.getNode()) {
+              const node = response.getNode()
+              if (node) {
+                this.connectedClients += 1
+                this.clientsMeta[peer] = {
+                  length: node.getLength(),
+                  nextIndex: node.getLength(),
+                  matchIndex: node.getLength() - 1,
+                }
+              }
             }
           }
         })

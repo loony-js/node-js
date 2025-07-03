@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import * as grpc from "@grpc/grpc-js"
 import EventEmitter from "node:events"
 import GrpcHandler from "./grpc.server"
@@ -6,11 +5,8 @@ import { RaftLog } from "./log"
 import messages, {
   AppendEntriesReq,
   HeartbeatReq,
-  HeartbeatRes,
   VoteReq,
-  VoteRes,
 } from "../generated/raft_pb"
-// import * as grpc from "@grpc/grpc-js"
 
 interface LogEntry {
   term: number
@@ -43,8 +39,8 @@ export type Packet = {
   leader: number | null
   candidateId?: number
   leaderId?: number
-  last?: any // Mark as optional since it's conditionally added
-  entry?: any // Also optional
+  last?: any
+  entry?: any
 }
 
 export type AppendEntriesRPC = {
@@ -77,7 +73,7 @@ export class RaftNode extends EventEmitter {
   prevLogIndex: number
   states: any
 
-  constructor(id: number, peers: number[]) {
+  constructor(id: number) {
     super()
     this.id = id
     this.state = RAFT_STATE.FOLLOWER
@@ -100,13 +96,13 @@ export class RaftNode extends EventEmitter {
 
   status() {
     return {
+      id: this.id,
+      term: this.term,
+      state: this.state,
+      leaderId: this.leaderId,
       commitIndex: this.commitIndex,
       lastApplied: this.lastApplied,
       prevLogIndex: this.prevLogIndex,
-      state: this.state,
-      term: this.term,
-      leaderId: this.leaderId,
-      id: this.id,
     }
   }
 
@@ -186,7 +182,7 @@ export class RaftNode extends EventEmitter {
     if (this.state !== RAFT_STATE.LEADER) return
 
     setInterval(() => {
-      const cb = (err: grpc.ServiceError, res: messages.HeartbeatRes) => {
+      const cb = (err: grpc.ServiceError) => {
         if (err) {
           console.error("Error:", err)
         }
@@ -240,6 +236,7 @@ export class RaftNode extends EventEmitter {
   //   }
 
   handleAppendEntries(req: AppendEntriesReq): { success: boolean } {
+    console.log(`Received append entry.`)
     const term = req.getTerm()
     const leaderId = req.getLeaderid()
     const prevLogIndex = req.getPrevlogindex()
@@ -266,7 +263,6 @@ export class RaftNode extends EventEmitter {
     if (
       prevLogIndex >= 0 &&
       (prevLogIndex >= this.log.len() ||
-        // this.log[prevLogIndex].term !== rpc.prevLogTerm
         this.log.getLogTermForIndex(prevLogIndex) !== prevLogTerm)
     ) {
       return {
@@ -275,22 +271,18 @@ export class RaftNode extends EventEmitter {
     }
 
     const entries = JSON.parse(reqEntries)
-    // 4. If an existing entry conflicts with a new one (same index but different terms),
-    //    delete the existing entry and all that follow it (§5.3)
     for (let i = 0; i < entries.length; i++) {
       const index = prevLogIndex + 1 + i
       const incoming = entries[i]
 
       if (index < this.log.len()) {
         if (this.log.getLogTermForIndex(index) !== incoming.term) {
-          // Conflict found, delete all entries from this point
           this.log.updateEntries(0, index)
           break
         }
       }
     }
 
-    // 5. Append any new entries not already in the log
     for (let i = 0; i < entries.length; i++) {
       const index = prevLogIndex + 1 + i
       if (index >= this.log.len()) {
@@ -298,7 +290,6 @@ export class RaftNode extends EventEmitter {
       }
     }
 
-    // 6. If leaderCommit > commitIndex, set commitIndex = min(leaderCommit, index of last new entry)
     if (leaderCommit > this.commitIndex) {
       const lastNewIndex = prevLogIndex + entries.length
       this.commitIndex = Math.min(leaderCommit, lastNewIndex)
@@ -327,7 +318,6 @@ export class RaftNode extends EventEmitter {
     if (this.state !== RAFT_STATE.LEADER) return
 
     this.log.appendEntry({ term: this.term, command })
-    // const newIndex = this.log.length - 1
 
     if (this.grpc) {
       for (const peer of this.grpc.ports) {
@@ -336,13 +326,12 @@ export class RaftNode extends EventEmitter {
     }
   }
 
-  // Send AppendEntries RPC to a follower
   sendAppendEntries(peer: number, overrideEntries?: LogEntry[]) {
     const follower = this.grpc?.clientsMeta[peer]
     if (!follower) {
       return
     }
-    const nextIdx = follower.getLength()
+    const nextIdx = follower.length
     const prevLogIndex = nextIdx - 1
 
     const prevLogTerm =
@@ -368,38 +357,41 @@ export class RaftNode extends EventEmitter {
   // Simulated network send
   sendRPC(peer: number, rpc: AppendEntriesRPC) {
     const run = (success: boolean) => {
-      this.onAppendEntriesResponse(success, peer)
+      this.onAppendEntryResponse(success, peer)
     }
     this.grpc?.appendEntry(rpc, peer, run)
   }
 
   // Simulated follower response handler
-  onAppendEntriesResponse(success: boolean, peer: number) {
+  onAppendEntryResponse(success: boolean, peer: number) {
     const follower = this.grpc?.clientsMeta[peer]
     if (success && follower) {
-      const len = follower.getLength()
-      follower?.setLength(len + 1)
-      // follower.matchIndex = this.log.len() - 1
-      // follower.nextIndex = follower.matchIndex + 1
-    } else {
-      // follower.nextIndex = Math.max(0, follower.nextIndex - 1)
-      // this.sendAppendEntries(followerId) // retry
+      follower.length = +1
+      follower.matchIndex = follower.length - 1
+      follower.nextIndex = follower.length
+    } else if (follower) {
+      follower.nextIndex = Math.max(0, follower.nextIndex - 1)
+      this.sendAppendEntries(peer) // retry
     }
     this.updateCommitIndex()
   }
 
   updateCommitIndex() {
-    // const matchIndices = Object.values(this.followers)
-    //   .map((f) => f.matchIndex)
-    //   .concat(this.log.length - 1) // include leader's index
-    //   .sort((a, b) => b - a)
-    // const majorityMatch = matchIndices[Math.floor(this.peers.length / 2)]
-    // if (
-    //   majorityMatch > this.commitIndex &&
-    //   this.log[majorityMatch].term === this.currentTerm
-    // ) {
-    //   this.commitIndex = majorityMatch
-    //   console.log(`Commit index updated to ${this.commitIndex}`)
-    // }
+    const followers = this.grpc?.clientsMeta
+    if (followers) {
+      const matchIndices = Object.values(followers)
+        .map((f) => f.matchIndex)
+        .concat(this.log.len() - 1) // include leader's index
+        .sort((a, b) => b - a)
+      const majorityMatch =
+        matchIndices[Math.floor(Object.entries(followers).length / 2)]
+      if (
+        majorityMatch > this.commitIndex &&
+        this.log.getEntry(majorityMatch).term === this.term
+      ) {
+        this.commitIndex = majorityMatch
+        console.log(`Commit index updated to ${this.commitIndex}`)
+      }
+    }
   }
 }

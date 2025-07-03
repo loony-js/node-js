@@ -7,7 +7,7 @@ const { getGrpcConfig, getHttpConfig } = config
 const { GRPC_PORT, GRPC_PEERS } = getGrpcConfig()
 const { HTTP_PORT } = getHttpConfig()
 
-const node = new RaftNode(GRPC_PORT, GRPC_PEERS)
+const node = new RaftNode(GRPC_PORT)
 const grpcServer = new GrpcHandler()
 grpcServer.setRaftNode(node)
 grpcServer.addServices()
