@@ -13,11 +13,10 @@ const HEARTBEAT_INTERVAL = 1500
 const ELECTION_TIMER = 3000
 
 enum RAFT_STATE {
-  STOPPED = 0,
-  LEADER = 1,
-  CANDIDATE = 2,
-  FOLLOWER = 3,
-  CHILD = 4,
+  STOPPED = "STOPPED",
+  LEADER = "LEADER",
+  CANDIDATE = "CANDIDATE",
+  FOLLOWER = "FOLLOWER",
 }
 
 export enum MESSAGE {
@@ -98,7 +97,7 @@ export class RaftNode extends EventEmitter {
       leaderId: this.leaderId,
       commitIndex: this.commitIndex,
       lastApplied: this.lastApplied,
-      prevLogIndex: this.prevLogIndex,
+      prevLogIndex: this.log.len() - 1,
     }
   }
 
@@ -320,7 +319,6 @@ export class RaftNode extends EventEmitter {
 
   apply(command: any) {
     console.log(`[${this.id}] Applying command:`, command)
-    // Apply command to state machine
   }
 
   appendNewEntry(command: any) {
@@ -363,7 +361,6 @@ export class RaftNode extends EventEmitter {
     this.sendRPC(peer, rpc)
   }
 
-  // Simulated network send
   sendRPC(peer: number, rpc: AppendEntriesRPC) {
     const run = (success: boolean) => {
       this.onAppendEntryResponse(success, peer)
@@ -371,7 +368,6 @@ export class RaftNode extends EventEmitter {
     this.grpc?.appendEntry(rpc, peer, run)
   }
 
-  // Simulated follower response handler
   onAppendEntryResponse(success: boolean, peer: number) {
     const follower = this.grpc?.clientsMeta[peer]
     if (success && follower) {
@@ -380,7 +376,7 @@ export class RaftNode extends EventEmitter {
       follower.nextIndex = follower.length
     } else if (follower) {
       follower.nextIndex = Math.max(0, follower.nextIndex - 1)
-      this.sendAppendEntries(peer) // retry
+      this.sendAppendEntries(peer)
     }
     this.updateCommitIndex()
   }
@@ -390,7 +386,7 @@ export class RaftNode extends EventEmitter {
     if (followers) {
       const matchIndices = Object.values(followers)
         .map((f) => f.matchIndex)
-        .concat(this.log.len() - 1) // include leader's index
+        .concat(this.log.len() - 1)
         .sort((a, b) => b - a)
       const majorityMatch =
         matchIndices[Math.floor(Object.entries(followers).length / 2)]

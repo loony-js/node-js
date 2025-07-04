@@ -9,8 +9,8 @@ const app = express()
 
 app.use(
   cors({
-    origin: "http://localhost:3000", // frontend origin
-    credentials: true, // 🔥 allow cookies to be sent
+    origin: "http://localhost:3000",
+    credentials: true,
   }),
 )
 app.use(cookieParser())

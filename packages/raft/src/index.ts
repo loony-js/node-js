@@ -18,7 +18,6 @@ grpcServer.addClients(GRPC_PEERS)
 node.start()
 grpcServer.start(GRPC_PORT)
 
-// Simple Route
 app.get("/", (req, res) => {
   res.send("Hello, Express!")
 })

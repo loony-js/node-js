@@ -2,8 +2,14 @@
 
 curl http://localhost:2000/
 curl http://localhost:2000/logStatus
+
 curl http://localhost:2000/nodeStatus
+curl http://localhost:2001/nodeStatus
+curl http://localhost:2002/nodeStatus
+
 curl http://localhost:2000/entries
+curl http://localhost:2001/entries
+curl http://localhost:2002/entries
 
 sleep 5
 
