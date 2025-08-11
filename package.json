@@ -17,6 +17,7 @@
   ],
   "dependencies": {
     "@tailwindcss/postcss": "^4.1.11",
+    "lightweight-charts": "^5.0.8",
     "loony-sdk": "0.1.0",
     "loony-timer": "0.1.0",
     "loony-utils": "0.1.0",

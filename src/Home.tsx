@@ -25,6 +25,16 @@ export default function Home() {
           <h2 className="text-lg font-semibold">Voice Streaming</h2>
           <p className="text-gray-600">Stream audio data.</p>
         </div>
+
+        <div
+          onClick={() => {
+            navigate("/tradingView")
+          }}
+          className="bg-white shadow rounded-md p-4 transition-shadow duration-300 hover:shadow-[0_4px_12px_rgba(0,0,0,0.15)]"
+        >
+          <h2 className="text-lg font-semibold">Trading View</h2>
+          <p className="text-gray-600">Stocks and Market trading view.</p>
+        </div>
       </div>
     </div>
   )

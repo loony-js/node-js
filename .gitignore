@@ -97,3 +97,5 @@ Desktop.ini
 *.tmp
 *.swp
 *.swo
+.local
+local

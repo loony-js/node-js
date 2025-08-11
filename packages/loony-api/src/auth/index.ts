@@ -37,12 +37,17 @@ router.post("/login", async (req: Request, res: Response) => {
       "SELECT * FROM users WHERE username = $1",
       [username],
     )
-    if (userRows.rows.length === 0)
+    if (userRows.rows.length === 0) {
       res.status(400).json({ msg: "Invalid credentials" })
+      return
+    }
 
     const user = userRows.rows[0]
     const valid = await bcrypt.compare(password, user.password)
-    if (!valid) res.status(400).json({ msg: "Invalid credentials" })
+    if (!valid) {
+      res.status(400).json({ msg: "Invalid credentials" })
+      return
+    }
 
     const token = jwt.sign(
       {

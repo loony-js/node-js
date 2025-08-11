@@ -7,6 +7,7 @@ import Signup from "./auth/Signup"
 import VoiceStreaming from "VoiceStreaming"
 import Navbar from "Navbar"
 import { AuthContext, AuthProvider, AuthStatus } from "./context/AuthContext"
+import CandlestickChart from "Trading"
 
 function App() {
   return (
@@ -30,6 +31,7 @@ export const AppRoute = ({ authContext }: { authContext: any }) => {
           <Route path="/" element={<Home />} />
           <Route path="crypto" element={<Crypto />} />
           <Route path="voiceStreaming" element={<VoiceStreaming />} />
+          <Route path="tradingView" element={<CandlestickChart />} />
         </Routes>
       </>
     )
