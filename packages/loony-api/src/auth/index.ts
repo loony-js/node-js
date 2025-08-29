@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express"
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
-import pool from "../db"
+import { authPool } from "../db"
 import config from "../config"
 
 const { SECRET_KEY } = config
@@ -11,7 +11,7 @@ const router = express.Router()
 router.post("/register", async (req: Request, res: Response) => {
   const { username, password, fname, lname } = req.body
   try {
-    const userExists = await pool.query(
+    const userExists = await authPool.query(
       "SELECT * FROM users WHERE username = $1",
       [username],
     )
@@ -19,7 +19,7 @@ router.post("/register", async (req: Request, res: Response) => {
       res.status(400).json({ msg: "User already exists" })
 
     const hashedPassword = await bcrypt.hash(password, 10)
-    const newUser = await pool.query(
+    const newUser = await authPool.query(
       "INSERT INTO users (fname, lname, username, password) VALUES ($1, $2, $3, $4) RETURNING id, username",
       [fname, lname, username, hashedPassword],
     )
@@ -33,7 +33,7 @@ router.post("/register", async (req: Request, res: Response) => {
 router.post("/login", async (req: Request, res: Response) => {
   const { username, password } = req.body
   try {
-    const userRows = await pool.query(
+    const userRows = await authPool.query(
       "SELECT * FROM users WHERE username = $1",
       [username],
     )
