@@ -5,9 +5,12 @@
   "types": "dist/index.d.ts",
   "license": "MIT",
   "scripts": {
-    "build": "./scripts/build.sh"
+    "build": "rm -rf dist && tsc --build"
   },
   "devDependencies": {
     "@types/node": "^22.5.5"
+  },
+  "dependencies": {
+    "argon2": "^0.44.0"
   }
 }

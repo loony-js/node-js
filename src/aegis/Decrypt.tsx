@@ -1,53 +1,102 @@
 import { useState } from "react"
 import { POST } from "../api/index"
+import { IoEye, IoEyeOff } from "react-icons/io5"
 
 function Decrypt() {
-  const [form, setState] = useState({
+  const [formData, setFormData] = useState({
     password: "",
     master_password: "",
   })
-  const [res, setRes] = useState("")
+  const [state, setState] = useState({
+    decryptedValue: "",
+    showPassword: false,
+  })
+
+  const validate = () => {
+    if (formData.password && formData.master_password) {
+      return true
+    } else {
+      return false
+    }
+  }
 
   const handleSubmit = (e: any) => {
     e.preventDefault()
-    POST("/aegis/decrypt", form, (res) => {
-      setRes(res.password)
-    })
+    if (validate()) {
+      try {
+        POST("/aegis/decrypt", formData, (res) => {
+          setState({
+            ...state,
+            decryptedValue: res.password,
+          })
+        })
+      } catch (error) {
+        console.log(error)
+      }
+    }
   }
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     event.preventDefault()
-    setState({
-      ...form,
+    setFormData({
+      ...formData,
       [event.target.name]: event.target.value,
+    })
+  }
+
+  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault()
+    let paste = (e.clipboardData || window.Clipboard).getData("text")
+    paste = paste.trimEnd()
+    setFormData({
+      ...formData,
+      password: paste,
     })
   }
 
   return (
     <div>
-      <form
-        onSubmit={handleSubmit}
-        className="space-y-4 p-4 bg-gray-100 rounded-lg"
-      >
+      <form onSubmit={handleSubmit} className="space-y-4 rounded-lg">
         <input
           type="text"
           name="password"
-          value={form.password}
+          value={formData.password}
           onChange={handleChange}
           placeholder="Enter password"
           className="w-full px-4 py-2 rounded-md border border-gray-300 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
           required
+          onPaste={handlePaste}
         />
 
-        <input
-          type="password"
-          name="master_password"
-          value={form.master_password}
-          onChange={handleChange}
-          placeholder="Enter master password"
-          className="w-full px-4 py-2 rounded-md border border-gray-300 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          required
-        />
+        <div>
+          <label className="block text-sm mb-2">Password</label>
+          <div className="relative">
+            <input
+              name="master_password"
+              type={state.showPassword ? "text" : "password"}
+              value={formData.master_password}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+
+            {/* Show eye icon only when typing */}
+            {formData.password.length > 0 && (
+              <button
+                type="button"
+                onClick={() =>
+                  setState({ ...state, showPassword: !state.showPassword })
+                }
+                className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700"
+              >
+                {state.showPassword ? (
+                  <IoEyeOff className="w-5 h-5" />
+                ) : (
+                  <IoEye className="w-5 h-5" />
+                )}
+              </button>
+            )}
+          </div>
+        </div>
 
         <button
           type="submit"
@@ -56,7 +105,7 @@ function Decrypt() {
           Submit
         </button>
       </form>
-      <div>{res}</div>
+      <div>{state.decryptedValue}</div>
     </div>
   )
 }
