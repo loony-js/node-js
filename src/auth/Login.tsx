@@ -1,9 +1,37 @@
 import { useState } from "react"
-import { POST } from "../api/index"
 import { AuthStatus } from "context/AuthContext"
 import { IoEye, IoEyeOff } from "react-icons/io5"
+import httpClient from "utils/httpClient"
+import { useNavigate } from "react-router"
+
+export const login = (credentials: any) =>
+  httpClient.post("/login", credentials)
+
+export const useAuth = () => {
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+
+  const handleLogin = async (credentials: any) => {
+    setLoading(true)
+    setError(null)
+    try {
+      const { data } = await login(credentials)
+      localStorage.setItem("token", data.token) // store JWT
+      return data // caller decides what to do (redirect, etc.)
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Login failed")
+      throw err
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return { handleLogin, loading, error }
+}
 
 function Login({ authContext }: { authContext: any }) {
+  const navigate = useNavigate()
+  const { handleLogin } = useAuth()
   const [formData, setFormData] = useState({
     username: "",
     password: "",
@@ -12,15 +40,17 @@ function Login({ authContext }: { authContext: any }) {
     showPassword: false,
   })
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
-    if (formData.username && formData.password) {
-      POST("/login", formData, () => {
-        authContext.setAuthContext({
-          user: null,
-          status: AuthStatus.AUTHORIZED,
-        })
+    try {
+      await handleLogin(formData)
+      authContext.setAuthContext({
+        user: null,
+        status: AuthStatus.AUTHORIZED,
       })
+      navigate("/") // redirect after login
+    } catch {
+      /* error handled in hook */
     }
   }
 
