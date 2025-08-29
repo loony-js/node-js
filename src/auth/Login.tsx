@@ -1,17 +1,21 @@
 import { useState } from "react"
 import { POST } from "../api/index"
 import { AuthStatus } from "context/AuthContext"
+import { IoEye, IoEyeOff } from "react-icons/io5"
 
 function Login({ authContext }: { authContext: any }) {
-  const [form, setState] = useState({
+  const [formData, setFormData] = useState({
     username: "",
     password: "",
+  })
+  const [state, setState] = useState({
+    showPassword: false,
   })
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault()
-    if (form.username && form.password) {
-      POST("/login", form, () => {
+    if (formData.username && formData.password) {
+      POST("/login", formData, () => {
         authContext.setAuthContext({
           user: null,
           status: AuthStatus.AUTHORIZED,
@@ -22,8 +26,8 @@ function Login({ authContext }: { authContext: any }) {
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     event.preventDefault()
-    setState({
-      ...form,
+    setFormData({
+      ...formData,
       [event.target.name]: event.target.value,
     })
   }
@@ -34,32 +38,45 @@ function Login({ authContext }: { authContext: any }) {
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Username / Email Input */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Username or Email
-          </label>
+          <label className="block text-sm mb-2">Username or Email</label>
           <input
             type="text"
             name="username"
-            value={form.username}
+            value={formData.username}
             onChange={handleChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
           />
         </div>
 
-        {/* Password Input */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Password
-          </label>
-          <input
-            type="password"
-            name="password"
-            value={form.password}
-            onChange={handleChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-          />
+          <label className="block text-sm mb-2">Password</label>
+          <div className="relative">
+            <input
+              name="password"
+              type={state.showPassword ? "text" : "password"}
+              value={formData.password}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+
+            {/* Show eye icon only when typing */}
+            {formData.password.length > 0 && (
+              <button
+                type="button"
+                onClick={() =>
+                  setState({ ...state, showPassword: !state.showPassword })
+                }
+                className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700"
+              >
+                {state.showPassword ? (
+                  <IoEyeOff className="w-5 h-5" />
+                ) : (
+                  <IoEye className="w-5 h-5" />
+                )}
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Submit Button */}
