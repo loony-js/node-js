@@ -4,8 +4,10 @@ import "express-session"
 declare module "express-session" {
   interface SessionData {
     user?: {
-      id: number
+      uid: number
       username: string
+      fname: string
+      lname: string
       // add more fields as needed
     }
   }

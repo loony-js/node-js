@@ -48,10 +48,9 @@ router.post("/login", async (req: Request, res: Response) => {
       res.status(400).json({ msg: "Invalid credentials" })
       return
     }
-
     const token = jwt.sign(
       {
-        id: user.id,
+        uid: user.uid,
         username: user.username,
         fname: user.fname,
         lname: user.lname,

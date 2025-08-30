@@ -6,8 +6,11 @@ const router = express.Router()
 
 // GET all users
 router.get("/all", async (req: Request, res: Response) => {
+  const user = req.session.user
   try {
-    const result = await appPool.query("SELECT * FROM aegis")
+    const result = await appPool.query("SELECT * FROM aegis where user_id=$1", [
+      user?.uid,
+    ])
     res.json(result.rows)
   } catch (err: any) {
     res.status(500).json({ error: err.message })
@@ -16,10 +19,11 @@ router.get("/all", async (req: Request, res: Response) => {
 
 router.get("/:name", async (req: Request, res: Response) => {
   try {
-    const { name } = req.params
-    const result = await appPool.query("SELECT * FROM aegis WHERE name = $1", [
-      name,
-    ])
+    const { name, user_id } = req.params
+    const result = await appPool.query(
+      "SELECT * FROM aegis WHERE name = $1 AND user_id=$2",
+      [name, user_id],
+    )
     res.json(result.rows[0])
   } catch (err: any) {
     res.status(500).json({ error: err.message })
@@ -29,12 +33,13 @@ router.get("/:name", async (req: Request, res: Response) => {
 // POST new user
 router.post("/encrypt", async (req: Request, res: Response) => {
   try {
+    const user = req.session.user
     const { name, url, username, password, master_password } = req.body
     const encryptedText = await encrypt(password, master_password)
 
     const result = await appPool.query(
-      "INSERT INTO aegis (name, url, username, password) VALUES ($1, $2, $3, $4) RETURNING *",
-      [name, url, username, encryptedText.toString("base64")],
+      "INSERT INTO aegis (user_id, name, url, username, password) VALUES ($1, $2, $3, $4, $5) RETURNING *",
+      [user?.uid, name, url, username, encryptedText.toString("base64")],
     )
     res.status(201).json(result.rows[0])
   } catch (err: any) {

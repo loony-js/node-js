@@ -1,7 +1,10 @@
-CREATE TABLE aegis(
+CREATE TABLE sankar.aegis(
     id SERIAL PRIMARY KEY,
-    name VARCHAR(25),
-    username TEXT NOT NULL,
+    user_id INT NOT NULL,
+    name TEXT,
     url TEXT,
-    password TEXT NOT NULL
+    username TEXT NOT NULL,
+    password TEXT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );

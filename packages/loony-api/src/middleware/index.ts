@@ -9,10 +9,10 @@ function authMiddleware(req: any, res: any, next: any) {
 
   try {
     const decoded = jwt.verify(token, SECRET_KEY)
-    req.user = decoded
+    req.session.user = decoded
     next()
   } catch {
-    res.status(403).json({ message: "Invalid token" })
+    res.status(403).json({ message: "Authentication failed. Invalid token" })
   }
 }
 
