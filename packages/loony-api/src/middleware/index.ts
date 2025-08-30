@@ -4,7 +4,7 @@ import config from "../config"
 const { SECRET_KEY } = config
 
 function authMiddleware(req: any, res: any, next: any) {
-  const token = req.cookies.token
+  const token = req.cookies.access_token
   if (!token) return res.status(401).json({ message: "Unauthorized" })
 
   try {

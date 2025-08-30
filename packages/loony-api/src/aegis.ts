@@ -5,7 +5,7 @@ import { appPool } from "./db"
 const router = express.Router()
 
 // GET all users
-router.get("/aegis/all", async (req: Request, res: Response) => {
+router.get("/all", async (req: Request, res: Response) => {
   try {
     const result = await appPool.query("SELECT * FROM aegis")
     res.json(result.rows)
@@ -14,7 +14,7 @@ router.get("/aegis/all", async (req: Request, res: Response) => {
   }
 })
 
-router.get("/aegis/:name", async (req: Request, res: Response) => {
+router.get("/:name", async (req: Request, res: Response) => {
   try {
     const { name } = req.params
     const result = await appPool.query("SELECT * FROM aegis WHERE name = $1", [
@@ -27,7 +27,7 @@ router.get("/aegis/:name", async (req: Request, res: Response) => {
 })
 
 // POST new user
-router.post("/aegis/encrypt", async (req: Request, res: Response) => {
+router.post("/encrypt", async (req: Request, res: Response) => {
   try {
     const { name, url, username, password, master_password } = req.body
     const encryptedText = await encrypt(password, master_password)
@@ -42,18 +42,21 @@ router.post("/aegis/encrypt", async (req: Request, res: Response) => {
   }
 })
 
-router.post("/aegis/decrypt", async (req: Request, res: Response) => {
+router.post("/decrypt", async (req: Request, res: Response) => {
   try {
     const { password, master_password } = req.body
-    const ori_password = await decrypt(password, master_password)
-    res.status(201).json({ password: ori_password })
+    const ori_password = await decrypt(
+      Buffer.from(password, "base64"),
+      master_password,
+    )
+    res.status(201).json({ password: ori_password.toString("utf-8") })
   } catch (err: any) {
     res.status(500).json({ error: err.message })
   }
 })
 
 // PUT update user
-router.put("/aegis/update/:id", async (req: Request, res: Response) => {
+router.put("/update/:id", async (req: Request, res: Response) => {
   try {
     const { password } = req.body
     const { id } = req.params
@@ -68,7 +71,7 @@ router.put("/aegis/update/:id", async (req: Request, res: Response) => {
 })
 
 // DELETE user
-router.post("/aegis/delete/:id", async (req: Request, res: Response) => {
+router.post("/delete/:id", async (req: Request, res: Response) => {
   try {
     const { id } = req.params
     await appPool.query("DELETE FROM aegis WHERE id = $1", [id])

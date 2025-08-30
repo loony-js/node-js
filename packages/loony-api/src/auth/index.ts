@@ -61,7 +61,7 @@ router.post("/login", async (req: Request, res: Response) => {
         expiresIn: "6h",
       },
     )
-    res.cookie("AUTH_TOKEN", token, {
+    res.cookie("access_token", token, {
       httpOnly: true,
       secure: false, // true if HTTPS
       sameSite: "lax",
@@ -73,7 +73,7 @@ router.post("/login", async (req: Request, res: Response) => {
 })
 
 router.get("/session", async (req: any, res: any) => {
-  const token = req.cookies.AUTH_TOKEN
+  const token = req.cookies.access_token
   if (!token) return res.status(401).json({ message: "Unauthorized" })
 
   try {

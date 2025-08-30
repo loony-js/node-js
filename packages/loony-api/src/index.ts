@@ -5,18 +5,20 @@ import auth from "./auth"
 import authMiddleware from "./middleware"
 
 const { PORT } = config
-// Middleware
-app.use(aegis)
-app.use(auth)
 
 // Simple Route
 app.get("/", (req, res) => {
   res.send("Hello, Express!")
 })
 
-app.get("/hello", authMiddleware, (req, res) => {
+app.use(auth)
+
+app.get("/hello", (req, res) => {
   res.send("Hello, Express!")
 })
+
+// Middleware
+app.use("/aegis", authMiddleware, aegis)
 
 // Start Server
 server.listen(PORT, () => {

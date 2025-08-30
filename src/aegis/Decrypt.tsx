@@ -55,21 +55,24 @@ function Decrypt() {
   }
 
   return (
-    <div>
+    <div className="mt-4">
       <form onSubmit={handleSubmit} className="space-y-4 rounded-lg">
-        <input
-          type="text"
-          name="password"
-          value={formData.password}
-          onChange={handleChange}
-          placeholder="Enter password"
-          className="w-full px-4 py-2 rounded-md border border-gray-300 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          required
-          onPaste={handlePaste}
-        />
-
         <div>
           <label className="block text-sm mb-2">Password</label>
+          <div className="relative">
+            <input
+              name="password"
+              type="text"
+              value={formData.password}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              onPaste={handlePaste}
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm mb-2">Master Password</label>
           <div className="relative">
             <input
               name="master_password"
@@ -80,7 +83,7 @@ function Decrypt() {
             />
 
             {/* Show eye icon only when typing */}
-            {formData.password.length > 0 && (
+            {formData.master_password.length > 0 && (
               <button
                 type="button"
                 onClick={() =>

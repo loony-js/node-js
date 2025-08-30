@@ -114,7 +114,7 @@ function Encrypt() {
 
         <div>
           <label className="block text-sm mb-2">Password</label>
-          <div>
+          <div className="relative">
             <input
               name="password"
               type={state.showPassword ? "text" : "password"}
@@ -144,7 +144,7 @@ function Encrypt() {
 
         <div>
           <label className="block text-sm mb-2">Master Password</label>
-          <div>
+          <div className="relative">
             <input
               name="master_password"
               type={state.showMasterPassword ? "text" : "password"}
