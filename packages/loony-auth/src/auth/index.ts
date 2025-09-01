@@ -62,8 +62,9 @@ router.post("/login", async (req: Request, res: Response) => {
     )
     res.cookie("access_token", token, {
       httpOnly: true,
-      secure: false, // true if HTTPS
-      sameSite: "lax",
+      secure: true, // true if HTTPS
+      sameSite: "none", // lax
+      maxAge: 1000 * 60 * 60 * 24, // 1 day
     })
     res.json({ token })
   } catch (err: any) {

@@ -2,7 +2,7 @@
 import axios from "axios"
 
 const httpClient = axios.create({
-  baseURL: "http://localhost:2000",
+  baseURL: "https://localhost:2000",
   timeout: 10000,
   headers: { "Content-Type": "application/json" },
   withCredentials: true,

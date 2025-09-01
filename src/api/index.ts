@@ -40,7 +40,7 @@ const AUTHPOST = (
 
 const GET = <R>(url: string, cb: (res: R | null, err: any) => void) => {
   const newUrl = cleanUrl(url)
-  fetch(`http://localhost:2000/${newUrl}`, {
+  fetch(`https://localhost:2000/${newUrl}`, {
     method: "GET",
     credentials: "include",
   })
@@ -59,7 +59,7 @@ const POST = (
   cb: (res: Record<string, any>) => void,
 ) => {
   const newUrl = cleanUrl(url)
-  fetch(`http://localhost:2000/${newUrl}`, {
+  fetch(`https://localhost:2000/${newUrl}`, {
     method: "POST",
     credentials: "include",
     body: JSON.stringify(body),
