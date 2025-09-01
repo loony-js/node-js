@@ -56,10 +56,16 @@ router.post("/login", async (req: Request, res: Response) => {
         lname: user.lname,
       },
       SECRET_KEY,
-      {
-        expiresIn: "6h",
-      },
+      // {
+      //   expiresIn: "3Minutes",
+      // },
     )
+    req.session.user = {
+      uid: user.uid,
+      username: user.username,
+      fname: user.fname,
+      lname: user.lname,
+    }
     res.cookie("access_token", token, {
       httpOnly: true,
       secure: true, // true if HTTPS
@@ -88,8 +94,25 @@ router.get("/session", async (req: any, res: any) => {
 })
 
 router.post("/logout", async (req: any, res: any) => {
-  res.clearCookie("access_token")
-  res.json({})
+  req.session.destroy((err: any) => {
+    if (err) {
+      return res.status(500).json({ message: "Logout failed" })
+    }
+    res.clearCookie("connect.sid", {
+      httpOnly: true,
+      secure: true, // must match
+      sameSite: "none", // must match
+      // path and domain must match too if you customized them
+      // path: "/",
+      // domain: "localhost",
+    })
+    res.clearCookie("access_token", {
+      httpOnly: true,
+      secure: true, // must match how you set it
+      sameSite: "none", // must match how you set it
+    })
+    res.status(200).json({ message: "Logged out successfully" })
+  })
 })
 
 export default router

@@ -1,6 +1,7 @@
-import { POST } from "api"
+import { logout } from "api"
 import { AuthStatus } from "context/AuthContext"
 import { useState } from "react"
+import { useNavigate } from "react-router"
 
 const Navbar = ({ authContext }: { authContext: any }) => {
   const [isOpen, setIsOpen] = useState(false)
@@ -58,13 +59,18 @@ const Navbar = ({ authContext }: { authContext: any }) => {
 }
 
 const AuthNavRight = ({ authContext }: { authContext: any }) => {
+  const navigate = useNavigate()
   const onLogout = () => {
-    POST("/logout", {}, () => {
+    try {
+      logout()
       authContext.setAuthContext({
         user: null,
         status: AuthStatus.UNAUTHORIZED,
       })
-    })
+      navigate("/login")
+    } catch {
+      console.log("Logout failed.")
+    }
   }
 
   return (

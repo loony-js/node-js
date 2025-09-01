@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { POST } from "../api/index"
+import { encryptText } from "../api/index"
 import { Facebook, Instagram, Gmail } from "../Icons/index"
 import { IoEye, IoEyeOff } from "react-icons/io5"
 
@@ -39,11 +39,7 @@ function Encrypt() {
   const handleSubmit = (e: any) => {
     e.preventDefault()
     if (validate()) {
-      try {
-        POST("/aegis/encrypt", formData, () => {})
-      } catch (error: any) {
-        console.log(error)
-      }
+      encryptText(formData).then(() => {})
     }
   }
 

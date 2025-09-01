@@ -1,8 +1,11 @@
 import { useState } from "react"
-import { POST } from "../api/index"
 import { IoEye, IoEyeOff } from "react-icons/io5"
+import { useSignup } from "hooks/auth"
+import { useNavigate } from "react-router"
 
 const Signup = () => {
+  const navigate = useNavigate()
+  const { handleSignup } = useSignup()
   const [formData, setFormData] = useState({
     fname: "",
     lname: "",
@@ -21,15 +24,28 @@ const Signup = () => {
     setFormData({ ...formData, [name]: value })
   }
 
-  const handleSubmit = () => {
+  const validate = () => {
     if (
       formData.username &&
       formData.fname &&
       formData.password &&
+      formData.password.length >= 6 &&
       formData.confirm_password &&
       formData.password === formData.confirm_password
     ) {
-      POST("/register", formData, () => {})
+      return true
+    }
+    return false
+  }
+
+  const handleSubmit = () => {
+    if (validate()) {
+      try {
+        handleSignup(formData)
+        navigate("/login")
+      } catch {
+        console.log("Login failed.")
+      }
     }
   }
 

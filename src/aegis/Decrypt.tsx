@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { POST } from "../api/index"
+import { decryptText } from "../api/index"
 import { IoEye, IoEyeOff } from "react-icons/io5"
 
 function Decrypt() {
@@ -23,16 +23,12 @@ function Decrypt() {
   const handleSubmit = (e: any) => {
     e.preventDefault()
     if (validate()) {
-      try {
-        POST("/aegis/decrypt", formData, (res) => {
-          setState({
-            ...state,
-            decryptedValue: res.password,
-          })
+      decryptText(formData).then(({ data }: any) => {
+        setState({
+          ...state,
+          decryptedValue: data.password,
         })
-      } catch (error) {
-        console.log(error)
-      }
+      })
     }
   }
 

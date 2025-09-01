@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { AUTHGET, POST } from "../api/index"
+import { deleteCredential, getAllCredentials } from "../api/index"
 
 export default function Table() {
   const [creds, setCreds] = useState<null | []>(null)
@@ -7,8 +7,8 @@ export default function Table() {
   const [isOpen, setIsOpen] = useState(false)
 
   useEffect(() => {
-    AUTHGET("/aegis/all", (res: any) => {
-      setCreds(res)
+    getAllCredentials().then(({ data }) => {
+      setCreds(data)
     })
   }, [])
 
@@ -18,7 +18,7 @@ export default function Table() {
   }
 
   const confirmDelete = () => {
-    POST("/aegis/delete/" + activeRow, {}, () => {
+    deleteCredential(activeRow).then(() => {
       const filter: any = creds?.filter((c: any) => c.id !== activeRow)
       setCreds(filter)
       setActiveRow(0)

@@ -1,4 +1,4 @@
-import { GET } from "../api/index"
+import { userIsLoggedIn } from "../api/index"
 
 import React, { useEffect, useState } from "react"
 
@@ -43,27 +43,29 @@ const useAuthSession = (): [
   const [authContext, setAuthContext] = useState(authState)
 
   useEffect(() => {
-    GET<{ loggedIn: boolean; user: User }>("/session", (data, err) => {
-      if (data) {
-        if (data.loggedIn) {
-          setAuthContext({
-            user: data.user,
-            status: AuthStatus.AUTHORIZED,
-          })
-        } else if (!data.loggedIn) {
-          setAuthContext({
-            user: null,
-            status: AuthStatus.UNAUTHORIZED,
-          })
-          console.log(`${AuthStatus.UNAUTHORIZED}`)
+    userIsLoggedIn()
+      .then(({ data }: any) => {
+        if (data) {
+          if (data.loggedIn) {
+            setAuthContext({
+              user: data.user,
+              status: AuthStatus.AUTHORIZED,
+            })
+          } else if (!data.loggedIn) {
+            setAuthContext({
+              user: null,
+              status: AuthStatus.UNAUTHORIZED,
+            })
+            console.log(`${AuthStatus.UNAUTHORIZED}`)
+          }
         }
-      } else if (err) {
+      })
+      .catch(() => {
         setAuthContext({
           user: null,
           status: AuthStatus.UNAUTHORIZED,
         })
-      }
-    })
+      })
   }, [])
   return [authContext, setAuthContext]
 }

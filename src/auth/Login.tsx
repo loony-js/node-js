@@ -1,37 +1,12 @@
 import { useState } from "react"
 import { AuthStatus } from "context/AuthContext"
 import { IoEye, IoEyeOff } from "react-icons/io5"
-import httpClient from "utils/httpClient"
 import { useNavigate } from "react-router"
-
-export const login = (credentials: any) =>
-  httpClient.post("/login", credentials)
-
-export const useAuth = () => {
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
-
-  const handleLogin = async (credentials: any) => {
-    setLoading(true)
-    setError(null)
-    try {
-      const { data } = await login(credentials)
-      localStorage.setItem("token", data.token) // store JWT
-      return data // caller decides what to do (redirect, etc.)
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Login failed")
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  return { handleLogin, loading, error }
-}
+import { useLogin } from "hooks/auth"
 
 function Login({ authContext }: { authContext: any }) {
   const navigate = useNavigate()
-  const { handleLogin } = useAuth()
+  const { handleLogin } = useLogin()
   const [formData, setFormData] = useState({
     username: "",
     password: "",
@@ -40,15 +15,28 @@ function Login({ authContext }: { authContext: any }) {
     showPassword: false,
   })
 
+  const validate = () => {
+    if (
+      formData.username &&
+      formData.password &&
+      formData.password.length >= 6
+    ) {
+      return true
+    }
+    return false
+  }
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
     try {
-      await handleLogin(formData)
-      authContext.setAuthContext({
-        user: null,
-        status: AuthStatus.AUTHORIZED,
-      })
-      navigate("/") // redirect after login
+      if (validate()) {
+        const user = await handleLogin(formData)
+        authContext.setAuthContext({
+          user,
+          status: AuthStatus.AUTHORIZED,
+        })
+        navigate("/") // redirect after login
+      }
     } catch {
       /* error handled in hook */
     }

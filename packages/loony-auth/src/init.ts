@@ -22,10 +22,17 @@ app.use(
 )
 app.use(
   session({
+    name: "connect.sid", // default name, can change
     secret: SECRET_KEY,
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: false },
+    cookie: {
+      httpOnly: true,
+      secure: true, // required for HTTPS
+      sameSite: "none", // required if frontend != backend
+      // maxAge: 1000 * 60 * 60 * 24, // 1 day
+      maxAge: 1000 * 60 * 60 * 6, // 24hour,
+    },
   }),
 )
 app.use(cookieParser())

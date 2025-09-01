@@ -1,4 +1,5 @@
-import { useWebSocket, useMicrophone } from "hooks"
+import { useWebSocket } from "hooks/socket"
+import { useMicrophone } from "hooks/microphone"
 import { useState } from "react"
 
 const withSocket = true
