@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { GET, POST } from "../api/index"
+import { AUTHGET, POST } from "../api/index"
 
 export default function Table() {
   const [creds, setCreds] = useState<null | []>(null)
@@ -7,7 +7,7 @@ export default function Table() {
   const [isOpen, setIsOpen] = useState(false)
 
   useEffect(() => {
-    GET("/aegis/all", (res: any) => {
+    AUTHGET("/aegis/all", (res: any) => {
       setCreds(res)
     })
   }, [])

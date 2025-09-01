@@ -1,1 +1,1 @@
-{"root":["./src/aegis.ts","./src/config.ts","./src/db.ts","./src/index.ts","./src/init.ts","./src/types.d.ts","./src/auth/index.ts","./src/middleware/index.ts"],"version":"5.7.3"}
+{"root":["./src/aegis.ts","./src/config.ts","./src/db.ts","./src/index.ts","./src/init.ts","./src/types.d.ts","./src/middleware/index.ts"],"version":"5.7.3"}

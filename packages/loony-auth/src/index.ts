@@ -1,7 +1,6 @@
 import { app, server } from "./init"
 import config from "./config"
-import aegis from "./aegis"
-import authMiddleware from "./middleware"
+import auth from "./auth"
 
 const { PORT } = config
 
@@ -10,12 +9,11 @@ app.get("/", (req, res) => {
   res.send("Hello, Express!")
 })
 
+app.use(auth)
+
 app.get("/hello", (req, res) => {
   res.send("Hello, Express!")
 })
-
-// Middleware
-app.use("/aegis", authMiddleware, aegis)
 
 // Start Server
 server.listen(PORT, () => {

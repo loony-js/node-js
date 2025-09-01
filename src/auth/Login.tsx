@@ -65,7 +65,7 @@ function Login({ authContext }: { authContext: any }) {
   return (
     <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow-lg">
       <h2 className="text-2xl font-semibold mb-6 text-gray-800">Login</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4" autoComplete="on">
         {/* Username / Email Input */}
         <div>
           <label className="block text-sm mb-2">Username or Email</label>
@@ -76,6 +76,7 @@ function Login({ authContext }: { authContext: any }) {
             onChange={handleChange}
             className="w-full px-4 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
+            autoComplete="username"
           />
         </div>
 
@@ -88,6 +89,8 @@ function Login({ authContext }: { authContext: any }) {
               value={formData.password}
               onChange={handleChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              autoComplete="password"
+              required
             />
 
             {/* Show eye icon only when typing */}

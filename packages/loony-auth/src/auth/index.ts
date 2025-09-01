@@ -87,7 +87,7 @@ router.get("/session", async (req: any, res: any) => {
 })
 
 router.post("/logout", async (req: any, res: any) => {
-  res.clearCookie("AUTH_TOKEN")
+  res.clearCookie("access_token")
   res.json({})
 })
 

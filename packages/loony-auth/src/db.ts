@@ -1,11 +1,11 @@
 import { Pool } from "pg"
 
-const appPool = new Pool({
-  connectionString: process.env.APP_DATABASE_URL,
+const authPool = new Pool({
+  connectionString: process.env.AUTH_DATABASE_URL,
 })
 
 function initPool() {
-  return appPool
+  return authPool
     .query("SELECT 1")
     .then(() => {
       console.log("✅ Database connected successfully")
@@ -19,4 +19,4 @@ function initPool() {
 // Export a promise that resolves to a working pool
 initPool()
 
-export { appPool }
+export { authPool }
