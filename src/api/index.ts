@@ -2,7 +2,7 @@ const cleanUrl = (url: string) => (url[0] === "/" ? url.slice(1) : url)
 
 const AUTHGET = <R>(url: string, cb: (res: R | null, err: any) => void) => {
   const newUrl = cleanUrl(url)
-  fetch(`http://localhost:2001/${newUrl}`, {
+  fetch(`https://localhost:2001/${newUrl}`, {
     method: "GET",
     credentials: "include",
   })
@@ -21,7 +21,7 @@ const AUTHPOST = (
   cb: (res: Record<string, any>) => void,
 ) => {
   const newUrl = cleanUrl(url)
-  fetch(`http://localhost:2001/${newUrl}`, {
+  fetch(`https://localhost:2001/${newUrl}`, {
     method: "POST",
     credentials: "include",
     body: JSON.stringify(body),

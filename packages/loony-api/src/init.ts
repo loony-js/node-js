@@ -1,12 +1,17 @@
 import express from "express"
 import session from "express-session"
-import http from "http"
+import https from "https"
 import cors from "cors"
 import cookieParser from "cookie-parser"
-
+import fs from "fs"
 import config from "./config"
 
-const { SECRET_KEY } = config
+const { SECRET_KEY, KEY_PATH, CERT_PATH } = config
+const options = {
+  key: fs.readFileSync(KEY_PATH), // or localhost.key
+  cert: fs.readFileSync(CERT_PATH), // or localhost.crt
+}
+
 const app = express()
 
 app.use(
@@ -25,6 +30,6 @@ app.use(
 )
 app.use(cookieParser())
 app.use(express.json())
-const server = http.createServer(app)
+const server = https.createServer(options, app)
 
 export { app, server, config }

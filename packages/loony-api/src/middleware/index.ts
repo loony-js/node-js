@@ -5,7 +5,6 @@ const { SECRET_KEY } = config
 
 function authMiddleware(req: any, res: any, next: any) {
   const token = req.cookies.access_token
-  console.log("Access token. loony-api", token)
   if (!token) return res.status(401).json({ message: "Unauthorized" })
 
   try {
