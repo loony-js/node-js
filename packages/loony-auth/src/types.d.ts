@@ -5,9 +5,9 @@ declare module "express-session" {
   interface SessionData {
     user?: {
       uid: number
-      username: string
-      fname: string
-      lname: string
+      // username: string
+      // fname: string
+      // lname: string
       // add more fields as needed
     }
   }

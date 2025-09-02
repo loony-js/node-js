@@ -5,8 +5,8 @@ import { appPool } from "./db"
 const router = express.Router()
 
 // GET all users
-router.get("/all", async (req: Request, res: Response) => {
-  const user = req.session.user
+router.get("/all", async (req: any, res: any) => {
+  const user = req.user
   try {
     const result = await appPool.query("SELECT * FROM aegis where user_id=$1", [
       user?.uid,
@@ -31,9 +31,9 @@ router.get("/:name", async (req: Request, res: Response) => {
 })
 
 // POST new user
-router.post("/encrypt", async (req: Request, res: Response) => {
+router.post("/encrypt", async (req: any, res: Response) => {
   try {
-    const user = req.session.user
+    const user = req.user
     const { name, url, username, password, master_password } = req.body
     const encryptedText = await encrypt(password, master_password)
 

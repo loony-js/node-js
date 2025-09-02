@@ -1,4 +1,4 @@
-import { userIsLoggedIn } from "../api/index"
+import { getUserInfo } from "../api/index"
 
 import React, { useEffect, useState } from "react"
 
@@ -43,24 +43,15 @@ const useAuthSession = (): [
   const [authContext, setAuthContext] = useState(authState)
 
   useEffect(() => {
-    userIsLoggedIn()
+    getUserInfo()
       .then(({ data }: any) => {
-        if (data) {
-          if (data.loggedIn) {
-            setAuthContext({
-              user: data.user,
-              status: AuthStatus.AUTHORIZED,
-            })
-          } else if (!data.loggedIn) {
-            setAuthContext({
-              user: null,
-              status: AuthStatus.UNAUTHORIZED,
-            })
-            console.log(`${AuthStatus.UNAUTHORIZED}`)
-          }
-        }
+        setAuthContext({
+          user: data,
+          status: AuthStatus.AUTHORIZED,
+        })
       })
       .catch(() => {
+        console.log("Errosjfjdslfjsdll")
         setAuthContext({
           user: null,
           status: AuthStatus.UNAUTHORIZED,

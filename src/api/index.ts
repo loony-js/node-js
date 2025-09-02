@@ -1,6 +1,6 @@
 import { apiHttpClient, authHttpClient } from "./httpClient"
 
-export const userIsLoggedIn = () => authHttpClient.get("/session")
+export const getUserInfo = () => authHttpClient.get("/userInfo")
 
 export const login = (credentials: any) =>
   authHttpClient.post("/login", credentials)
