@@ -1,6 +1,6 @@
 import { apiHttpClient, authHttpClient } from "./httpClient"
 
-export const getUserInfo = () => authHttpClient.get("/userInfo")
+export const getUserInfo = () => authHttpClient.get("/user/userInfo")
 
 export const login = (credentials: any) =>
   authHttpClient.post("/login", credentials)
@@ -10,7 +10,8 @@ export const signup = (credentials: any) =>
 
 export const logout = () => authHttpClient.post("/logout")
 
-export const getAllCredentials = () => apiHttpClient.get("/aegis/all")
+export const getAllCredentials = (user_id: string | number) =>
+  apiHttpClient.get(`/aegis/${user_id}/all`)
 export const deleteCredential = (id: number) =>
   apiHttpClient.post("/aegis/delete/" + id)
 export const encryptText = (data: any) =>

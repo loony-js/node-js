@@ -1,15 +1,16 @@
 // src/api/httpClient.js
 import axios from "axios"
+console.log(process.env)
 
 const authHttpClient = axios.create({
-  baseURL: "https://localhost:2000",
+  baseURL: process.env.AUTH_URL,
   timeout: 10000,
   headers: { "Content-Type": "application/json" },
   withCredentials: true,
 })
 
 const apiHttpClient = axios.create({
-  baseURL: "https://localhost:2001",
+  baseURL: process.env.AEGIS_URL,
   timeout: 10000,
   headers: { "Content-Type": "application/json" },
   withCredentials: true,
@@ -27,9 +28,9 @@ const apiHttpClient = axios.create({
 let isRefreshing = false
 let refreshSubscribers: any = []
 
-function subscribeTokenRefresh(cb: any) {
-  refreshSubscribers.push(cb)
-}
+// function subscribeTokenRefresh(cb: any) {
+//   refreshSubscribers.push(cb)
+// }
 
 function onRrefreshed() {
   refreshSubscribers.forEach((cb: any) => cb())

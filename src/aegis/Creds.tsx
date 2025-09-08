@@ -1,16 +1,20 @@
-import { useEffect, useState } from "react"
+import { useContext, useEffect, useState } from "react"
 import { deleteCredential, getAllCredentials } from "../api/index"
+import { AuthContext } from "context/AuthContext"
 
 export default function Table() {
+  const { user } = useContext(AuthContext)
   const [creds, setCreds] = useState<null | []>(null)
   const [activeRow, setActiveRow] = useState(0)
   const [isOpen, setIsOpen] = useState(false)
 
   useEffect(() => {
-    getAllCredentials().then(({ data }) => {
-      setCreds(data)
-    })
-  }, [])
+    if (user) {
+      getAllCredentials(user?.uid).then(({ data }) => {
+        setCreds(data)
+      })
+    }
+  }, [user])
 
   const handleDelete = (id: number) => {
     setActiveRow(id)

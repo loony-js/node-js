@@ -142,7 +142,6 @@ router.get("/userInfo", async (req: any, res: any) => {
       return res.status(401).json({ message: "No access token" })
     }
     const payload: any = verifyAccessToken(access_token)
-    console.log(payload)
     const userRows = await authPool.query(
       "SELECT uid, fname, lname FROM users WHERE uid = $1",
       [payload.uid],
