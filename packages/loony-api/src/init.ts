@@ -5,7 +5,7 @@ import cookieParser from "cookie-parser"
 import fs from "fs"
 import config from "./config"
 
-const { KEY_PATH, CERT_PATH } = config
+const { KEY_PATH, CERT_PATH, ALLOW_ORIGIN } = config
 const options = {
   key: fs.readFileSync(KEY_PATH), // or localhost.key
   cert: fs.readFileSync(CERT_PATH), // or localhost.crt
@@ -15,8 +15,15 @@ const app = express()
 
 app.use(
   cors({
-    origin: "http://localhost:3000", // frontend origin
-    credentials: true, // 🔥 allow cookies to be sent
+    origin: ALLOW_ORIGIN, // frontend origin
+    methods: ["GET", "POST"],
+    allowedHeaders: [
+      "Content-Type",
+      "Accept",
+      "Authorization",
+      "access-control-allow-origin",
+    ],
+    credentials: true, // 🔥 allow cookies to be sent,
   }),
 )
 // app.use(

@@ -5,7 +5,7 @@ import dotenv from "dotenv"
 import { handleWebSocket } from "./socket"
 
 dotenv.config()
-const PORT = process.env.PORT || 2000
+const PORT = process.env.PORT || 3117
 const app = express()
 const server = http.createServer(app)
 

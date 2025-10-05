@@ -1,7 +1,8 @@
 import { Pool } from "pg"
+import config from "./config"
 
 const appPool = new Pool({
-  connectionString: process.env.APP_DATABASE_URL,
+  connectionString: config.APP_DATABASE_URL,
 })
 
 function initPool() {

@@ -5,11 +5,11 @@ import { appPool } from "./db"
 const router = express.Router()
 
 // GET all users
-router.get("/all", async (req: any, res: any) => {
-  const user = req.user
+router.get("/:user_id/all", async (req: any, res: any) => {
+  const { user_id } = req.params
   try {
     const result = await appPool.query("SELECT * FROM aegis where user_id=$1", [
-      user?.uid,
+      user_id,
     ])
     res.json(result.rows)
   } catch (err: any) {
@@ -33,13 +33,12 @@ router.get("/:name", async (req: Request, res: Response) => {
 // POST new user
 router.post("/encrypt", async (req: any, res: Response) => {
   try {
-    const user = req.user
-    const { name, url, username, password, master_password } = req.body
+    const { user_id, name, url, username, password, master_password } = req.body
     const encryptedText = await encrypt(password, master_password)
 
     const result = await appPool.query(
       "INSERT INTO aegis (user_id, name, url, username, password) VALUES ($1, $2, $3, $4, $5) RETURNING *",
-      [user?.uid, name, url, username, encryptedText.toString("base64")],
+      [user_id, name, url, username, encryptedText.toString("base64")],
     )
     res.status(201).json(result.rows[0])
   } catch (err: any) {

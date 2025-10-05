@@ -1,6 +1,4 @@
-// src/api/httpClient.js
 import axios from "axios"
-console.log(process.env)
 
 const authHttpClient = axios.create({
   baseURL: process.env.AUTH_URL,

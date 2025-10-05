@@ -1,4 +1,4 @@
-CREATE TABLE sankar.aegis(
+CREATE TABLE aegis(
     id SERIAL PRIMARY KEY,
     user_id INT NOT NULL,
     name TEXT,

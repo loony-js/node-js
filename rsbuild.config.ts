@@ -1,10 +1,11 @@
 import { defineConfig } from "@rsbuild/core"
 import { pluginReact } from "@rsbuild/plugin-react"
-// import dotenv from "dotenv"
-
-// dotenv.config()
 
 export default defineConfig({
+  server: {
+    port: (process.env.APP_PORT && parseInt(process.env.APP_PORT)) || 3033,
+    strictPort: true,
+  },
   source: {
     define: {
       "process.env": JSON.stringify(process.env),

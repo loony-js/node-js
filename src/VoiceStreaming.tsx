@@ -3,7 +3,7 @@ import { useMicrophone } from "hooks/microphone"
 import { useState } from "react"
 
 const withSocket = true
-const defaultSocketUrl = `ws://localhost:2000/ws`
+const defaultSocketUrl = `ws://localhost:2011/ws`
 
 export default function VoiceStreaming() {
   const [url, setUrl] = useState(defaultSocketUrl)

@@ -76,7 +76,7 @@ export default function Table() {
         <tbody className="divide-y divide-gray-200">
           {creds &&
             creds.map((cred: any) => (
-              <tr key={cred.id}>
+              <tr key={cred.url}>
                 <td className="px-4 py-2">{cred.name}</td>
                 <td className="px-4 py-2">{cred.username}</td>
                 <td className="px-4 py-2">{cred.password}</td>

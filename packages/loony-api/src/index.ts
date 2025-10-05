@@ -3,8 +3,7 @@ import config from "./config"
 import aegis from "./aegis"
 import authMiddleware from "./middleware"
 
-const { PORT } = config
-
+const { APP_PORT } = config
 // Simple Route
 app.get("/", (req, res) => {
   res.send("Hello, Express!")
@@ -18,6 +17,6 @@ app.get("/hello", (req, res) => {
 app.use("/aegis", authMiddleware, aegis)
 
 // Start Server
-server.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`)
+server.listen(APP_PORT, () => {
+  console.log(`Server is running on http://localhost:${APP_PORT}`)
 })

@@ -1,7 +1,8 @@
-import { useState } from "react"
+import { useContext, useState } from "react"
 import { encryptText } from "../api/index"
 import { Facebook, Instagram, Gmail } from "../Icons/index"
 import { IoEye, IoEyeOff } from "react-icons/io5"
+import { AuthContext } from "context/AuthContext"
 
 const domains = [
   { name: "Facebook", icon: <Facebook />, url: "https://facebook.com" },
@@ -10,6 +11,8 @@ const domains = [
 ]
 
 function Encrypt() {
+  const { user } = useContext(AuthContext)
+
   const [formData, setFormData] = useState({
     name: "",
     url: "",
@@ -39,7 +42,7 @@ function Encrypt() {
   const handleSubmit = (e: any) => {
     e.preventDefault()
     if (validate()) {
-      encryptText(formData).then(() => {})
+      encryptText({ ...formData, user_id: user?.uid }).then(() => {})
     }
   }
 
