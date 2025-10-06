@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import express, { Request, Response } from "express"
 import { encrypt, decrypt } from "loony-sdk"
 import { appPool } from "./db"
@@ -36,7 +37,7 @@ router.get("/:aegis_id/get", async (req: Request, res: Response) => {
 // POST new user
 router.post("/encrypt", async (req: any, res: Response) => {
   try {
-    const { user_id, name, username, password, master_password, inputs } =
+    const { user_id, name, url, username, password, master_password, inputs } =
       req.body
     const pool = await appPool.connect()
 
@@ -55,21 +56,37 @@ router.post("/encrypt", async (req: any, res: Response) => {
       )
     }
 
+    const parsedInputs = []
+
     if (username) {
-      await pool.query(
-        "INSERT INTO aegis_key_value (aegis_id, key, value) VALUES ($1, $2, $3)",
-        [aegisId, "username", username],
-      )
+      parsedInputs.push({ key: "username", value: username })
     }
 
-    const insertPromises = Object.entries(inputs).map(async ([key, value]) => {
-      return pool.query(
-        "INSERT INTO aegis_key_value (aegis_id, key, value) VALUES ($1, $2, $3)",
-        [aegisId, key, value],
-      )
+    if (url) {
+      parsedInputs.push({ key: "url", value: url })
+    }
+
+    Object.entries(inputs).forEach((_, v) => {
+      parsedInputs.push(v)
     })
 
-    await Promise.all(insertPromises)
+    console.log(parsedInputs, "parsedInputs")
+
+    const params = Object.entries(parsedInputs)
+      .map(([key, value]) => {
+        return `(${[aegisId, `'${value.key}'`, `'${value.value}'`].join(", ")})`
+      })
+      .join(", ")
+
+    console.log(params)
+
+    const query = `
+      INSERT INTO aegis_key_value (aegis_id, key, value)
+      VALUES ${params}
+    `
+    console.log(query)
+    await pool.query(query)
+
     await pool.query("COMMIT")
 
     res.status(201).json({
