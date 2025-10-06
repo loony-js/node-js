@@ -94,11 +94,14 @@ function Encrypt() {
       </div>
       {modal ? (
         <Modal
-          title="Input Name"
+          modalTitle="Input Name"
+          buttonTitle="Encrypt"
+          inputTitle="Key name"
           cancel={() => {
             showModal(false)
           }}
-          confirm={(data) => {
+          confirm={(e, data) => {
+            e.preventDefault()
             setInputs((prevState: any) => ({
               ...prevState,
               [data]: "",

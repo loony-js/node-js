@@ -8,7 +8,7 @@ export const CancelButton = ({
   return (
     <button
       onClick={onClick}
-      className="px-4 py-2 border border-[#cccccc] dark:border-[#4d4d4d] hover:border-[#666666] text-gray-800 dark:text-white rounded"
+      className="px-4 py-2 border border-[#cccccc] dark:border-[#4d4d4d] hover:border-[#666666] text-gray-800 rounded"
     >
       Cancel
     </button>

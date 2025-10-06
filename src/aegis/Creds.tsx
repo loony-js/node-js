@@ -1,10 +1,12 @@
 import { useCallback, useContext, useEffect, useState } from "react"
 import {
+  decryptText,
   deleteCredential,
   getAllCredentials,
   getCredentialInfo,
 } from "../api/index"
 import { AuthContext } from "context/AuthContext"
+import Modal from "./Modal"
 
 export default function Table() {
   const { user } = useContext(AuthContext)
@@ -12,6 +14,14 @@ export default function Table() {
   const [activeRow, setActiveRow] = useState(0)
   const [isOpen, setIsOpen] = useState(false)
   const [credInfo, setCredInfo] = useState<any>(null)
+  const [state, setState] = useState({
+    decryptedValue: "",
+    showPassword: false,
+  })
+  const [modal, showModal] = useState<any>({
+    showModal: false,
+    data: null,
+  })
 
   useEffect(() => {
     if (user) {
@@ -30,6 +40,21 @@ export default function Table() {
   const handleDelete = (id: number) => {
     setActiveRow(id)
     setIsOpen(true)
+  }
+
+  const handleDecrypt = (e: any, v: any) => {
+    e.preventDefault()
+    if (modal.data && modal.data.value) {
+      decryptText({
+        password: modal.data.value,
+        master_password: v,
+      }).then(({ data }: any) => {
+        setState({
+          ...state,
+          decryptedValue: data.password,
+        })
+      })
+    }
   }
 
   const confirmDelete = () => {
@@ -75,13 +100,33 @@ export default function Table() {
           </div>
         </div>
       )}
+      {modal.showModal ? (
+        <Modal
+          inputTitle="Enter master password"
+          buttonTitle="Decrypt"
+          modalTitle="Decrypt Text"
+          cancel={() => {
+            showModal({
+              showModal: false,
+              data: null,
+            })
+            setState({
+              decryptedValue: "",
+              showPassword: false,
+            })
+          }}
+          confirm={(e, data) => {
+            handleDecrypt(e, data)
+          }}
+          value={state.decryptedValue}
+        />
+      ) : null}
       <div className="flex flex-row">
         <div className="w-[50%]">
           <table className="min-w-full bg-white rounded-lg shadow-md">
             <thead className="bg-gray-200 text-gray-700">
               <tr>
                 <th className="px-4 py-2 text-left">Name</th>
-                <th className="px-4 py-2 text-left">Username</th>
                 <th className="px-4 py-2 text-left">Actions</th>
               </tr>
             </thead>
@@ -98,11 +143,10 @@ export default function Table() {
                     >
                       {cred.name}
                     </td>
-                    <td className="px-4 py-2">{cred.username}</td>
                     <td className="px-4 py-2">
                       <button
                         onClick={() => {
-                          handleDelete(cred.id)
+                          handleDelete(cred.uid)
                         }}
                       >
                         Delete
@@ -120,6 +164,21 @@ export default function Table() {
                 <div key={cred.key} className="mb-5">
                   <div className="font-semibold">{cred.key}</div>
                   <div>{cred.value}</div>
+                  {cred.key === "password" ? (
+                    <div>
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault()
+                          showModal({
+                            showModal: true,
+                            data: cred,
+                          })
+                        }}
+                      >
+                        Decrypt
+                      </button>
+                    </div>
+                  ) : null}
                 </div>
               )
             })}

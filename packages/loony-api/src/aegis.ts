@@ -36,7 +36,8 @@ router.get("/:aegis_id/get", async (req: Request, res: Response) => {
 // POST new user
 router.post("/encrypt", async (req: any, res: Response) => {
   try {
-    const { user_id, name, password, master_password, inputs } = req.body
+    const { user_id, name, username, password, master_password, inputs } =
+      req.body
     const pool = await appPool.connect()
 
     await pool.query("BEGIN")
@@ -51,6 +52,13 @@ router.post("/encrypt", async (req: any, res: Response) => {
       await pool.query(
         "INSERT INTO aegis_key_value (aegis_id, key, value) VALUES ($1, $2, $3)",
         [aegisId, "password", encryptedText.toString("base64")],
+      )
+    }
+
+    if (username) {
+      await pool.query(
+        "INSERT INTO aegis_key_value (aegis_id, key, value) VALUES ($1, $2, $3)",
+        [aegisId, "username", username],
       )
     }
 
@@ -105,7 +113,8 @@ router.put("/update/:id", async (req: Request, res: Response) => {
 router.post("/delete/:id", async (req: Request, res: Response) => {
   try {
     const { id } = req.params
-    await appPool.query("DELETE FROM aegis WHERE id = $1", [id])
+    await appPool.query("DELETE FROM aegis_key_value WHERE aegis_id = $1", [id])
+    await appPool.query("DELETE FROM aegis WHERE uid = $1", [id])
     res.json({ message: "ok" })
   } catch (err: any) {
     res.status(500).json({ error: err.message })

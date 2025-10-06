@@ -1,9 +1,8 @@
 import { useState } from "react"
 import Encrypt from "./Encrypt"
-import Decrypt from "./Decrypt"
 import Creds from "./Creds"
 
-const tabs = ["Encrypt", "Decrypt", "List"]
+const tabs = ["List", "Encrypt"]
 
 export default function Aegis() {
   const [activeTab, setActiveTab] = useState(0)
@@ -25,9 +24,8 @@ export default function Aegis() {
           </button>
         ))}
       </div>
-      {activeTab === 0 && <Encrypt />}
-      {activeTab === 1 && <Decrypt />}
-      {activeTab === 2 && <Creds />}
+      {activeTab === 0 && <Creds />}
+      {activeTab === 1 && <Encrypt />}
     </div>
   )
 }

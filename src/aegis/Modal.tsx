@@ -4,21 +4,27 @@ import { CancelButton, Button } from "../ui/Button"
 export default function NewInputModal({
   cancel,
   confirm,
-  title,
+  modalTitle,
+  inputTitle,
+  buttonTitle,
+  value,
 }: {
   cancel: () => void
-  confirm: (e: any) => void
-  title?: string
+  confirm: (e: any, data: any) => void
+  modalTitle?: string
+  inputTitle?: string
+  buttonTitle?: string
+  value?: any
 }) {
   const [key, setKey] = useState("")
   return (
-    <div className="fixed inset-0 z-10 flex items-center justify-center bg-black/60">
-      <div className="bg-white dark:bg-[#2e2e2e] rounded-lg shadow-lg w-full max-w-sm p-6">
-        <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">
-          New Input
-        </h2>
+    <div className="fixed inset-0 z-10 flex items-center justify-center">
+      <div className="bg-white rounded-lg shadow-lg w-full max-w-sm p-6">
+        <h2 className="text-lg font-semibold mb-4">{modalTitle}</h2>
         <p className="text-blue-600 dark:text-red-300 text-lg mb-6">
-          <label className="block text-sm mb-2">{title}</label>
+          <label className="block text-sm mb-2 text-gray-900">
+            {inputTitle}
+          </label>
           <input
             type="text"
             className="w-full px-4 py-2 rounded-md border border-gray-300 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -28,13 +34,14 @@ export default function NewInputModal({
             value={key}
           />
         </p>
+        {value ? <p>Value: {value}</p> : null}
         <div className="flex justify-end space-x-2">
           <CancelButton onClick={cancel} />
           <Button
-            onClick={() => {
-              confirm(key)
+            onClick={(e) => {
+              confirm(e, key)
             }}
-            title="Create"
+            title={buttonTitle || ""}
           />
         </div>
       </div>
