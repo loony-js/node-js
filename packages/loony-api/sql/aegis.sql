@@ -1,10 +1,20 @@
-CREATE TABLE aegis(
-    id SERIAL PRIMARY KEY,
+CREATE TABLE aegis (
+    uid SERIAL PRIMARY KEY,
     user_id INT NOT NULL,
     name TEXT,
-    url TEXT,
-    username TEXT NOT NULL,
-    password TEXT NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE aegis_key_value (
+    uid SERIAL PRIMARY KEY,
+    aegis_id INT NOT NULL,
+    key TEXT NOT NULL,
+    value TEXT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_aegis
+        FOREIGN KEY(aegis_id) 
+        REFERENCES aegis(uid)
+        ON DELETE CASCADE
 );

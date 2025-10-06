@@ -1,5 +1,9 @@
-import { useContext, useEffect, useState } from "react"
-import { deleteCredential, getAllCredentials } from "../api/index"
+import { useCallback, useContext, useEffect, useState } from "react"
+import {
+  deleteCredential,
+  getAllCredentials,
+  getCredentialInfo,
+} from "../api/index"
 import { AuthContext } from "context/AuthContext"
 
 export default function Table() {
@@ -7,6 +11,7 @@ export default function Table() {
   const [creds, setCreds] = useState<null | []>(null)
   const [activeRow, setActiveRow] = useState(0)
   const [isOpen, setIsOpen] = useState(false)
+  const [credInfo, setCredInfo] = useState<any>(null)
 
   useEffect(() => {
     if (user) {
@@ -15,6 +20,12 @@ export default function Table() {
       })
     }
   }, [user])
+
+  const fetchInfo = useCallback((data: any) => {
+    getCredentialInfo(data.uid).then((res) => {
+      setCredInfo(res.data)
+    })
+  }, [])
 
   const handleDelete = (id: number) => {
     setActiveRow(id)
@@ -64,35 +75,56 @@ export default function Table() {
           </div>
         </div>
       )}
-      <table className="min-w-full bg-white rounded-lg shadow-md">
-        <thead className="bg-gray-200 text-gray-700">
-          <tr>
-            <th className="px-4 py-2 text-left">Name</th>
-            <th className="px-4 py-2 text-left">Username</th>
-            <th className="px-4 py-2 text-left">Hashed Text</th>
-            <th className="px-4 py-2 text-left">Actions</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-gray-200">
-          {creds &&
-            creds.map((cred: any) => (
-              <tr key={cred.url}>
-                <td className="px-4 py-2">{cred.name}</td>
-                <td className="px-4 py-2">{cred.username}</td>
-                <td className="px-4 py-2">{cred.password}</td>
-                <td className="px-4 py-2">
-                  <button
-                    onClick={() => {
-                      handleDelete(cred.id)
-                    }}
-                  >
-                    Delete
-                  </button>
-                </td>
+      <div className="flex flex-row">
+        <div className="w-[50%]">
+          <table className="min-w-full bg-white rounded-lg shadow-md">
+            <thead className="bg-gray-200 text-gray-700">
+              <tr>
+                <th className="px-4 py-2 text-left">Name</th>
+                <th className="px-4 py-2 text-left">Username</th>
+                <th className="px-4 py-2 text-left">Actions</th>
               </tr>
-            ))}
-        </tbody>
-      </table>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {creds &&
+                creds.map((cred: any) => (
+                  <tr key={cred.name}>
+                    <td
+                      className="px-4 py-2"
+                      onClick={(e) => {
+                        e.preventDefault()
+                        fetchInfo(cred)
+                      }}
+                    >
+                      {cred.name}
+                    </td>
+                    <td className="px-4 py-2">{cred.username}</td>
+                    <td className="px-4 py-2">
+                      <button
+                        onClick={() => {
+                          handleDelete(cred.id)
+                        }}
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+        </div>
+        <div className="w-[50%] pl-10">
+          {credInfo &&
+            credInfo.map((cred: any) => {
+              return (
+                <div key={cred.key} className="mb-5">
+                  <div className="font-semibold">{cred.key}</div>
+                  <div>{cred.value}</div>
+                </div>
+              )
+            })}
+        </div>
+      </div>
     </div>
   )
 }

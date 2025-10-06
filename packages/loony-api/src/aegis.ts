@@ -17,14 +17,17 @@ router.get("/:user_id/all", async (req: any, res: any) => {
   }
 })
 
-router.get("/:name", async (req: Request, res: Response) => {
+router.get("/:aegis_id/get", async (req: Request, res: Response) => {
   try {
-    const { name, user_id } = req.params
+    const { aegis_id } = req.params
     const result = await appPool.query(
-      "SELECT * FROM aegis WHERE name = $1 AND user_id=$2",
-      [name, user_id],
+      `SELECT a.uid AS aegis_id, kv.key, kv.value
+        FROM aegis a
+        LEFT JOIN aegis_key_value kv ON a.uid = kv.aegis_id
+        WHERE a.uid = $1`,
+      [aegis_id],
     )
-    res.json(result.rows[0])
+    res.json(result.rows)
   } catch (err: any) {
     res.status(500).json({ error: err.message })
   }
@@ -33,15 +36,39 @@ router.get("/:name", async (req: Request, res: Response) => {
 // POST new user
 router.post("/encrypt", async (req: any, res: Response) => {
   try {
-    const { user_id, name, url, username, password, master_password } = req.body
-    const encryptedText = await encrypt(password, master_password)
+    const { user_id, name, password, master_password, inputs } = req.body
+    const pool = await appPool.connect()
 
-    const result = await appPool.query(
-      "INSERT INTO aegis (user_id, name, url, username, password) VALUES ($1, $2, $3, $4, $5) RETURNING *",
-      [user_id, name, url, username, encryptedText.toString("base64")],
+    await pool.query("BEGIN")
+    const aegisRes = await pool.query(
+      "INSERT INTO aegis (user_id, name) VALUES ($1, $2) RETURNING uid",
+      [user_id, name],
     )
-    res.status(201).json(result.rows[0])
+    const aegisId = aegisRes.rows[0].uid
+
+    if (password && master_password) {
+      const encryptedText = await encrypt(password, master_password)
+      await pool.query(
+        "INSERT INTO aegis_key_value (aegis_id, key, value) VALUES ($1, $2, $3)",
+        [aegisId, "password", encryptedText.toString("base64")],
+      )
+    }
+
+    const insertPromises = Object.entries(inputs).map(async ([key, value]) => {
+      return pool.query(
+        "INSERT INTO aegis_key_value (aegis_id, key, value) VALUES ($1, $2, $3)",
+        [aegisId, key, value],
+      )
+    })
+
+    await Promise.all(insertPromises)
+    await pool.query("COMMIT")
+
+    res.status(201).json({
+      aegisId,
+    })
   } catch (err: any) {
+    console.log(err)
     res.status(500).json({ error: err.message })
   }
 })

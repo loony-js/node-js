@@ -38,7 +38,8 @@ const Signup = () => {
     return false
   }
 
-  const handleSubmit = () => {
+  const handleSubmit = (e: any) => {
+    e.preventDefault()
     if (validate()) {
       try {
         handleSignup(formData)

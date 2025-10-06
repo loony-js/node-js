@@ -3,6 +3,9 @@ import { encryptText } from "../api/index"
 import { Facebook, Instagram, Gmail } from "../Icons/index"
 import { IoEye, IoEyeOff } from "react-icons/io5"
 import { AuthContext } from "context/AuthContext"
+import Modal from "./Modal"
+import { Button } from "../ui/Button"
+import { Plus } from "lucide-react"
 
 const domains = [
   { name: "Facebook", icon: <Facebook />, url: "https://facebook.com" },
@@ -12,7 +15,8 @@ const domains = [
 
 function Encrypt() {
   const { user } = useContext(AuthContext)
-
+  const [inputs, setInputs] = useState<any>({})
+  const [modal, showModal] = useState(false)
   const [formData, setFormData] = useState({
     name: "",
     url: "",
@@ -28,10 +32,10 @@ function Encrypt() {
 
   const validate = () => {
     if (
-      formData.name &&
-      formData.username &&
-      formData.password &&
-      formData.master_password
+      formData.name
+      // formData.username &&
+      // formData.password &&
+      // formData.master_password
     ) {
       return true
     } else {
@@ -42,7 +46,7 @@ function Encrypt() {
   const handleSubmit = (e: any) => {
     e.preventDefault()
     if (validate()) {
-      encryptText({ ...formData, user_id: user?.uid }).then(() => {})
+      encryptText({ ...formData, inputs, user_id: user?.uid }).then(() => {})
     }
   }
 
@@ -52,6 +56,19 @@ function Encrypt() {
       ...formData,
       [event.target.name]: event.target.value,
     })
+  }
+
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    event.preventDefault()
+    setInputs({
+      ...inputs,
+      [event.target.name]: event.target.value,
+    })
+  }
+
+  const onClickNewInput = (e: any) => {
+    e.preventDefault()
+    showModal(true)
   }
 
   return (
@@ -75,6 +92,21 @@ function Encrypt() {
           )
         })}
       </div>
+      {modal ? (
+        <Modal
+          title="Input Name"
+          cancel={() => {
+            showModal(false)
+          }}
+          confirm={(data) => {
+            setInputs((prevState: any) => ({
+              ...prevState,
+              [data]: "",
+            }))
+            showModal(false)
+          }}
+        />
+      ) : null}
       <form onSubmit={handleSubmit} className="space-y-4 rounded-lg">
         <div>
           <label className="block text-sm mb-2">Name</label>
@@ -82,18 +114,6 @@ function Encrypt() {
             type="text"
             name="name"
             value={formData.name}
-            onChange={handleChange}
-            className="w-full px-4 py-2 rounded-md border border-gray-300 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm mb-2">Url</label>
-          <input
-            type="text"
-            name="url"
-            value={formData.url}
             onChange={handleChange}
             className="w-full px-4 py-2 rounded-md border border-gray-300 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
@@ -110,7 +130,17 @@ function Encrypt() {
             required
           />
         </div>
-
+        <div>
+          <label className="block text-sm mb-2">Url</label>
+          <input
+            type="text"
+            name="url"
+            value={formData.url}
+            onChange={handleChange}
+            className="w-full px-4 py-2 rounded-md border border-gray-300 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
+        </div>
         <div>
           <label className="block text-sm mb-2">Password</label>
           <div className="relative">
@@ -172,6 +202,35 @@ function Encrypt() {
               </button>
             )}
           </div>
+        </div>
+
+        <div>
+          <h3 className="font-bold">Add new fields</h3>
+          <div className="border-t border-gray-300 pt-5"></div>
+          <div>
+            <Button
+              title="Input"
+              onClick={onClickNewInput}
+              icon={<Plus size={16} />}
+            />
+          </div>
+          {Object.keys(inputs).map((key: any) => {
+            return (
+              <>
+                <label className="block text-sm mb-2">{key}</label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    name={key}
+                    value={inputs[key]}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 rounded-md border border-gray-300 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+              </>
+            )
+          })}
         </div>
 
         <button

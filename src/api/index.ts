@@ -6,12 +6,14 @@ export const login = (credentials: any) =>
   authHttpClient.post("/login", credentials)
 
 export const signup = (credentials: any) =>
-  authHttpClient.post("/register", credentials)
+  authHttpClient.post("/signup", credentials)
 
 export const logout = () => authHttpClient.post("/logout")
 
 export const getAllCredentials = (user_id: string | number) =>
   apiHttpClient.get(`/aegis/${user_id}/all`)
+export const getCredentialInfo = (aegis_id: string | number) =>
+  apiHttpClient.get(`/aegis/${aegis_id}/get`)
 export const deleteCredential = (id: number) =>
   apiHttpClient.post("/aegis/delete/" + id)
 export const encryptText = (data: any) =>
