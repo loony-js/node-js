@@ -5,7 +5,7 @@ import { IoEye, IoEyeOff } from "react-icons/io5"
 import { AuthContext } from "context/AuthContext"
 import Modal from "./Modal"
 import { Button } from "../ui/Button"
-import { Plus } from "lucide-react"
+import { ArrowLeft, Plus } from "lucide-react"
 
 const domains = [
   { name: "Facebook", icon: <Facebook />, url: "https://facebook.com" },
@@ -13,7 +13,7 @@ const domains = [
   { name: "Instagram", icon: <Instagram />, url: "https://instagram.com" },
 ]
 
-function Encrypt() {
+function Encrypt({ navigate }: any) {
   const { user } = useContext(AuthContext)
   const [inputs, setInputs] = useState<any>({})
   const [modal, showModal] = useState(false)
@@ -72,8 +72,21 @@ function Encrypt() {
   }
 
   return (
-    <div>
-      <div className="flex flex-row py-2">
+    <div className="min-h-screen flex flex-col px-[30%]">
+      <div className="py-4">
+        <button
+          className="bg-gray-100 hover:bg-gray-200 transition px-4 py-2 rounded-lg flex items-center gap-2"
+          onClick={() => {
+            navigate(1)
+          }}
+        >
+          <ArrowLeft size={18} />
+        </button>
+        <div className="py-4">
+          <h1 className="text-2xl font-semibold">Create</h1>
+        </div>
+      </div>
+      <div className="flex flex-row">
         {domains.map((domain, index) => {
           return (
             <div
@@ -118,7 +131,7 @@ function Encrypt() {
             name="name"
             value={formData.name}
             onChange={handleChange}
-            className="w-full px-4 py-2 rounded-md border border-gray-300 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-2 rounded-md border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
           />
         </div>
@@ -129,7 +142,7 @@ function Encrypt() {
             name="username"
             value={formData.username}
             onChange={handleChange}
-            className="w-full px-4 py-2 rounded-md border border-gray-300 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-2 rounded-md border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
           />
         </div>
