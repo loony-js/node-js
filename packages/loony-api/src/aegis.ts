@@ -70,21 +70,17 @@ router.post("/encrypt", async (req: any, res: Response) => {
       parsedInputs.push(v)
     })
 
-    console.log(parsedInputs, "parsedInputs")
-
     const params = Object.entries(parsedInputs)
       .map(([key, value]) => {
         return `(${[aegisId, `'${value.key}'`, `'${value.value}'`].join(", ")})`
       })
       .join(", ")
 
-    console.log(params)
-
     const query = `
       INSERT INTO aegis_key_value (aegis_id, key, value)
       VALUES ${params}
     `
-    console.log(query)
+
     await pool.query(query)
 
     await pool.query("COMMIT")
