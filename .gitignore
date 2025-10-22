@@ -99,3 +99,4 @@ Desktop.ini
 *.swo
 .local
 local
+.env.postgres
