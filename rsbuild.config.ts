@@ -3,7 +3,7 @@ import { pluginReact } from "@rsbuild/plugin-react"
 
 export default defineConfig({
   server: {
-    port: (process.env.APP_PORT && parseInt(process.env.APP_PORT)) || 3033,
+    port: (process.env.APP_PORT && parseInt(process.env.APP_PORT)) || 5000,
     strictPort: true,
   },
   source: {

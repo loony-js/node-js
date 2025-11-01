@@ -1,5 +1,4 @@
 import { useState } from "react"
-import "./index.css"
 
 const BubbleSortVisualizer = () => {
   const [array, setArray] = useState([50, 30, 70, 10, 90, 20, 60])

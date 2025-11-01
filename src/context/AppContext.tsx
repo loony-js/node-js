@@ -3,8 +3,7 @@ import { AppContextProps, AppState } from "loony-types"
 import config from "../../config/app.config.json"
 
 const appConfig: any = config
-const env: string = config.env
-const currentConfig: any = appConfig[env]
+const currentConfig: any = appConfig[config.NODE_ENV]
 const { API_URL } = currentConfig
 
 const AppContext = createContext<AppContextProps>({
@@ -16,6 +15,8 @@ const AppContext = createContext<AppContextProps>({
     width: 1920,
     height: 1080,
   },
+  isDark: true,
+  api: null,
   setAppContext: () => {
     return
   },
@@ -31,6 +32,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       width: 1920,
       height: 1080,
     },
+    isDark: true,
+    api: null,
   })
 
   useEffect(() => {

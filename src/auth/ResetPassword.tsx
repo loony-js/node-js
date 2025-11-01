@@ -1,7 +1,7 @@
 import { useContext, useState } from "react"
 import { useNavigate, useParams } from "react-router"
 import { NotificationContextProps } from "loony-types"
-import { onSendResetPassword } from "loony-api"
+import { onSendResetPassword } from "loony-api/src/index.ts"
 import { AuthContext } from "../context/AuthContext.tsx"
 
 const ResetPassword = ({

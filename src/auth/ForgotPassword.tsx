@@ -1,7 +1,7 @@
 import { useContext, useState } from "react"
 import { useNavigate } from "react-router"
 import { NotificationContextProps } from "loony-types"
-import {} from "loony-api"
+import {} from "loony-api/src/index.ts"
 import { AuthContext } from "../context/AuthContext.tsx"
 
 const ForgotPassword = ({
