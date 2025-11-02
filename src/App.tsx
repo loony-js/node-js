@@ -3,7 +3,7 @@ import { Routes, Route } from "react-router"
 import Aegis from "./aegis/index"
 import Login from "./auth/Login"
 import Signup from "./auth/Signup"
-import VoiceStreaming from "VoiceStreaming"
+import VoiceStreaming from "streaming/VoiceStreaming"
 import Algorithms from "./algorithms/index"
 import Home, { LoginHome } from "./Home"
 
@@ -60,7 +60,7 @@ export const AppRoute = ({
         <div className="flex flex-1 overflow-hidden h-screen">
           <LoginDesktopLeftNavbar />
           {app === "Aegis" ? <Aegis /> : null}
-          {app === "VoiceStreaming" ? <VoiceStreaming /> : null}
+          {app === "Voice Streaming" ? <VoiceStreaming /> : null}
           {app === "Trading" ? <Trading /> : null}
           {app === "Algorithms" ? <Algorithms /> : null}
           {app === "" ? (

@@ -15,7 +15,7 @@ const cards = [
   },
   {
     id: 3,
-    title: "Trading View",
+    title: "Trading",
     description: "Stocks and Market trading view.",
   },
   {

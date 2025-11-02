@@ -26,8 +26,8 @@ export default function Table({ navigate }: any) {
               navigate(2)
             }}
           >
-            <Plus size={18} className="dark:text-gray-900" />
-            <span className="dark:text-gray-900">Add</span>
+            <Plus size={18} />
+            <span>Add</span>
           </button>
         </div>
 
@@ -50,7 +50,7 @@ export default function Table({ navigate }: any) {
                 }}
               >
                 <div className="flex items-center gap-3">
-                  <Globe className="text-gray-900" size={18} />
+                  <Globe className="" size={18} />
                   <div>
                     <p className="font-medium">{item.name}</p>
                     {/* {item.accounts > 1 && (

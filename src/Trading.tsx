@@ -147,13 +147,15 @@ const CandlestickChart = ({
   }
 
   return (
-    <div>
-      <canvas
-        ref={canvasRef}
-        style={{ border: "1px solid #ccc" }}
-        onWheel={handleWheel}
-      />
-    </div>
+    <main className="flex-1 min-h-screen ml-64 bg-stone-50 dark:bg-[#212121] pt-16">
+      <div className="min-h-screen flex flex-col px-[5%] text-white">
+        <canvas
+          ref={canvasRef}
+          style={{ border: "1px solid #ccc" }}
+          onWheel={handleWheel}
+        />
+      </div>
+    </main>
   )
 }
 

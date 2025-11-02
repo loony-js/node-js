@@ -12,7 +12,7 @@ export default function Decrypt({ navigate, data }: any) {
   }, [data])
 
   return (
-    <div className="min-h-screen flex flex-col items-center">
+    <div className="min-h-screen flex flex-col items-center dark:text-white">
       <div className="max-w-3xl w-full">
         <div className="py-4">
           <button

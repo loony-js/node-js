@@ -1,46 +1,112 @@
-import { useState } from "react"
+import { useState, useRef } from "react"
+import { numbers } from "./utils"
+import { Button } from "loony-ui"
 
 const BubbleSortVisualizer = () => {
-  const [array, setArray] = useState([50, 30, 70, 10, 90, 20, 60])
+  const [array, setArray] = useState(numbers)
   const [swappingIdx, setSwappingIdx] = useState<number[]>([])
+  const [isSorting, setIsSorting] = useState(false)
+  const [isPaused, setIsPaused] = useState(false)
+
+  const pauseRef = useRef(false)
+  const stopRef = useRef(false)
+
+  const sleep = (ms: number) =>
+    new Promise((resolve) => setTimeout(resolve, ms))
+
+  const waitWhilePaused = async () => {
+    while (pauseRef.current) {
+      await sleep(50)
+    }
+  }
 
   const bubbleSort = async () => {
+    setIsSorting(true)
+    stopRef.current = false
+    pauseRef.current = false
+
     const arr = [...array]
     const n = arr.length
+    let swapped
 
     for (let i = 0; i < n - 1; i++) {
+      swapped = false
       for (let j = 0; j < n - i - 1; j++) {
-        setSwappingIdx([j, j + 1]) // Highlight elements being compared
+        if (stopRef.current) return setIsSorting(false)
 
-        await new Promise((resolve) => setTimeout(resolve, 1000)) // Delay for animation
+        setSwappingIdx([j, j + 1])
+        await waitWhilePaused()
+        await sleep(100)
 
         if (arr[j] > arr[j + 1]) {
-          ;[arr[j], arr[j + 1]] = [arr[j + 1], arr[j]] // Swap elements
-          setArray([...arr]) // Update UI
-
-          await new Promise((resolve) => setTimeout(resolve, 1000)) // Delay after swap
+          ;[arr[j], arr[j + 1]] = [arr[j + 1], arr[j]]
+          swapped = true
+          setArray([...arr])
+          await sleep(150)
         }
       }
+      if (!swapped) break
     }
-    setSwappingIdx([]) // Reset highlights after sorting
+
+    setSwappingIdx([])
+    setIsSorting(false)
+  }
+
+  const handlePause = () => {
+    pauseRef.current = true
+    setIsPaused(true)
+  }
+
+  const handleResume = () => {
+    pauseRef.current = false
+    setIsPaused(false)
+  }
+
+  const handleStop = () => {
+    stopRef.current = true
+    pauseRef.current = false
+    setIsPaused(false)
   }
 
   return (
-    <div className="container">
-      <h2 className="heading">Bubble Sort</h2>
-      <div className="array-container">
+    <div className="">
+      <div>
+        <h2>Bubble Sort</h2>
+      </div>
+      <div className="flex items-end py-3">
         {array.map((num, idx) => (
           <div
             key={idx}
-            className={`bar ${swappingIdx.includes(idx) ? "swapping" : ""}`}
+            style={{ height: num }}
+            className={`p-1 mr-2 border border-gray-500 ${swappingIdx.includes(idx) ? "border-white" : ""}`}
           >
             {num}
           </div>
         ))}
       </div>
-      <button onClick={bubbleSort} className="sort-btn">
-        Start Sorting
-      </button>
+      <div className="flex gap-3">
+        <Button variant="border" onClick={bubbleSort}>
+          Start
+        </Button>
+
+        {isSorting && !isPaused && (
+          <Button variant="border" onClick={handlePause}>
+            Pause
+          </Button>
+        )}
+
+        {isSorting && isPaused && (
+          <Button variant="border" onClick={handleResume}>
+            Resume
+          </Button>
+        )}
+
+        {isSorting && (
+          <Button variant="border" onClick={handleStop}>
+            Stop
+          </Button>
+        )}
+      </div>
     </div>
   )
 }

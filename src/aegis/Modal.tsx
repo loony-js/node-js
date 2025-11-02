@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { CancelButton, Button } from "../ui/Button"
+import { Button, Input } from "loony-ui"
 
 export default function NewInputModal({
   cancel,
@@ -19,7 +19,7 @@ export default function NewInputModal({
   const [key, setKey] = useState("")
   return (
     <div className="fixed inset-0 z-10 flex items-center justify-center bg-black/60">
-      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg w-full max-w-sm p-6">
+      <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-lg w-full max-w-sm p-6">
         <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">
           {modalTitle}
         </h2>
@@ -27,24 +27,29 @@ export default function NewInputModal({
           <label className="block text-sm mb-2 text-gray-900 dark:text-white">
             {inputTitle}
           </label>
-          <input
+          <Input
+            name="New Input"
             type="text"
-            className="w-full px-4 py-2 rounded-md border border-gray-300 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
             onChange={(e) => {
               setKey(e.target.value)
             }}
             value={key}
+            placeholder="New Input name"
           />
         </p>
         {value ? <p>Value: {value}</p> : null}
         <div className="flex justify-end space-x-2">
-          <CancelButton onClick={cancel} />
+          <Button variant="border" onClick={cancel}>
+            Cancel
+          </Button>
           <Button
+            variant="submit"
             onClick={(e) => {
               confirm(e, key)
             }}
-            title={buttonTitle || ""}
-          />
+          >
+            {buttonTitle}
+          </Button>
         </div>
       </div>
     </div>

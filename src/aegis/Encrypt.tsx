@@ -4,9 +4,8 @@ import { Facebook, Instagram, Gmail } from "../Icons/index"
 import { IoEye, IoEyeOff } from "react-icons/io5"
 import { AuthContext } from "context/AuthContext"
 import Modal from "./Modal"
-import { Button } from "../ui/Button"
 import { ArrowLeft, Plus } from "lucide-react"
-import { Input, FormSubmitButton, ButtonIcon } from "loony-ui"
+import { Input, Button } from "loony-ui"
 
 const domains = [
   { name: "Facebook", icon: <Facebook />, url: "https://facebook.com" },
@@ -75,13 +74,14 @@ function Encrypt({ navigate }: any) {
   return (
     <div className="min-h-screen flex flex-col px-[30%] text-white">
       <div className="py-4">
-        <ButtonIcon
+        <Button
+          variant="border"
           onClick={() => {
             navigate(1)
           }}
         >
           <ArrowLeft size={18} />
-        </ButtonIcon>
+        </Button>
         <div className="py-4">
           <h1 className="text-2xl font-semibold">Create</h1>
         </div>
@@ -123,7 +123,7 @@ function Encrypt({ navigate }: any) {
           }}
         />
       ) : null}
-      <form onSubmit={handleSubmit} className="space-y-4 rounded-lg">
+      <form onSubmit={handleSubmit} className="space-y-4 rounded-lg mt-8">
         <div>
           <label className="block text-sm mb-2">Name</label>
           <Input
@@ -219,9 +219,9 @@ function Encrypt({ navigate }: any) {
           <h3 className="font-bold">Add new fields</h3>
           <div className="border-t border-gray-300 pt-5"></div>
           <div>
-            <ButtonIcon onClick={onClickNewInput}>
+            <Button variant="border" onClick={onClickNewInput}>
               <Plus size={16} />
-            </ButtonIcon>
+            </Button>
           </div>
           {Object.keys(inputs).map((key: any) => {
             return (
@@ -242,7 +242,22 @@ function Encrypt({ navigate }: any) {
           })}
         </div>
 
-        <FormSubmitButton>Submit</FormSubmitButton>
+        <button
+          className="w-full
+            py-2.5
+            rounded-lg
+            font-medium
+            duration-200
+            bg-black
+            text-white
+            hover:bg-gray-800
+            dark:bg-white
+            dark:text-black
+            dark:hover:bg-gray-200
+            dark:focus:ring-white"
+        >
+          Submit
+        </button>
       </form>
     </div>
   )
