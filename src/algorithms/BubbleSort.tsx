@@ -12,13 +12,13 @@ const BubbleSortVisualizer = () => {
       for (let j = 0; j < n - i - 1; j++) {
         setSwappingIdx([j, j + 1]) // Highlight elements being compared
 
-        await new Promise((resolve) => setTimeout(resolve, 1500)) // Delay for animation
+        await new Promise((resolve) => setTimeout(resolve, 1000)) // Delay for animation
 
         if (arr[j] > arr[j + 1]) {
           ;[arr[j], arr[j + 1]] = [arr[j + 1], arr[j]] // Swap elements
           setArray([...arr]) // Update UI
 
-          await new Promise((resolve) => setTimeout(resolve, 1500)) // Delay after swap
+          await new Promise((resolve) => setTimeout(resolve, 1000)) // Delay after swap
         }
       }
     }

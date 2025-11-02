@@ -18,11 +18,13 @@ export default function NewInputModal({
 }) {
   const [key, setKey] = useState("")
   return (
-    <div className="fixed inset-0 z-10 flex items-center justify-center">
-      <div className="bg-white rounded-lg shadow-lg w-full max-w-sm p-6">
-        <h2 className="text-lg font-semibold mb-4">{modalTitle}</h2>
+    <div className="fixed inset-0 z-10 flex items-center justify-center bg-black/60">
+      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg w-full max-w-sm p-6">
+        <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">
+          {modalTitle}
+        </h2>
         <p className="text-blue-600 dark:text-red-300 text-lg mb-6">
-          <label className="block text-sm mb-2 text-gray-900">
+          <label className="block text-sm mb-2 text-gray-900 dark:text-white">
             {inputTitle}
           </label>
           <input

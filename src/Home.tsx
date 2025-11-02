@@ -1,41 +1,56 @@
-import { useNavigate } from "react-router"
+import DesktopLeftNavbar from "navbar/HomeLeftNavbar"
+import { Card } from "loony-ui"
 
-export default function Home() {
-  const navigate = useNavigate()
+const cards = [
+  {
+    id: 1,
+    title: "Aegis",
+    description:
+      "Never forget your username and password. We store them securely.",
+  },
+  {
+    id: 2,
+    title: "Voice Streaming",
+    description: "Stream audio data.",
+  },
+  {
+    id: 3,
+    title: "Trading View",
+    description: "Stocks and Market trading view.",
+  },
+  {
+    id: 4,
+    title: "Algorithms",
+    description: "Visual representation of algorithms.",
+  },
+]
+export default function Home({ setApp, appContext, mobileNavOpen }: any) {
   return (
-    <div className="w-[60%] mx-auto p-4">
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-        <div
-          onClick={() => {
-            navigate("/crypto")
-          }}
-          className="bg-white shadow rounded-md p-4 transition-shadow duration-300 hover:shadow-[0_4px_12px_rgba(0,0,0,0.15)]"
-        >
-          <h2 className="text-lg font-semibold">Aegis</h2>
-          <p className="text-gray-600">
-            Never forget your username and password. We store them securely.
-          </p>
-        </div>
-        <div
-          onClick={() => {
-            navigate("/voiceStreaming")
-          }}
-          className="bg-white shadow rounded-md p-4 transition-shadow duration-300 hover:shadow-[0_4px_12px_rgba(0,0,0,0.15)]"
-        >
-          <h2 className="text-lg font-semibold">Voice Streaming</h2>
-          <p className="text-gray-600">Stream audio data.</p>
-        </div>
-
-        <div
-          onClick={() => {
-            navigate("/tradingView")
-          }}
-          className="bg-white shadow rounded-md p-4 transition-shadow duration-300 hover:shadow-[0_4px_12px_rgba(0,0,0,0.15)]"
-        >
-          <h2 className="text-lg font-semibold">Trading View</h2>
-          <p className="text-gray-600">Stocks and Market trading view.</p>
+    <>
+      <DesktopLeftNavbar
+        appContext={appContext}
+        mobileNavOpen={mobileNavOpen}
+      />
+      <div className="ml-72 p-4 flex-1 bg-stone-50 dark:bg-[#212121] overflow-y-auto mt-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+          {cards.map((card) => {
+            return (
+              <Card
+                key={card.id}
+                navigate={() => setApp(card.title)}
+                image=""
+                node={card}
+              />
+            )
+          })}
         </div>
       </div>
-    </div>
+    </>
+  )
+}
+
+export const LoginHome = () => {
+  return (
+    <div className="ml-72 p-4 flex-1 bg-stone-50 dark:bg-[#212121] overflow-y-auto mt-16"></div>
   )
 }

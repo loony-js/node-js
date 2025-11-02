@@ -16,7 +16,7 @@ export default function Table({ navigate }: any) {
   }, [user])
 
   return (
-    <div className="min-h-screen flex flex-col items-center">
+    <div className="min-h-screen flex flex-col items-center dark:text-white">
       <div className="max-w-3xl w-full">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-semibold">Passwords</h1>
@@ -26,7 +26,8 @@ export default function Table({ navigate }: any) {
               navigate(2)
             }}
           >
-            <Plus size={18} /> Add
+            <Plus size={18} className="dark:text-gray-900" />
+            <span className="dark:text-gray-900">Add</span>
           </button>
         </div>
 

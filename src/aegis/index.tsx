@@ -16,10 +16,10 @@ export default function Aegis() {
   }
 
   return (
-    <div className="w-[60%] mx-auto p-4">
+    <main className="flex-1 min-h-screen ml-64 bg-stone-50 dark:bg-[#212121] pt-16">
       {tab === 1 && <Creds navigate={navigate} />}
       {tab === 2 && <Encrypt navigate={navigate} />}
       {tab === 3 && <Decrypt data={data} navigate={navigate} />}
-    </div>
+    </main>
   )
 }

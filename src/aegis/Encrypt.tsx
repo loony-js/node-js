@@ -6,6 +6,7 @@ import { AuthContext } from "context/AuthContext"
 import Modal from "./Modal"
 import { Button } from "../ui/Button"
 import { ArrowLeft, Plus } from "lucide-react"
+import { Input, FormSubmitButton, ButtonIcon } from "loony-ui"
 
 const domains = [
   { name: "Facebook", icon: <Facebook />, url: "https://facebook.com" },
@@ -72,16 +73,15 @@ function Encrypt({ navigate }: any) {
   }
 
   return (
-    <div className="min-h-screen flex flex-col px-[30%]">
+    <div className="min-h-screen flex flex-col px-[30%] text-white">
       <div className="py-4">
-        <button
-          className="bg-gray-100 hover:bg-gray-200 transition px-4 py-2 rounded-lg flex items-center gap-2"
+        <ButtonIcon
           onClick={() => {
             navigate(1)
           }}
         >
           <ArrowLeft size={18} />
-        </button>
+        </ButtonIcon>
         <div className="py-4">
           <h1 className="text-2xl font-semibold">Create</h1>
         </div>
@@ -126,48 +126,44 @@ function Encrypt({ navigate }: any) {
       <form onSubmit={handleSubmit} className="space-y-4 rounded-lg">
         <div>
           <label className="block text-sm mb-2">Name</label>
-          <input
+          <Input
             type="text"
             name="name"
             value={formData.name}
             onChange={handleChange}
-            className="w-full px-4 py-2 rounded-md border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
+            placeholder="Enter your First name"
           />
         </div>
         <div>
           <label className="block text-sm mb-2">Username</label>
-          <input
+          <Input
             type="text"
             name="username"
             value={formData.username}
             onChange={handleChange}
-            className="w-full px-4 py-2 rounded-md border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
+            placeholder="Enter Username"
           />
         </div>
         <div>
           <label className="block text-sm mb-2">Url</label>
-          <input
+          <Input
             type="text"
             name="url"
             value={formData.url}
             onChange={handleChange}
-            className="w-full px-4 py-2 rounded-md border border-gray-300 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
+            placeholder="Enter Url"
           />
         </div>
         <div>
           <label className="block text-sm mb-2">Password</label>
           <div className="relative">
-            <input
+            <Input
               name="password"
               type={state.showPassword ? "text" : "password"}
               value={formData.password}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter password"
             />
-
             {/* Show eye icon only when typing */}
             {formData.password.length > 0 && (
               <button
@@ -190,14 +186,13 @@ function Encrypt({ navigate }: any) {
         <div>
           <label className="block text-sm mb-2">Master Password</label>
           <div className="relative">
-            <input
+            <Input
               name="master_password"
               type={state.showMasterPassword ? "text" : "password"}
               value={formData.master_password}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter Master password"
             />
-
             {/* Show eye icon only when typing */}
             {formData.master_password.length > 0 && (
               <button
@@ -224,11 +219,9 @@ function Encrypt({ navigate }: any) {
           <h3 className="font-bold">Add new fields</h3>
           <div className="border-t border-gray-300 pt-5"></div>
           <div>
-            <Button
-              title="Input"
-              onClick={onClickNewInput}
-              icon={<Plus size={16} />}
-            />
+            <ButtonIcon onClick={onClickNewInput}>
+              <Plus size={16} />
+            </ButtonIcon>
           </div>
           {Object.keys(inputs).map((key: any) => {
             return (
@@ -249,12 +242,7 @@ function Encrypt({ navigate }: any) {
           })}
         </div>
 
-        <button
-          type="submit"
-          className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition-colors"
-        >
-          Submit
-        </button>
+        <FormSubmitButton>Submit</FormSubmitButton>
       </form>
     </div>
   )

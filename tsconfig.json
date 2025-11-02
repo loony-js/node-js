@@ -34,7 +34,9 @@
       "loony-web-api": ["packages/loony-web-api/src"],
       "loony-web-api/*": ["packages/loony-web-api/src/*"],
       "loony-types": ["packages/loony-types/src"],
-      "loony-types/*": ["packages/loony-types/src/*"]
+      "loony-types/*": ["packages/loony-types/src/*"],
+      "loony-ui": ["packages/loony-ui/src"],
+      "loony-ui/*": ["packages/loony-ui/src/*"]
     },
     "baseUrl": "src"
   },
