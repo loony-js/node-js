@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { getCredentialInfo, decryptText } from "../api/index"
+import { getCredentialInfo, decryptText, deleteCredential } from "../api/index"
 import { ArrowLeft } from "lucide-react"
 import { Button, Input, Modal } from "loony-ui"
 
@@ -72,8 +72,32 @@ const DecryptModal = ({ password, cancel }: any) => {
   )
 }
 
+const ConfirmDeleteModal = ({ confirm, cancel }: any) => {
+  return (
+    <Modal>
+      <div>
+        <div>
+          <h2 className="font-bold py-4">
+            Are you sure you want to delete credential?
+          </h2>
+        </div>
+
+        <div className="py-2 flex space-x-2">
+          <Button variant="border" onClick={cancel}>
+            Cancel
+          </Button>
+          <Button variant="delete" onClick={confirm}>
+            Confirm
+          </Button>
+        </div>
+      </div>
+    </Modal>
+  )
+}
+
 export default function Decrypt({ navigate, data }: any) {
   const [credInfo, setCredInfo] = useState<any>(null)
+  const [confirmDeleteModal, setConfirmDeleteModal] = useState(false)
   const [modal, setModal] = useState(false)
   const [password, setPassword] = useState("")
 
@@ -83,6 +107,10 @@ export default function Decrypt({ navigate, data }: any) {
     })
   }, [data])
 
+  const onDeleteCredential = () => {
+    deleteCredential(data.uid)
+  }
+
   return (
     <div className="min-h-screen flex flex-col items-center dark:text-white">
       {modal ? (
@@ -90,6 +118,15 @@ export default function Decrypt({ navigate, data }: any) {
           password={password}
           cancel={() => {
             setModal(false)
+          }}
+        />
+      ) : null}
+      {confirmDeleteModal ? (
+        <ConfirmDeleteModal
+          password={password}
+          confirm={onDeleteCredential}
+          cancel={() => {
+            setConfirmDeleteModal(false)
           }}
         />
       ) : null}
@@ -108,29 +145,41 @@ export default function Decrypt({ navigate, data }: any) {
           </div>
         </div>
         <div className="w-[50%]">
-          {credInfo &&
-            credInfo.map((cred: any) => {
-              return (
-                <div key={cred.key} className="mb-5">
-                  <div className="font-semibold">{cred.key}</div>
-                  <div>{cred.value}</div>
-                  {cred.key === "password" ? (
-                    <div className="mt-4">
-                      <Button
-                        variant="border"
-                        onClick={(e) => {
-                          e.preventDefault()
-                          setModal(true)
-                          setPassword(cred.value)
-                        }}
-                      >
-                        Decrypt
-                      </Button>
-                    </div>
-                  ) : null}
-                </div>
-              )
-            })}
+          <div>
+            {credInfo &&
+              credInfo.map((cred: any) => {
+                return (
+                  <div key={cred.key} className="mb-5">
+                    <div className="font-semibold">{cred.key}</div>
+                    <div>{cred.value}</div>
+                    {cred.key === "password" ? (
+                      <div className="mt-4">
+                        <Button
+                          variant="border"
+                          onClick={(e) => {
+                            e.preventDefault()
+                            setModal(true)
+                            setPassword(cred.value)
+                          }}
+                        >
+                          Decrypt
+                        </Button>
+                      </div>
+                    ) : null}
+                  </div>
+                )
+              })}
+          </div>
+          <div>
+            <Button
+              variant="border"
+              onClick={() => {
+                setConfirmDeleteModal(true)
+              }}
+            >
+              Delete
+            </Button>
+          </div>
         </div>
       </div>
     </div>
