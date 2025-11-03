@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from "react"
 import { getAllCredentials } from "../api/index"
 import { AuthContext } from "context/AuthContext"
 import { ChevronRight, Globe, Plus } from "lucide-react"
+import { Button } from "loony-ui"
 
 export default function Table({ navigate }: any) {
   const { user } = useContext(AuthContext)
@@ -20,15 +21,15 @@ export default function Table({ navigate }: any) {
       <div className="max-w-3xl w-full">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-semibold">Passwords</h1>
-          <button
-            className="bg-gray-100 hover:bg-gray-200 transition px-4 py-2 rounded-lg flex items-center gap-2"
+          <Button
+            variant="buttonIcon"
             onClick={() => {
               navigate(2)
             }}
           >
             <Plus size={18} />
             <span>Add</span>
-          </button>
+          </Button>
         </div>
 
         <p className="text-sm mb-4">
@@ -42,7 +43,7 @@ export default function Table({ navigate }: any) {
             creds.map((item, index) => (
               <div
                 key={index}
-                className="flex justify-between items-center p-4 hover:bg-[#f4f4f4] transition cursor-pointer"
+                className="flex justify-between items-center p-4 hover:bg-[#f4f4f4] dark:hover:bg-[#363636] transition cursor-pointer"
                 // onClick={() => setExpanded(expanded === index ? null : index)}
                 onClick={(e) => {
                   e.preventDefault()

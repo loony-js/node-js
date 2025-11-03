@@ -7,7 +7,7 @@ import VoiceStreaming from "streaming/VoiceStreaming"
 import Algorithms from "./algorithms/index"
 import Home, { LoginHome } from "./Home"
 
-import Navbar from "TopNavbar"
+import Navbar from "navbar/TopNavbar"
 import { AuthContext, AuthStatus } from "./context/AuthContext"
 import Trading from "Trading"
 import { useState } from "react"

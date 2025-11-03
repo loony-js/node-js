@@ -1,6 +1,6 @@
 import { ReactNode } from "react"
 
-const buttonVariant: any = {
+export const buttonVariant: any = {
   default: `w-full
     py-2.5
     rounded-lg
@@ -50,9 +50,24 @@ const buttonVariant: any = {
     py-2
     border
     border-gray-300
-    hover:border-gray-500
     dark:border-[#636363]
-    dark:text-white`,
+    dark:text-gray-300
+    hover:border-gray-500
+    hover:text-gray-100
+    `,
+  hoverButton: `flex
+    items-center
+    gap-2
+    px-4
+    py-2
+    text-sm
+    font-medium
+    hover:bg-stone-200
+    hover:dark:bg-[#363636]
+    rounded-sm
+    transition
+    duration-200
+    `,
 }
 
 type Variant = "default" | "border" | "submit" | "delete" | "buttonIcon"

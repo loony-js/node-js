@@ -5,8 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react"
 import { AuthStatus } from "loony-types"
 import { useLogout } from "loony-web-api"
 import type { AppContextProps, AuthContextProps } from "loony-types"
-import { Menu } from "lucide-react"
-import {} from "./"
+import {} from ".."
 
 const TopNavbar = ({
   authContext,
@@ -65,9 +64,9 @@ const TopNavbar = ({
 const AuthNavRight = ({ logoutUser }: any) => {
   return (
     <>
-      <ul className="flex flex-col md:flex-row md:space-x-6 mt-3 md:mt-0">
-        <li>
-          <a href="#" onClick={logoutUser} className="block py-2">
+      <ul className="">
+        <li className="flex items-center gap-2 px-4 py-2 text-sm font-medium hover:bg-stone-200 hover:dark:bg-[#363636] rounded-sm transition duration-200">
+          <a href="#" onClick={logoutUser} className="">
             Logout
           </a>
         </li>
