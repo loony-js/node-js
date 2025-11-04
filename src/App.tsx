@@ -46,7 +46,6 @@ export const AppRoute = ({
   authContext: any
   appContext: any
 }) => {
-  const [app, setApp] = useState("")
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
 
   if (authContext.status === AuthStatus.AUTHORIZED) {
@@ -59,17 +58,24 @@ export const AppRoute = ({
         />
         <div className="flex flex-1 overflow-hidden h-screen">
           <LoginDesktopLeftNavbar />
-          {app === "Aegis" ? <Aegis /> : null}
-          {app === "Voice Streaming" ? <VoiceStreaming /> : null}
-          {app === "Trading" ? <Trading /> : null}
-          {app === "Algorithms" ? <Algorithms /> : null}
-          {app === "" ? (
-            <Home
-              setApp={setApp}
-              appContext={appContext}
-              mobileNavOpen={mobileNavOpen}
+          <Routes>
+            <Route
+              index
+              element={
+                <Home appContext={appContext} mobileNavOpen={mobileNavOpen} />
+              }
             />
-          ) : null}
+            <Route
+              path="/"
+              element={
+                <Home appContext={appContext} mobileNavOpen={mobileNavOpen} />
+              }
+            />
+            <Route path="/aegis" element={<Aegis />} />
+            <Route path="/voiceStreaming" element={<VoiceStreaming />} />
+            <Route path="/trading" element={<Trading />} />
+            <Route path="/algorithms" element={<Algorithms />} />
+          </Routes>
         </div>
       </>
     )

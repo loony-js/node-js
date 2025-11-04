@@ -1,30 +1,36 @@
 import DesktopLeftNavbar from "navbar/HomeLeftNavbar"
 import { Card } from "loony-ui"
+import { useNavigate } from "react-router"
 
 const cards = [
   {
     id: 1,
     title: "Aegis",
+    route: "aegis",
     description:
       "Never forget your username and password. We store them securely.",
   },
   {
     id: 2,
     title: "Voice Streaming",
+    route: "voiceStreaming",
     description: "Stream audio data.",
   },
   {
     id: 3,
     title: "Trading",
+    route: "trading",
     description: "Stocks and Market trading view.",
   },
   {
     id: 4,
     title: "Algorithms",
+    route: "algorithms",
     description: "Visual representation of algorithms.",
   },
 ]
-export default function Home({ setApp, appContext, mobileNavOpen }: any) {
+export default function Home({ appContext, mobileNavOpen }: any) {
+  const navigate = useNavigate()
   return (
     <>
       <DesktopLeftNavbar
@@ -37,7 +43,7 @@ export default function Home({ setApp, appContext, mobileNavOpen }: any) {
             return (
               <Card
                 key={card.id}
-                navigate={() => setApp(card.title)}
+                navigate={() => navigate(`/${card.route}`, { replace: true })}
                 image=""
                 node={card}
               />
