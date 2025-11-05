@@ -1,32 +1,46 @@
-import { useContext, useEffect, useState } from "react"
-import { getAllCredentials } from "../api/index"
+import { useCallback, useContext, useEffect } from "react"
+import { getAllCredentialsApi } from "../api/index"
 import { AuthContext } from "context/AuthContext"
 import { ChevronRight, Globe, Plus } from "lucide-react"
 import { Button } from "loony-ui"
 
-export default function Table({ navigate }: any) {
+export default function Table({ state, setState }: any) {
+  const { allCredentials } = state
   const { user } = useContext(AuthContext)
-  const [creds, setCreds] = useState<null | any[]>(null)
 
   useEffect(() => {
     if (user) {
-      getAllCredentials(user?.uid).then(({ data }) => {
-        setCreds(data)
+      getAllCredentialsApi(user?.uid).then(({ data }) => {
+        setState((prevState: any) => ({
+          ...prevState,
+          allCredentials: data,
+        }))
       })
     }
-  }, [user])
+  }, [user, setState])
+
+  const encryptOne = useCallback(() => {
+    setState((prevState: any) => ({
+      ...prevState,
+      activeTab: 2,
+    }))
+  }, [setState])
+
+  const decryptItem = (e: any, item: any) => {
+    e.preventDefault()
+    setState((prevState: any) => ({
+      ...prevState,
+      activeTab: 3,
+      activeCredential: item,
+    }))
+  }
 
   return (
     <div className="min-h-screen flex flex-col items-center dark:text-white">
       <div className="max-w-3xl w-full">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-semibold">Passwords</h1>
-          <Button
-            variant="buttonIcon"
-            onClick={() => {
-              navigate(2)
-            }}
-          >
+          <Button variant="buttonIcon" onClick={encryptOne}>
             <Plus size={18} />
             <span>Add</span>
           </Button>
@@ -39,15 +53,14 @@ export default function Table({ navigate }: any) {
 
         {/* Password List */}
         <div className="rounded-xl shadow-lg divide-y divide-gray-200">
-          {creds &&
-            creds.map((item, index) => (
+          {allCredentials &&
+            allCredentials.map((item: any, index: number) => (
               <div
                 key={index}
                 className="flex justify-between items-center p-4 hover:bg-[#f4f4f4] dark:hover:bg-[#363636] transition cursor-pointer"
                 // onClick={() => setExpanded(expanded === index ? null : index)}
                 onClick={(e) => {
-                  e.preventDefault()
-                  navigate(3, item)
+                  decryptItem(e, item)
                 }}
               >
                 <div className="flex items-center gap-3">

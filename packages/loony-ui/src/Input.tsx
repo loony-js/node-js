@@ -5,6 +5,7 @@ export const Input = ({
   placeholder,
   name,
   disabled,
+  required,
 }: {
   name: string
   value: string
@@ -12,6 +13,7 @@ export const Input = ({
   placeholder: string
   onChange: React.ChangeEventHandler<HTMLInputElement>
   disabled?: boolean
+  required?: boolean
 }) => {
   return (
     <input
@@ -35,7 +37,7 @@ export const Input = ({
       name={name}
       onChange={onChange}
       placeholder={placeholder}
-      required
+      required={required ? true : false}
       disabled={disabled}
     />
   )

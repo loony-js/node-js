@@ -3,23 +3,22 @@ import Encrypt from "./Encrypt"
 import Decrypt from "./Decrypt"
 
 import Creds from "./Creds"
+import Edit from "./Edit"
 
 export default function Aegis() {
-  const [tab, setTab] = useState(1)
-  const [data, setData] = useState(null)
-
-  const navigate = (index: number, __data: any) => {
-    if (__data) {
-      setData(__data)
-    }
-    setTab(index)
-  }
+  const [state, setState] = useState({
+    activeTab: 1,
+    allCredentials: [],
+    activeCredential: null,
+    editCredential: null,
+  })
 
   return (
     <main className="flex-1 min-h-screen ml-64 bg-stone-50 dark:bg-[#212121] pt-16">
-      {tab === 1 && <Creds navigate={navigate} />}
-      {tab === 2 && <Encrypt navigate={navigate} />}
-      {tab === 3 && <Decrypt data={data} navigate={navigate} />}
+      {state.activeTab === 1 && <Creds state={state} setState={setState} />}
+      {state.activeTab === 2 && <Encrypt state={state} setState={setState} />}
+      {state.activeTab === 3 && <Decrypt state={state} setState={setState} />}
+      {state.activeTab === 4 && <Edit state={state} setState={setState} />}
     </main>
   )
 }

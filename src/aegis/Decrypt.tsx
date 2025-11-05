@@ -1,42 +1,55 @@
 import { useEffect, useState } from "react"
-import { getCredentialInfo, decryptText, deleteCredential } from "../api/index"
+import {
+  getOneCredentialApi,
+  decryptOneCredentialApi,
+  deleteOneCredentialApi,
+} from "../api/index"
 import { ArrowLeft } from "lucide-react"
 import { Button, Input, Modal } from "loony-ui"
+import React from "react"
 
-const DecryptModal = ({ password, cancel }: any) => {
+const DecryptModal = ({
+  password,
+  cancel,
+  setFormData,
+  onDecryptFinish,
+}: any) => {
   const [master_password, setMasterPassword] = useState("")
-  const [decrypted_password, setDecryptedPassword] = useState("")
+  // const [decrypted_password, setDecryptedPassword] = useState("")
   const [error, setError] = useState("")
 
   const onDecrypt = () => {
     if (master_password) {
-      decryptText({
+      decryptOneCredentialApi({
         password,
         master_password,
       })
         .then((res) => {
-          console.log(res.data)
           if (res.data && res.data.password) {
-            setDecryptedPassword(res.data.password)
+            setFormData((prevState: any) => ({
+              ...prevState,
+              password: res.data.password,
+            }))
+            setError("")
           }
         })
-        .catch(() => {
+        .then(() => {
+          onDecryptFinish()
+        })
+        .catch((err) => {
+          console.log(err)
           setError("Invalid")
         })
     }
   }
-
   return (
     <Modal>
       <div>
         <div>
-          <h2 className="font-bold py-4">Decrypt text</h2>
-        </div>
-        <div className="flex flex-wrap whitespace-normal gap-2">
-          Password: {password.slice(0, 15)}...
+          <h2 className="font-bold py-4">Master password</h2>
         </div>
         <div className="py-2">
-          <label>Enter master password</label>
+          <label>{error}</label>
           <Input
             name="Master password"
             value={master_password}
@@ -45,17 +58,6 @@ const DecryptModal = ({ password, cancel }: any) => {
             onChange={(e) => {
               setMasterPassword(e.target.value)
             }}
-          />
-        </div>
-        <div className="py-2">
-          <label>Decrypted password</label>
-          <Input
-            name="Decrypted password"
-            value={decrypted_password || error}
-            type="text"
-            placeholder="Decrpyted password"
-            onChange={() => {}}
-            disabled={true}
           />
         </div>
 
@@ -95,35 +97,91 @@ const ConfirmDeleteModal = ({ confirm, cancel }: any) => {
   )
 }
 
-export default function Decrypt({ navigate, data }: any) {
-  const [credInfo, setCredInfo] = useState<any>(null)
+const createNewFormData = () => ({
+  name: "",
+  url: "",
+  username: "",
+  password: "",
+  master_password: "",
+})
+
+export default function Decrypt({
+  state: aegisState,
+  setState: setAegisState,
+}: any) {
+  const { activeCredential } = aegisState
+  const [formData, setFormData] = useState<any>(null)
+
   const [confirmDeleteModal, setConfirmDeleteModal] = useState(false)
   const [modal, setModal] = useState(false)
-  const [password, setPassword] = useState("")
+  const [dec, setDec] = useState(false)
 
   useEffect(() => {
-    getCredentialInfo(data.uid).then((res) => {
-      setCredInfo(res.data)
+    React.startTransition(() => {
+      getOneCredentialApi(activeCredential.uid).then((res: any) => {
+        const r: any = createNewFormData()
+        res.data.forEach((x: any) => {
+          if (x.value) {
+            r[x.key] = x.value
+          }
+        })
+        if (activeCredential.name) {
+          r.name = activeCredential.name
+        }
+        setFormData(r)
+      })
     })
-  }, [data])
+  }, [])
 
   const onDeleteCredential = () => {
-    deleteCredential(data.uid)
+    deleteOneCredentialApi(activeCredential.uid)
+      .then(() => {
+        goHome()
+      })
+      .catch((err) => {
+        console.log(err)
+      })
   }
+  const goHome = () => {
+    setConfirmDeleteModal(false)
+    setAegisState((prevState: any) => ({ ...prevState, activeTab: 1 }))
+  }
+
+  const goEdit = () => {
+    if (dec) {
+      setModal(true)
+      setAegisState((prevState: any) => ({
+        ...prevState,
+        activeTab: 4,
+        editCredential: { ...formData, aegis_id: activeCredential.uid },
+      }))
+    } else {
+      setModal(true)
+    }
+  }
+
+  const onDecryptFinish = () => {
+    setDec(true)
+    setModal(false)
+  }
+
+  if (!formData) return null
 
   return (
     <div className="min-h-screen flex flex-col items-center dark:text-white">
       {modal ? (
         <DecryptModal
-          password={password}
+          password={formData.password}
           cancel={() => {
             setModal(false)
           }}
+          setFormData={setFormData}
+          onDecryptFinish={onDecryptFinish}
         />
       ) : null}
       {confirmDeleteModal ? (
         <ConfirmDeleteModal
-          password={password}
+          password={formData.password}
           confirm={onDeleteCredential}
           cancel={() => {
             setConfirmDeleteModal(false)
@@ -132,45 +190,47 @@ export default function Decrypt({ navigate, data }: any) {
       ) : null}
       <div className="max-w-3xl w-full">
         <div className="py-4">
-          <Button
-            variant="border"
-            onClick={() => {
-              navigate(1)
-            }}
-          >
+          <Button variant="border" onClick={goHome}>
             <ArrowLeft size={18} />
           </Button>
           <div className="py-4">
-            <h1 className="text-2xl font-semibold">{data.name}</h1>
+            <h1 className="text-2xl font-semibold">{activeCredential.name}</h1>
           </div>
         </div>
         <div className="w-[50%]">
-          <div>
-            {credInfo &&
-              credInfo.map((cred: any) => {
-                return (
-                  <div key={cred.key} className="mb-5">
-                    <div className="font-semibold">{cred.key}</div>
-                    <div>{cred.value}</div>
-                    {cred.key === "password" ? (
-                      <div className="mt-4">
-                        <Button
-                          variant="border"
-                          onClick={(e) => {
-                            e.preventDefault()
-                            setModal(true)
-                            setPassword(cred.value)
-                          }}
-                        >
-                          Decrypt
-                        </Button>
-                      </div>
-                    ) : null}
-                  </div>
-                )
-              })}
+          <div className="mb-5">
+            <div className="font-semibold">Name</div>
+            <div>{formData.name}</div>
+          </div>
+          <div className="mb-5">
+            <div className="font-semibold">Url</div>
+            <div>{formData.url}</div>
+          </div>
+          <div className="mb-5">
+            <div className="font-semibold">Username</div>
+            <div>{formData.username}</div>
           </div>
           <div>
+            <div className="font-semibold">Password</div>
+            <div>{formData.password}</div>
+          </div>
+          <div className="py-2 mt-8">
+            <span className="mr-2">
+              <Button
+                variant="border"
+                onClick={(e) => {
+                  e.preventDefault()
+                  setModal(true)
+                }}
+              >
+                Decrypt
+              </Button>
+            </span>
+            <span className="mr-2">
+              <Button variant="border" onClick={goEdit}>
+                Edit
+              </Button>
+            </span>
             <Button
               variant="border"
               onClick={() => {

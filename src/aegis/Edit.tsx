@@ -1,11 +1,12 @@
-import { useContext, useState } from "react"
-import { addOneCredentialApi } from "../api/index"
+import { useContext, useEffect, useState } from "react"
+import { editOneCredentialApi } from "../api/index"
 import { Facebook, Instagram, Gmail } from "../Icons/index"
 import { IoEye, IoEyeOff } from "react-icons/io5"
 import { AuthContext } from "context/AuthContext"
 import Modal from "./Modal"
 import { ArrowLeft, Plus } from "lucide-react"
 import { Input, Button } from "loony-ui"
+import React from "react"
 
 const domains = [
   { name: "Facebook", icon: <Facebook />, url: "https://facebook.com" },
@@ -21,7 +22,8 @@ const createNewFormData = () => ({
   master_password: "",
 })
 
-function Encrypt({ setState: aegisSetState }: any) {
+function Edit({ state: aegisState, setState: aegisSetState }: any) {
+  const { editCredential } = aegisState
   const { user } = useContext(AuthContext)
   const [inputs, setInputs] = useState<any>({})
   const [modal, showModal] = useState(false)
@@ -31,6 +33,12 @@ function Encrypt({ setState: aegisSetState }: any) {
     showPassword: false,
     showMasterPassword: false,
   })
+
+  useEffect(() => {
+    React.startTransition(() => {
+      setFormData({ ...formData, ...editCredential })
+    })
+  }, [])
 
   const validate = () => {
     if (
@@ -47,8 +55,12 @@ function Encrypt({ setState: aegisSetState }: any) {
 
   const handleSubmit = (e: any) => {
     e.preventDefault()
-    if (validate()) {
-      addOneCredentialApi({ ...formData, inputs, user_id: user?.uid })
+    if (validate() && editCredential && editCredential.aegis_id && user?.uid) {
+      editOneCredentialApi(editCredential.aegis_id, {
+        ...formData,
+        inputs,
+        user_id: user?.uid,
+      })
         .then(({ data }) => {
           aegisSetState((prevState: any) => ({
             ...prevState,
@@ -64,6 +76,8 @@ function Encrypt({ setState: aegisSetState }: any) {
         .catch((err) => {
           console.log(err)
         })
+    } else {
+      console.log(editCredential, user)
     }
   }
 
@@ -282,4 +296,4 @@ function Encrypt({ setState: aegisSetState }: any) {
   )
 }
 
-export default Encrypt
+export default Edit
