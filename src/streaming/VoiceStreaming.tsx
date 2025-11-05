@@ -70,10 +70,10 @@ export default function VoiceStreaming() {
   return (
     <main className="flex-1 min-h-screen ml-64 bg-stone-50 dark:bg-[#212121] text-white pt-16">
       <div className="w-[60%] mx-auto p-4 space-y-6">
-        <div className="space-y-4 border border-[#303030] rounded-lg shadow p-6">
+        <div className="space-y-4 border border-[#4d4d4d] rounded-lg shadow p-6">
           {/* Title */}
           <h2 className="text-2xl font-semibold">Voice Recorder</h2>
-          <hr className="border-[#303030]" />
+          <hr className="border-[#4d4d4d]" />
 
           {/* Socket Status */}
           <div className="space-y-4">
@@ -110,7 +110,7 @@ export default function VoiceStreaming() {
             </div>
           </div>
 
-          <hr className="border-[#303030]" />
+          <hr className="border-[#4d4d4d]" />
 
           {/* Recording Status */}
           <div className="space-y-4">
@@ -135,7 +135,7 @@ export default function VoiceStreaming() {
             </div>
           </div>
 
-          <hr className="border-[#303030]" />
+          <hr className="border-[#4d4d4d]" />
 
           {/* Upload File */}
           <div>
@@ -155,7 +155,7 @@ export default function VoiceStreaming() {
         </div>
 
         {/* Transcription List */}
-        <div className="mt-6 border border-[#303030] rounded-lg p-4">
+        <div className="mt-6 border border-[#4d4d4d] rounded-lg p-4">
           <ul className="list-disc list-inside space-y-1">
             {texts.map((t, index) => (
               <li key={index}>{t}</li>

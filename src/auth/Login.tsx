@@ -64,7 +64,7 @@ function Login({ authContext }: { authContext: any }) {
                 name="username"
                 value={formData.username}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-[#4d4d4d] rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
                 autoComplete="username"
               />
@@ -78,7 +78,7 @@ function Login({ authContext }: { authContext: any }) {
                   type={state.showPassword ? "text" : "password"}
                   value={formData.password}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-[#4d4d4d] rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   autoComplete="password"
                   required
                 />

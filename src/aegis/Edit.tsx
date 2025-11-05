@@ -121,7 +121,7 @@ function Edit({ state: aegisState, setState: aegisSetState }: any) {
           return (
             <div
               key={index}
-              className="w-18 h-18 border border-gray-300 p-2 rounded-xl mr-2"
+              className="w-18 h-18 border border-[#4d4d4d] p-2 rounded-xl mr-2"
               onClick={() => {
                 setFormData({
                   ...formData,
@@ -250,7 +250,7 @@ function Edit({ state: aegisState, setState: aegisSetState }: any) {
 
         <div>
           <h3 className="font-bold">Add new fields</h3>
-          <div className="border-t border-gray-300 pt-5"></div>
+          <div className="border-t border-[#4d4d4d] pt-5"></div>
           <div>
             <Button variant="border" onClick={onClickNewInput}>
               <Plus size={16} />
@@ -266,7 +266,7 @@ function Edit({ state: aegisState, setState: aegisSetState }: any) {
                     name={key}
                     value={inputs[key]}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-2 rounded-md border border-gray-300 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-4 py-2 rounded-md border border-[#4d4d4d] bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     required
                   />
                 </div>

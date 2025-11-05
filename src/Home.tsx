@@ -28,6 +28,12 @@ const cards = [
     route: "algorithms",
     description: "Visual representation of algorithms.",
   },
+  {
+    id: 4,
+    title: "Colors",
+    route: "colors",
+    description: "Visual representation of css colors.",
+  },
 ]
 export default function Home({ appContext, mobileNavOpen }: any) {
   const navigate = useNavigate()

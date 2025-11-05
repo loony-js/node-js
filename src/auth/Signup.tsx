@@ -66,7 +66,7 @@ const Signup = () => {
                 name="username"
                 value={formData.username}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-[#4d4d4d] rounded-md bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />
             </div>
@@ -80,7 +80,7 @@ const Signup = () => {
                 name="fname"
                 value={formData.fname}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-[#4d4d4d] rounded-md bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />
             </div>
@@ -94,7 +94,7 @@ const Signup = () => {
                 name="lname"
                 value={formData.lname}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2 border border-[#4d4d4d] rounded-md bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />
             </div>
@@ -108,7 +108,7 @@ const Signup = () => {
                   type={state.showPassword ? "text" : "password"}
                   value={formData.password}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-[#4d4d4d] rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
 
                 {/* Show eye icon only when typing */}
@@ -138,7 +138,7 @@ const Signup = () => {
                   type={state.showConfirmPassword ? "text" : "password"}
                   value={formData.confirm_password}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-[#4d4d4d] rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
 
                 {/* Show eye icon only when typing */}

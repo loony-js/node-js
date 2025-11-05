@@ -13,6 +13,7 @@ import Trading from "Trading"
 import { useState } from "react"
 import AppContext from "context/AppContext"
 import LoginDesktopLeftNavbar from "navbar/LoginLeftNavbar"
+import HSLPaletteGenerator from "Colors"
 
 function App() {
   return (
@@ -75,6 +76,7 @@ export const AppRoute = ({
             <Route path="/voiceStreaming" element={<VoiceStreaming />} />
             <Route path="/trading" element={<Trading />} />
             <Route path="/algorithms" element={<Algorithms />} />
+            <Route path="/colors" element={<HSLPaletteGenerator />} />
           </Routes>
         </div>
       </>

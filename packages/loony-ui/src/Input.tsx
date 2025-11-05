@@ -23,7 +23,7 @@ export const Input = ({
         px-4
         py-2 
         border
-        border-gray-300
+        border-[#4d4d4d]
         dark:border-[#4d4d4d]
         rounded-md
         bg-gray-50
@@ -64,7 +64,7 @@ export const PasswordInput = ({
         px-4
         py-2 
         border
-        border-gray-300
+        border-[#4d4d4d]
         dark:border-[#4d4d4d]
         rounded-md
         bg-gray-50
