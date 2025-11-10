@@ -64,31 +64,7 @@ const useAuthSession = (): [
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [authContext, setAuthContext] = useAuthSession()
 
-  if (authContext.status === AuthStatus.IDLE)
-    return (
-      <div className="book-container">
-        <div style={{ display: "flex", flexDirection: "row", height: "100%" }}>
-          <div
-            style={{
-              width: "20%",
-              paddingTop: 15,
-              borderRight: "1px solid #ebebeb",
-            }}
-          />
-          <div
-            style={{
-              width: "100%",
-              paddingTop: 15,
-              paddingLeft: "5%",
-              paddingBottom: 50,
-            }}
-          >
-            <div>Loading...</div>
-          </div>
-        </div>
-      </div>
-    )
-
+  if (authContext.status === AuthStatus.IDLE) return null
   return (
     <AuthContext.Provider
       value={{

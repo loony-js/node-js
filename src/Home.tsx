@@ -34,6 +34,12 @@ const cards = [
     route: "colors",
     description: "Visual representation of css colors.",
   },
+  {
+    id: 5,
+    title: "Web Video Call",
+    route: "videoCall",
+    description: "Video call using WebRTC",
+  },
 ]
 export default function Home({ appContext, mobileNavOpen }: any) {
   const navigate = useNavigate()
@@ -58,11 +64,5 @@ export default function Home({ appContext, mobileNavOpen }: any) {
         </div>
       </div>
     </>
-  )
-}
-
-export const LoginHome = () => {
-  return (
-    <div className="ml-72 p-4 flex-1 bg-stone-50 dark:bg-[#212121] overflow-y-auto mt-16"></div>
   )
 }
