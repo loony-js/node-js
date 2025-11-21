@@ -1,6 +1,6 @@
 import { User } from "lucide-react"
 
-export const Card = ({
+export const BlogPostCard = ({
   navigate,
   image,
   node,

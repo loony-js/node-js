@@ -1,5 +1,5 @@
 import DesktopLeftNavbar from "navbar/HomeLeftNavbar"
-import { Card } from "loony-ui"
+import { BlogPostCard } from "loony-ui"
 import { useNavigate } from "react-router"
 
 const cards = [
@@ -40,6 +40,12 @@ const cards = [
     route: "videoCall",
     description: "Video call using WebRTC",
   },
+  {
+    id: 6,
+    title: "Web Templates",
+    route: "webTemplates",
+    description: "Web Teamplates",
+  },
 ]
 export default function Home({ appContext, mobileNavOpen }: any) {
   const navigate = useNavigate()
@@ -53,7 +59,7 @@ export default function Home({ appContext, mobileNavOpen }: any) {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
           {cards.map((card) => {
             return (
-              <Card
+              <BlogPostCard
                 key={card.id}
                 navigate={() => navigate(`/${card.route}`, { replace: true })}
                 image=""

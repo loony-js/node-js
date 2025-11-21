@@ -25,6 +25,7 @@ const Trading = lazy(() => import("./Trading"))
 const Algorithms = lazy(() => import("./algorithms"))
 const HSLPaletteGenerator = lazy(() => import("./Colors"))
 const WebRTCChat = lazy(() => import("./WebRTCChat"))
+const WebTemplates = lazy(() => import("./web-templates"))
 
 function App() {
   return (
@@ -96,6 +97,7 @@ export const AppRoute = ({
               <Route path="/algorithms" element={<Algorithms />} />
               <Route path="/colors" element={<HSLPaletteGenerator />} />
               <Route path="/videoCall" element={<WebRTCChat />} />
+              <Route path="/webTemplates" element={<WebTemplates />} />
             </Routes>
           </Suspense>
         </div>
